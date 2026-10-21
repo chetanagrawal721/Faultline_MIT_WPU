@@ -39,6 +39,7 @@ Every statement that writes a result table, found by searching `backend/faultlin
 
 | File | Statements | Tables | Class | Change |
 |---|---|---|---|---|
+| `evidence/projections.py` | the only writer of evidence rows after M13.2: `INSERT`, `UPSERT` and `DELETE` on `oracle_run`, `witness`, `finding`, `finding_evidence`, `attribution`, `attribution_attempt`, `remediation_plan` | those tables | Evidence (projection) | The module every writer and `rebuild` call; rows change only to follow an object. |
 | `witnesses/runs.py` | `INSERT oracle_job`, `INSERT oracle_run` (fresh and reused), `UPDATE oracle_job` status | `oracle_job`, `oracle_run` | Evidence | Each fresh run becomes an `oracle_result` object; rows are projections; the status `UPDATE` becomes events. |
 | `witnesses/verify.py` | `INSERT witness`, `UPDATE witness.body_json` | `witness` | Evidence | Immutable `witness` object; re-verification recorded separately (B12). |
 | `analysis/live.py` | `DELETE finding_evidence`, `DELETE finding`, `INSERT finding`, `INSERT finding_evidence`, `UPDATE cell`, `UPDATE project` (artifact hash), `UPDATE analysis` (status) | `finding`, `finding_evidence`, `cell` | Evidence (finding, evidence); workflow (cell state, project hash) | The finding becomes a `verdict` object plus a pointer; the delete-then-insert goes. |

@@ -1146,3 +1146,37 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 ### 2026-10-21 15:27 UTC | DONE | M13.1 | by Chetan Agrawal
 - Content-addressed object store
 - test cases passed: 5/5
+
+### 2026-10-21 15:28 UTC | START | M13.2 | by Chetan Agrawal
+- Event log, SQL projections and rebuild
+
+### 2026-10-21 17:04 UTC | TC PASS | TC-13.2.1 | by Chetan Agrawal
+- Events are append-only
+- evidence: evidence/M13.2/TC-13.2.1.txt
+
+### 2026-10-21 17:04 UTC | TC PASS | TC-13.2.2 | by Chetan Agrawal
+- Every job transition is one event
+- evidence: evidence/M13.2/TC-13.2.2.txt
+
+### 2026-10-21 17:04 UTC | TC PASS | TC-13.2.3 | by Chetan Agrawal
+- Existing responses are unchanged
+- evidence: evidence/M13.2/TC-13.2.3.txt
+
+### 2026-10-21 17:04 UTC | TC PASS | TC-13.2.4 | by Chetan Agrawal
+- Rebuild reproduces the API
+- evidence: evidence/M13.2/TC-13.2.4.txt
+
+### 2026-10-21 17:04 UTC | TC PASS | TC-13.2.5 | by Chetan Agrawal
+- Rebuild survives bad objects
+- evidence: evidence/M13.2/TC-13.2.5.txt
+
+### 2026-10-21 17:04 UTC | NOTE | - | by Chetan Agrawal
+- M13.2: the full integration and security suites pass with the store on (evidence/M13.2/*_integration_store_on.txt). tests/integration/test_workers.py hung on Windows on the committed code too: the harness opened a stdout pipe and never read it, so a worker stalled after 8 jobs; it now logs to a file, assertions unchanged. Two analyses of the same local test remote get different commit SHAs, so the witness_key (which hashes the artifact snapshot) differs between them; the comparison dump leaves it out.
+
+### 2026-10-21 17:04 UTC | DONE | M13.2 | by Chetan Agrawal
+- Event log, SQL projections and rebuild
+- test cases passed: 5/5
+
+### 2026-10-21 17:04 UTC | GATE DECLARED | Gate T1 | by Chetan Agrawal
+- Twist: storage
+- no waivers

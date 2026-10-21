@@ -1,0 +1,8 @@
+# TC-13.2.1 events are append-only
+# command: pytest tests/unit/test_evidence_events.py -k 'cannot_be_updated or unknown_event' -v
+collecting ... collected 9 items / 7 deselected / 2 selected
+
+tests/unit/test_evidence_events.py::test_events_cannot_be_updated_or_deleted PASSED [ 50%]
+tests/unit/test_evidence_events.py::test_unknown_event_kinds_are_refused PASSED [100%]
+
+======================= 2 passed, 7 deselected in 0.57s =======================

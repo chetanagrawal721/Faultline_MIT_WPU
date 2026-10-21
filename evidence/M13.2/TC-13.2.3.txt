@@ -1,0 +1,6 @@
+# TC-13.2.3
+# command: pytest tests/integration/test_evidence_projection.py -v
+tests/integration/test_evidence_projection.py::test_tc_13_2_3_the_evidence_tables_match_the_golden_recording PASSED [ 33%]
+tests/integration/test_evidence_projection.py::test_every_evidence_row_has_an_object_and_a_pointer PASSED [ 66%]
+tests/integration/test_evidence_projection.py::test_with_the_store_off_the_tables_are_the_same PASSED [100%]
+======================== 3 passed in 186.85s (0:03:06) ========================

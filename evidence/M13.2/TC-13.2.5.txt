@@ -1,0 +1,6 @@
+# TC-13.2.5
+# command: pytest tests/integration/test_evidence_rebuild.py -k tc_13_2_5 or missing_parent or failing_rebuild -v
+tests/integration/test_evidence_rebuild.py::test_tc_13_2_5_a_corrupt_object_is_reported_and_nothing_is_deleted PASSED [ 33%]
+tests/integration/test_evidence_rebuild.py::test_a_missing_parent_object_skips_the_child_and_reports_it PASSED [ 66%]
+tests/integration/test_evidence_rebuild.py::test_a_failing_rebuild_leaves_the_old_tables_in_place PASSED [100%]
+================= 3 passed, 2 deselected in 98.06s (0:01:38) ==================

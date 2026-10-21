@@ -1,0 +1,46 @@
+........................................................................ [ 34%]
+..............................xx........................................ [ 69%]
+F
+================================== FAILURES ===================================
+______________ test_tc_0_4_1_atomic_claim_two_workers_fifty_jobs ______________
+
+settings = Settings(db_path=WindowsPath('C:/Users/Chetan/AppData/Local/Temp/pytest-of-Chetan/pytest-841/test_tc_0_4_1_atomic_clai...store'), mode=<Mode.FIXTURE: 'FIXTURE'>, admin_token=None, lease_seconds=1.5, heartbeat_seconds=0.3, poll_seconds=0.05)
+conn = <sqlite3.Connection object at 0x000001E3EEC8BF10>
+
+    def test_tc_0_4_1_atomic_claim_two_workers_fifty_jobs(settings, conn):
+        ids = [jobs.create_job(conn, "noop", {"i": i})[0].job_id for i in range(50)]
+        workers = [spawn_worker(settings.db_path, once=True) for _ in range(2)]
+        for w in workers:
+>           w.wait(timeout=60)
+
+tests\integration\test_workers.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\AppData\Roaming\uv\python\cpython-3.12.15-windows-x86_64-none\Lib\subprocess.py:1264: in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <Popen: returncode: None args: ['C:\\Users\\Chetan\\Hackethopia\\.venv\\Scri...>
+timeout = 60
+
+    def _wait(self, timeout):
+        """Internal implementation of wait() on Windows."""
+        if timeout is None:
+            timeout_millis = _winapi.INFINITE
+        elif timeout <= 0:
+            timeout_millis = 0
+        else:
+            timeout_millis = int(timeout * 1000)
+        if self.returncode is None:
+            # API note: Returns immediately if timeout_millis == 0.
+            result = _winapi.WaitForSingleObject(self._handle,
+                                                 timeout_millis)
+            if result == _winapi.WAIT_TIMEOUT:
+>               raise TimeoutExpired(self.args, timeout)
+E               subprocess.TimeoutExpired: Command '['C:\\Users\\Chetan\\Hackethopia\\.venv\\Scripts\\python.exe', '-m', 'faultline.workers.run', '--once']' timed out after 60 seconds
+
+..\AppData\Roaming\uv\python\cpython-3.12.15-windows-x86_64-none\Lib\subprocess.py:1593: TimeoutExpired
+=========================== short test summary info ===========================
+FAILED tests/integration/test_workers.py::test_tc_0_4_1_atomic_claim_two_workers_fifty_jobs
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 142 passed, 3 deselected, 2 xfailed in 1832.17s (0:30:32)

@@ -1,0 +1,5 @@
+# TC-13.2.4
+# command: pytest tests/integration/test_evidence_rebuild.py -k tc_13_2_4 or second_rebuild -v
+tests/integration/test_evidence_rebuild.py::test_tc_13_2_4_rebuild_reproduces_the_api_and_leaves_the_objects_alone PASSED [ 50%]
+tests/integration/test_evidence_rebuild.py::test_a_second_rebuild_changes_nothing PASSED [100%]
+================= 2 passed, 3 deselected in 105.71s (0:01:45) =================

@@ -12,7 +12,9 @@ The hackathon twist "The Incremental Witness" asks for three things: a content-a
 
 - Evidence is stored as immutable objects: canonical JSON, one file per object, named by its hash. The id is `sha256(kind + "/" + schema_version + "\n" + canonical_payload)`. The store lives in `var/evidence/objects/<first two hex>/<id>.json` (the `var/` folder is already ignored by git).
 - Kinds and schema versions (all version 1): `oracle_result`, `witness`, `attribution`, `verdict`, `fix_plan`, `pair_record`, `ddmin_checkpoint`, `consumer_imports`.
-- The SQL tables `witness`, `attribution`, `attribution_attempt`, `finding`, `finding_evidence`, `remediation_plan`, `oracle_job` and `oracle_run` become **projections**: rows derived from objects, rebuildable with `tools/fl.py rebuild`. A writer first stores the object, then writes the row, then records a `POINTER_MOVED` event. No code path updates or deletes an evidence row in place.
+- The SQL tables `witness`, `attribution`, `attribution_attempt`, `finding`, `finding_evidence`, `remediation_plan` and `oracle_run` become **projections**: rows derived from objects, rebuildable with `tools/fl.py rebuild`. A writer builds the payload and calls `evidence/projections.py::write`, which stores the object (a new version, with a `slot` and a `seq`, when the thing can be superseded), moves the slot's pointer, records a `POINTER_MOVED` event, and then makes the SQL rows follow the object with the kind's `apply_*` function. That module is the only code that writes these rows, and `rebuild` calls the same `apply_*` functions, so a rebuilt row cannot differ from a live one. A row changes only to follow an object; nothing else updates or deletes it.
+- Versions and slots: a slot names the thing (`finding:<cell>`, `witness:<witness_key>`, `attribution:<witness_key>`, `fix_plan:<id>`); the object with the highest `seq` is current. A witness re-verification, a recomputed verdict and a re-run attribution are new objects in the same slot. Oracle runs have no slot: each run is its own object.
+- `oracle_job` is workflow state (it is created `RUNNING` and finished `DONE` around the sandbox call) and stays an ordinary mutable table, like `job`. Its content needed to recreate it is carried by the `oracle_result` object, so a rebuild can restore a missing job row.
 - Inventory, world and cache tables (`repository`, `snapshot`, `project`, `manifest`, `resolved_world`, `world_entry`, `usage_*`, `import_index`, `relationship*`, `analysis`) stay ordinary tables; they are not evidence.
 - The `job` table stays a mutable state machine used by the worker. Every state change also appends an event in the same transaction.
 - A migration `0007_evidence.sql` adds tables only. The setting `FAULTLINE_EVIDENCE_STORE=on|off` selects the new writers or the original ones; `off` is the regression baseline.
@@ -21,9 +23,13 @@ The hackathon twist "The Incremental Witness" asks for three things: a content-a
 
 `evidence_event` is append-only (triggers reject `UPDATE` and `DELETE`). Columns: id, time, analysis id, job id, kind, subject id, payload JSON. Event types:
 
-`JOB_QUEUED`, `JOB_CLAIMED`, `JOB_HEARTBEAT` (sampled), `JOB_RETRIED`, `JOB_CANCEL_REQUESTED`, `JOB_CANCELLED`, `JOB_DONE`, `JOB_FAILED`, `PAIR_REUSED`, `PAIR_RECOMPUTE_STARTED`, `PAIR_RECOMPUTE_DONE`, `OBJECT_REJECTED`, `WORLD_REUSED`, `WORLD_BUILT`, `DDMIN_ATTEMPT_STARTED`, `DDMIN_ATTEMPT_FINISHED`, `DDMIN_ATTEMPT_INTERRUPTED`, `DDMIN_CHECKPOINT`, `POINTER_MOVED`, `REBUILD_STARTED`, `REBUILD_DONE`.
+`JOB_QUEUED`, `JOB_CLAIMED`, `JOB_RETRIED`, `JOB_CANCEL_REQUESTED`, `JOB_CANCELLED`, `JOB_DONE`, `JOB_FAILED`, `PAIR_REUSED`, `PAIR_RECOMPUTE_STARTED`, `PAIR_RECOMPUTE_DONE`, `OBJECT_REJECTED`, `WORLD_REUSED`, `WORLD_BUILT`, `DDMIN_ATTEMPT_STARTED`, `DDMIN_ATTEMPT_FINISHED`, `DDMIN_ATTEMPT_INTERRUPTED`, `DDMIN_CHECKPOINT`, `POINTER_MOVED`, `REBUILD_STARTED`, `REBUILD_DONE`.
 
-Counters are computed from these events and nothing else.
+Job events are written by database triggers on the `job` table in the same statement that changes the state, so no code path can skip them. A cancel request that also changes the status writes `JOB_CANCEL_REQUESTED` and then `JOB_CANCELLED`. Heartbeats are not events (the heartbeat time stays on the job row). Counters are computed from events and nothing else.
+
+### 2a. Rebuild
+
+`rebuild` is one transaction: it discovers and verifies every object, picks the highest `seq` of each slot, deletes the projection rows, applies the objects in dependency order (each inside a savepoint; a row whose parent is missing is skipped and reported), recomputes `object_index` and `pointer`, and compares a normalised dump of the evidence tables with the dump taken before. If anything differs, or rows that have no object would be lost, it rolls back and reports `REFUSED` (`--allow-loss` overrides this for a database that was written with the store off). A dry run does the same and always rolls back. Objects are never deleted, rewritten or moved. This replaces the "scratch database, then swap" wording of the methodology with an equivalent single SQLite transaction.
 
 ### 3. Pair key
 

@@ -1,0 +1,39 @@
+.......F.......................................................          [100%]
+================================== FAILURES ===================================
+___________ test_contention_four_workers_no_lost_or_duplicated_work ___________
+
+settings = Settings(db_path=WindowsPath('C:/Users/Chetan/AppData/Local/Temp/pytest-of-Chetan/pytest-847/test_contention_four_work...store'), mode=<Mode.FIXTURE: 'FIXTURE'>, admin_token=None, lease_seconds=1.5, heartbeat_seconds=0.3, poll_seconds=0.05)
+conn = <sqlite3.Connection object at 0x000002041CB70C70>
+
+>   ???
+
+tests\integration\test_workers.py:124: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\AppData\Roaming\uv\python\cpython-3.12.15-windows-x86_64-none\Lib\subprocess.py:1264: in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <Popen: returncode: None args: ['C:\\Users\\Chetan\\Hackethopia\\.venv\\Scri...>
+timeout = 90
+
+    def _wait(self, timeout):
+        """Internal implementation of wait() on Windows."""
+        if timeout is None:
+            timeout_millis = _winapi.INFINITE
+        elif timeout <= 0:
+            timeout_millis = 0
+        else:
+            timeout_millis = int(timeout * 1000)
+        if self.returncode is None:
+            # API note: Returns immediately if timeout_millis == 0.
+            result = _winapi.WaitForSingleObject(self._handle,
+                                                 timeout_millis)
+            if result == _winapi.WAIT_TIMEOUT:
+>               raise TimeoutExpired(self.args, timeout)
+E               subprocess.TimeoutExpired: Command '['C:\\Users\\Chetan\\Hackethopia\\.venv\\Scripts\\python.exe', '-m', 'faultline.workers.run', '--once']' timed out after 90 seconds
+
+..\AppData\Roaming\uv\python\cpython-3.12.15-windows-x86_64-none\Lib\subprocess.py:1593: TimeoutExpired
+=========================== short test summary info ===========================
+FAILED tests/integration/test_workers.py::test_contention_four_workers_no_lost_or_duplicated_work
+1 failed, 62 passed, 1 deselected in 251.22s (0:04:11)
