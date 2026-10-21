@@ -6658,3 +6658,55 @@ Start with Step 1 only. Do not modify the code yet.
 ~~~~~~
 
 **Outcome:** Evaluation of the methodology against the codebase and a revised methodology, presented for confirmation before any implementation.
+
+### Prompt 34: Decisions and implementation brief for the twist
+
+**Purpose:** Fix the open design decisions (storage model, severity policy, LSP library, editor, time window) and state the implementation brief and acceptance gates for the twist.
+
+**Prompt:**
+
+~~~~~~text
+Answers to the open questions and the implementation brief for the twist.
+
+1. Append-only storage: Implement immutable content-addressed evidence objects, rebuildable SQL result tables, and mutable job state with every state transition recorded in an append-only event log. Preserve compatibility with the existing SQL workflow.
+2. Diagnostic severity: Keep the severity mapping provisional until the existing verdict semantics are audited and documented in the ADR. Finalize the mapping based on the actual meaning of each verdict.
+3. LSP implementation: Use pygls with pinned and verified dependencies, ensuring LSP 3.17 compatibility. Integrate cancellation explicitly with the existing job cancellation and sandbox/container termination mechanisms.
+4. Editor target: Implement and demonstrate VS Code integration first. Keep Neovim support optional so the core requirements can be completed and verified reliably.
+5. Jury deadline: Plan for a 1-2 day implementation window, prioritizing the complete required functionality and live demonstrations. Verify the actual jury schedule and adjust priorities accordingly.
+
+Implement the FAULTLINE Incremental Witness twist in the existing codebase. Act as a senior systems engineer: inspect the actual code first, then implement, test, and verify the changes without breaking existing functionality.
+
+1. Incremental Evidence Store
+- Implement immutable, content-addressed evidence and stable producer-consumer pair keys that work across separate analyses.
+- Reuse valid results when relevant inputs are unchanged; recompute only affected pairs when inputs change.
+- Display accurate reused, recomputed, and rejected-result counters based on actual execution records.
+- Preserve the existing SQL workflow and make result tables rebuildable from stored evidence.
+
+2. Persistent DDMin
+- Persist minimisation state and completed oracle outcomes after every test.
+- Resume interrupted minimisation without rerunning completed tests.
+- Create a deterministic fixture with approximately eight candidate dependency changes and one verified failure-inducing change.
+- Demonstrate interruption, worker restart, and successful recovery using real executions.
+
+3. VS Code LSP Integration
+- Implement LSP 3.17 over stdio with correct Windows-safe framing.
+- Show diagnostics at accurate call-site locations with appropriate severities.
+- Offer code actions only for verified fixes, editing the correct dependency file.
+- Make cancellation terminate the actual running sandbox/container.
+- Preserve existing UI, API, and SQL-based functionality.
+
+4. Jury Demonstrations
+Prepare two reproducible demos:
+- Incremental reuse: Run five producer-consumer pairs, change one producer revision, rerun, and demonstrate which pairs were genuinely reused or recomputed.
+- DDMin recovery: Interrupt minimisation partway through, restart it, and prove that completed oracle tests are not repeated.
+Warm the store using a genuine initial run. Never fake counters, weaken verification, or count cached results as fresh witness executions.
+
+5. Engineering Process
+Follow the repository's existing phase YAML, ADR, and tools/track.py conventions. Use acceptance gates T1-T6 for storage, incremental reuse, DDMin recovery, LSP diagnostics, fixes/cancellation, and regression testing.
+
+Deliverables: Working implementation, tests, deterministic fixtures, concise jury demo instructions, actual test results, and a list of remaining gaps.
+
+Start by auditing the current codebase. Prioritise correctness, reproducibility, and the complete twist over superficial demos. Clearly distinguish implemented and verified features from assumptions or unfinished work.
+~~~~~~
+
+**Outcome:** The revised methodology (`docs/INCREMENTAL_WITNESS_METHODOLOGY.md`) and the phase-by-phase playbook (`docs/INCREMENTAL_WITNESS_PLAYBOOK.md`), written before any implementation.
