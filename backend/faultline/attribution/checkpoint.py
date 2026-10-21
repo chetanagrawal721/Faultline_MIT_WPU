@@ -91,6 +91,7 @@ class ResumableDdmin:
         self.run = self.resumed = self.checkpoints = 0
         self.seq = 0
         self.parent: str | None = None
+        self.final_status: str | None = None             # set when the search has ended: later checkpoints (the necessity check) keep it
 
     # ---- loading -----------------------------------------------------------------------------------------------------
 
@@ -125,7 +126,8 @@ class ResumableDdmin:
 
     # ---- writing -----------------------------------------------------------------------------------------------------
 
-    def _checkpoint(self, status: str = "RUNNING", extra: dict | None = None) -> None:
+    def _checkpoint(self, status: str | None = None, extra: dict | None = None) -> None:
+        status = status or self.final_status or "RUNNING"
         self.seq += 1
         payload = {"schema": 1, "minimisation_id": self.min_id, "seq": self.seq, "parent": self.parent, "algorithm": ALGORITHM_VERSION,
                    "items": self.items, "state": self.state, "tests": list(self.memo.values()), "status": status,
@@ -221,8 +223,10 @@ class ResumableDdmin:
         res = ddmin(self.items, self._wrapped, Budget(max_tests=10 ** 9, max_seconds=1e12), on_state=self._on_state)
         if not (last_status and last_status["status"] == res.status and self.run == 0):         # an unchanged finished chain gets no duplicate
             self.state = {"phase": "DONE", "c": list(res.minimal or ()), "n": 0, "i": 0, "part": None}
+            self.final_status = res.status
             self._checkpoint(res.status, {"result": {"minimal": list(res.minimal) if res.minimal else None, "alternatives": [list(a) for a in res.alternatives],
                                                      "non_monotonic": res.non_monotonic, "unresolved": res.unresolved}})
+        self.final_status = res.status
         return ResumeResult(res, self.min_id, self.run, self.resumed, self.checkpoints, from_seq, res.status)
 
     def _on_state(self, state: dict) -> None:

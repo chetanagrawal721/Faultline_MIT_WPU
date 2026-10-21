@@ -409,3 +409,17 @@ def test_with_the_store_off_the_plain_search_runs(conn, monkeypatch):
     monkeypatch.setenv("FAULTLINE_EVIDENCE_STORE", "off")
     r = ResumableDdmin(conn, minimisation=mid("off"), items=ITEMS, test=oracle("single")).run_search()
     assert r.result.minimal == ("p07",) and r.checkpoints == 0 and r.tests_resumed == 0
+
+
+def test_a_check_after_the_search_keeps_the_chain_marked_finished(conn):
+    m = mid("final")
+    rd = ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle("single"))
+    assert rd.run_search().status == "COMPLETE"
+    out, detail = rd.check("necessity", frozenset({"p07"}), lambda s: (Outcome.PASS, {"note": "reverted: passes", "world_hash": "w_1"}))
+    assert out is Outcome.PASS and detail["note"] == "reverted: passes"
+    rows = conn.execute("SELECT seq, status FROM ddmin_checkpoint WHERE minimisation_id=? ORDER BY seq", (m,)).fetchall()
+    assert rows[-1]["status"] == "COMPLETE" and len(rows) >= 2, "the checkpoint written for the check does not make a finished chain look unfinished"
+    again = ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle("single"))
+    assert again.run_search().tests_run == 0
+    out2, detail2 = again.check("necessity", frozenset({"p07"}), lambda s: (_ for _ in ()).throw(AssertionError("must not run again")))
+    assert out2 is Outcome.PASS and detail2["world_hash"] == "w_1"
