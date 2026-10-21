@@ -6596,3 +6596,65 @@ he knows about this document but dont know what is completed and what is not lik
 ~~~~~~
 
 **Outcome:** `docs/FAULTLINE_BUILD_STATUS.md`.
+
+## 9. Hackathon twist: The Incremental Witness
+
+### Prompt 32: The assigned twist
+
+**Purpose:** Record the twist given by the organisers, which moves Faultline to a content-addressed store, persistent minimisation state and an LSP server.
+
+**Prompt:**
+
+~~~~~~text
+Your assigned twist: "The Incremental Witness"
+Transition FAULTLINE from mutable storage to a content-addressed store with Language Server Protocol (LSP) integration and persistent minimisation state.
+1. Content-Addressed Store
+
+* Replace the mutable SQLite/PostgreSQL job and result tables with a content-addressed, append-only store.
+* Key every dependency world, witness, and verdict using a hash of the pinned commit SHA, lockfile digest, resolver version, and platform.
+* When a producer commit changes, recompute only the affected pairs while reusing unchanged results.
+* Display live counters in the UI showing the number of results recomputed versus reused.
+
+2. Persistent DDMin State
+
+* Persist the Delta Debugging Minimisation (DDMin) state, including the candidate set and granularity, after every sandbox oracle run.
+* Ensure interrupted minimisation runs can resume from their last saved checkpoint instead of restarting from the beginning.
+
+3. Language Server Protocol (LSP 3.17)
+
+* Expose FAULTLINE as an LSP server over standard input/output (stdio) for Python consumers.
+* Implement textDocument/publishDiagnostics so findings appear on the exact call-site lines, with distinct severity levels for different verdicts.
+* Implement textDocument/codeAction to return verified fixes as WorkspaceEdit responses.
+* Support $/cancelRequest to terminate running sandbox executions when a cancellation request is received.
+* Demonstrate the implementation working in a real LSP client, such as VS Code or Neovim.
+
+The original SQL-based analysis workflow must continue to work. The jury will have a copy of this twist and will verify your implementation live. Implementing the assigned changes earns bonus points, while failing to include them results in a deduction.
+~~~~~~
+
+**Outcome:** The requirements for the twist work that follows.
+
+### Prompt 33: Evaluate the proposed methodology before implementing
+
+**Purpose:** Test a written methodology against the twist and the real codebase, and decide whether to build from it or revise it first, with a confirmation gate before any code is written.
+
+**Prompt:**
+
+~~~~~~text
+We have received the hackathon twist "The Incremental Witness" for FAULTLINE.
+I am providing the methodology document: `FAULTLINE_Incremental_Witness_Engineering_Methodology`
+You already know the complete FAULTLINE codebase, architecture, current implementation, and existing SQL workflow. Do not spend time re-analyzing the project from scratch.
+Step 1 - Evaluate the Methodology
+Thoroughly compare the provided methodology against the complete twist requirements (content-addressed append-only store; hash-based identity of worlds, witnesses and verdicts; incremental recomputation with reuse; live reused-vs-recomputed UI counters; persistent DDMin state and checkpoints; resume of interrupted minimisation; LSP 3.17 over stdio; publishDiagnostics with exact call-site lines and severities; codeAction returning verified WorkspaceEdit fixes; $/cancelRequest with real sandbox cancellation; a real VS Code or Neovim demonstration; the existing SQL workflow remaining fully functional).
+Determine whether the methodology is technically sound and practical to implement in our current FAULTLINE architecture. Identify: missing requirements, incorrect assumptions, architectural conflicts, risky implementation choices, potential jury-demo failures, required modifications, and dependencies between implementation phases.
+Step 2 - Give a Clear Decision
+GO (suitable, minor corrections only) or REVISE (substantial changes needed). If REVISE, create a corrected methodology optimized for our FAULTLINE implementation and this twist.
+IMPORTANT CONFIRMATION GATE
+If substantial revision is required, STOP after presenting the revised methodology and ask me for confirmation. Do NOT create the implementation playbook or modify the code until I confirm.
+Step 3 - Create the Implementation Playbook (after approval)
+A phase-by-phase, step-by-step playbook covering: content-addressed storage; incremental reuse and recomputation; live UI counters; persistent DDMin state; resume and recovery; the LSP 3.17 server; diagnostics; code actions and WorkspaceEdits; cancellation; SQL backward compatibility; VS Code/Neovim integration; testing and validation; end-to-end integration; the final jury demonstration. For each phase: objective, files and modules, steps, data and control flow, interfaces, tests, acceptance criteria, demo and verification steps, dependencies and blockers.
+Critical Requirement: do not replace or break the existing SQL-based workflow. The goal is a genuine working implementation, not mocked or demo-only functionality.
+Final Verification: unchanged inputs give reused results; changed inputs recompute only the affected results; DDMin interrupted, checkpoint saved, execution resumes; finding gives an exact LSP call-site diagnostic; verified fix gives a WorkspaceEdit; $/cancelRequest stops the sandbox execution; the SQL workflow still works.
+Start with Step 1 only. Do not modify the code yet.
+~~~~~~
+
+**Outcome:** Evaluation of the methodology against the codebase and a revised methodology, presented for confirmation before any implementation.
