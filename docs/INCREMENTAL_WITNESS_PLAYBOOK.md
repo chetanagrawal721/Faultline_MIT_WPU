@@ -1,4 +1,4 @@
-# Faultline: The Incremental Witness, implementation playbook
+ # Faultline: The Incremental Witness, implementation playbook
 
 Status: **DRAFT 2 for confirmation** (four review corrections applied: cold run is setup and the live demo starts warm; only result-affecting resolver settings enter the key; the sandbox boundary covers untrusted code, not the trusted control plane; the time target is not a promise). No code has been changed for the twist. This playbook implements `docs/INCREMENTAL_WITNESS_METHODOLOGY.md` (Draft 2), which it does not repeat; read that first.
 
@@ -134,7 +134,7 @@ M13.7 and M13.8 only need existing findings, so they can start after M13.0 and r
 
 ### Gate T1: Storage
 
-Declared with `python tools/track.py gate T1` after M13.1 and M13.2 are done and the key tests of M13.3 (TC-13.3.1 to TC-13.3.3) pass. Evidence: key determinism, atomic publish, tamper rejection, concurrent writes, crash repair, rebuild comparison.
+Declared with `python tools/track.py gate T1` after M13.0, M13.1 and M13.2 are done. Evidence: audit and ADR, key determinism of the object ids, atomic publish, tamper rejection, concurrent writes, crash repair, rebuild comparison.
 
 ---
 

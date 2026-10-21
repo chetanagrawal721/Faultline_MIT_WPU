@@ -1,0 +1,99 @@
+# ADR 0008: Incremental Witness: evidence store, resumable minimisation and the language server
+
+Status: accepted, 2026-10-21.
+
+## Context
+
+The hackathon twist "The Incremental Witness" asks for three things: a content-addressed, append-only evidence store with incremental recomputation and live counters; persistent, resumable delta-debugging state; and an LSP 3.17 server over stdio shown in a real editor. The original SQL workflow must keep working. The master specification describes a SQLite store whose result rows are mutable; the twist departs from that, so the departure is recorded here. The audit of the code is in `docs/INCREMENTAL_WITNESS_AUDIT.md`; the method is in `docs/INCREMENTAL_WITNESS_METHODOLOGY.md`.
+
+## Decisions
+
+### 1. Evidence objects and projections
+
+- Evidence is stored as immutable objects: canonical JSON, one file per object, named by its hash. The id is `sha256(kind + "/" + schema_version + "\n" + canonical_payload)`. The store lives in `var/evidence/objects/<first two hex>/<id>.json` (the `var/` folder is already ignored by git).
+- Kinds and schema versions (all version 1): `oracle_result`, `witness`, `attribution`, `verdict`, `fix_plan`, `pair_record`, `ddmin_checkpoint`, `consumer_imports`.
+- The SQL tables `witness`, `attribution`, `attribution_attempt`, `finding`, `finding_evidence`, `remediation_plan`, `oracle_job` and `oracle_run` become **projections**: rows derived from objects, rebuildable with `tools/fl.py rebuild`. A writer first stores the object, then writes the row, then records a `POINTER_MOVED` event. No code path updates or deletes an evidence row in place.
+- Inventory, world and cache tables (`repository`, `snapshot`, `project`, `manifest`, `resolved_world`, `world_entry`, `usage_*`, `import_index`, `relationship*`, `analysis`) stay ordinary tables; they are not evidence.
+- The `job` table stays a mutable state machine used by the worker. Every state change also appends an event in the same transaction.
+- A migration `0007_evidence.sql` adds tables only. The setting `FAULTLINE_EVIDENCE_STORE=on|off` selects the new writers or the original ones; `off` is the regression baseline.
+
+### 2. Events
+
+`evidence_event` is append-only (triggers reject `UPDATE` and `DELETE`). Columns: id, time, analysis id, job id, kind, subject id, payload JSON. Event types:
+
+`JOB_QUEUED`, `JOB_CLAIMED`, `JOB_HEARTBEAT` (sampled), `JOB_RETRIED`, `JOB_CANCEL_REQUESTED`, `JOB_CANCELLED`, `JOB_DONE`, `JOB_FAILED`, `PAIR_REUSED`, `PAIR_RECOMPUTE_STARTED`, `PAIR_RECOMPUTE_DONE`, `OBJECT_REJECTED`, `WORLD_REUSED`, `WORLD_BUILT`, `DDMIN_ATTEMPT_STARTED`, `DDMIN_ATTEMPT_FINISHED`, `DDMIN_ATTEMPT_INTERRUPTED`, `DDMIN_CHECKPOINT`, `POINTER_MOVED`, `REBUILD_STARTED`, `REBUILD_DONE`.
+
+Counters are computed from these events and nothing else.
+
+### 3. Pair key
+
+`pair_key = sha256("pair/1\n" + canonical(PairKeyInput))`, with the record stored as a `pair_record` object beside the digest. `PairKeyInput`:
+
+| Field | Source |
+|---|---|
+| `producer_repo`, `producer_commit`, `consumer_repo`, `consumer_commit` | pinned snapshots |
+| `producer_artifact_sha256` | content hash of the installed or imported tree |
+| `reference_lock_digest`, `consumer_lock_digest` | digest of the lockfile or pinned requirement set |
+| `reference_world_hash`, `consumer_world_hash` | `world_hash` |
+| `resolver`, `resolver_version` | the pinned `uv` |
+| `resolution`: `exclude_newer`, `index` | only when uv resolved the world; absent for a pinned lockfile |
+| `platform`: OS, architecture, runtime version | environment profile |
+| `entries`: consumer entry modules with file SHA-256 | import scan |
+| `oracles`: name, version and harness version for each oracle planned | oracle registry |
+| `image_digest` | sandbox image |
+| `witness_rule` (`3+3`), `verdict_rule` (`verdict-policy/1`) | policy |
+
+Excluded: wall-clock times, local paths, analysis and job ids, the order of unordered collections.
+
+### 4. DDMin checkpoint
+
+- `minimisation_id = sha256(pair_key, witness signature, sorted candidate set digest, "ddmin/2")`. The algorithm version string is `ddmin/2` (the current in-memory algorithm is version 1).
+- `test_id = sha256(minimisation_id, sorted subset, direction)`, direction one of `search`, `sufficiency`, `necessity`.
+- `ddmin_checkpoint` payload: `schema_version`, `minimisation_id`, `seq`, `parent` (previous checkpoint id or null), `state` `{phase, c, n, i}` (phase one of `SINGLETONS`, `FULL`, `REDUCE`, `POST`, `DONE`), `tests` (list of `{test_id, outcome, oracle_result_id}`), `budget` `{tests_used, seconds_used, max_tests, max_seconds}`, `status` (`RUNNING`, `COMPLETE`, `BUDGET_LIMITED`, `CANCELLED`, `FAILED`).
+- Outcomes: `FAIL`, `PASS`, `UNRESOLVED`, `INTERRUPTED`. Only `FAIL` counts as still failing, as today. `INTERRUPTED` and `UNRESOLVED` are never a cause.
+- A unique key `(minimisation_id, seq)` allows one writer per step.
+- Per-test order: look up `test_id` among stored results; else `DDMIN_ATTEMPT_STARTED`, run, store `oracle_result`, `DDMIN_ATTEMPT_FINISHED`, append the checkpoint. A test whose process died has no result object and runs once more. The window between a finished sandbox run and the stored result is a known limit and is stated in the final report.
+
+### 5. Severity mapping
+
+Final, following the meaning of each verdict (audit section 6):
+
+| Verdict | LSP severity | Reason |
+|---|---|---|
+| BREAK WITNESSED | Error | A reproducible failure under the witness rule |
+| SILENT DIVERGENCE WITNESSED | Warning | Reproducible difference in output; harm is not established |
+| EXPOSED | Warning | A changed symbol is referenced; execution did not settle it |
+| POTENTIAL | Information | Breaking changes exist; usage not resolved |
+| INCONCLUSIVE | Hint | Not enough evidence; the reason is shown |
+| HYGIENE | Hint | Versions differ with no relationship; no source location, shown on the package |
+| NO DIVERGENCE OBSERVED | none | Nothing diverged in what was exercised |
+| NOT EXPOSED | none | No resolved reference touches a changed symbol |
+
+An unknown verdict raises an error. Messages use only the exact verdict words. The live pipeline produces BREAK WITNESSED, SILENT DIVERGENCE WITNESSED, INCONCLUSIVE and no-diagnostic cases today; EXPOSED, POTENTIAL and NOT EXPOSED come from static analysis that is not wired into the live run, so they are mapped and unit-tested but not shown live.
+
+### 6. Language server
+
+- `pygls==2.1.1` with `lsprotocol==2025.0.0` (LSP 3.17), pinned in `pyproject.toml` and `uv.lock`.
+- The server is a client of the REST API. It reads findings, evidence and the stored consumer import sites; it starts and cancels jobs through the API. It never runs analysed code.
+- Methods: `initialize`, `initialized`, `shutdown`, `exit`, `textDocument/didOpen`, `didChange`, `didSave`, `didClose`, `textDocument/publishDiagnostics` (push), `textDocument/codeAction`, `workspace/executeCommand`, `$/cancelRequest`, and the custom request `faultline/analyze`.
+- Diagnostic location: for a consumer file, the import line of the affected module from the stored import scan (range: the whole line, since the scan has no column); for a producer file, the O-bind site (file, line, column) or the innermost artifact frame; otherwise no precise diagnostic.
+- Code action: `quickfix`, only for a `fix_plan` labelled VERIFIED on an import witness whose recorded target-file hash equals the file's current hash. The `WorkspaceEdit` edits the consumer's requirements file.
+
+### 7. Cancellation
+
+`$/cancelRequest` → look up the request id in the request-to-job table → mark cancelled → `POST /api/jobs/{id}/cancel` → the worker's heartbeat sees `cancel_requested` → `SandboxClient.cancel(job_id)` removes the job's containers → the job ends `CANCELLED`. pygls itself only cancels the Python future of the handler; the explicit bridge above is what stops the sandbox. Worst-case delay before the kill is the heartbeat interval (10 s by default); the measured value is recorded by TC-13.10.1.
+
+## Differences from the master
+
+1. The master describes mutable result rows in SQLite. They become projections of immutable objects (decision 1).
+2. The master has no event log or object store; both are added.
+3. The master has no LSP server; it is added as a client of the existing API.
+
+No verdict word, failure class, witness class or the 3 + 3 witness rule changes. The LLM stays out of every decision.
+
+## Consequences
+
+- Reused pair results are labelled as reused and are never counted as fresh runs inside a new witness. The existing run-level cache stays off for witnesses (`force=True`).
+- The consumer import scan is stored from now on.
+- Rebuilding projections never touches the object directory.
+- The final report lists what was implemented and verified, what was implemented but not verified, and what was not done.
