@@ -1,0 +1,139 @@
+phase: 13
+name: 'The Incremental Witness: evidence store, resumable minimisation, LSP'
+gate: T1
+release_point: 'Gate T1: Storage'
+goal: Content-addressed append-only evidence, persistent DDMin state and an LSP 3.17 server, with the SQL workflow still working.
+entry: Methodology and playbook confirmed (docs/INCREMENTAL_WITNESS_METHODOLOGY.md, docs/INCREMENTAL_WITNESS_PLAYBOOK.md).
+milestones:
+- id: M13.0
+  title: Audit, ADR 0008 and tracker setup
+  gate: T1
+  tier: MUST
+  hackathon: P0
+  goal: Confirm every baseline claim against the code, freeze the provisional design decisions and register Phase 13.
+  tasks:
+  - Record the baseline (branch, commit, pins, migrations, OpenAPI hash) and run the unit tests and the three previously failing integration tests.
+  - Check each baseline row of the methodology against the code; list every result-table writer, every ddmin caller, the location data of each witness type, the verdict semantics, the resolver settings
+    that affect the result and the cancel latency.
+  - Choose the five demo pairs from existing fixtures (at least two producers).
+  - Decide the object-store layout, key-schema version and migration number 0007.
+  - Write ADR 0008 (store, pair key, checkpoint and test_id, final severity table, cancellation path, departures from the master).
+  - Verify the pygls and lsprotocol versions for LSP 3.17, Python 3.12 wheels, hash pins and cancellation behaviour.
+  - Write phase13 YAML and the gates T1 to T6.
+  files:
+  - docs/adr/0008-incremental-witness.md
+  - docs/INCREMENTAL_WITNESS_AUDIT.md
+  - playbook/phases/phase13_t1.yaml
+  - playbook/phases.yaml
+  tcs:
+  - id: TC-13.0.1
+    title: Audit record is complete
+    kind: auto
+    steps: Run tests/unit/test_twist_audit.py, which parses docs/INCREMENTAL_WITNESS_AUDIT.md.
+    expect: Every methodology baseline row and every result-table writer has a result (confirmed, corrected or not found); none is blank.
+  - id: TC-13.0.2
+    title: Phase 13 is registered
+    kind: auto
+    steps: Run python tools/track.py status.
+    expect: Phase 13 milestones and gates T1 to T6 are listed; gates A to E, S and X are unchanged.
+  - id: TC-13.0.3
+    title: ADR 0008 is complete
+    kind: auto
+    steps: Run tests/unit/test_twist_audit.py ADR checks.
+    expect: ADR 0008 contains the final severity table, pair-key record, checkpoint record, event types and cancellation path.
+  - id: TC-13.0.4
+    title: Master consistency holds
+    kind: auto
+    steps: Run tests/unit/test_master_consistency.py.
+    expect: Passes; the departures from the master are documented in the ADR.
+- id: M13.1
+  title: Content-addressed object store
+  gate: T1
+  tier: MUST
+  hackathon: P0
+  goal: An immutable, atomic, verifying store for evidence objects.
+  tasks:
+  - Object envelope {kind, schema_version, payload}; id = hash of kind and version prefix plus canonical bytes.
+  - 'put: canonicalise, hash, temporary file, verify digest, atomic rename; same content returns the same id.'
+  - 'get: verify digest, schema and kind; report ok, missing, corrupt or unsupported.'
+  - link edges; kind registry with validators; tolerate rename onto an existing file on Windows.
+  files:
+  - backend/faultline/evidence/store.py
+  - backend/faultline/evidence/object_store.py
+  - backend/faultline/evidence/kinds.py
+  - tests/unit/test_evidence_store.py
+  tcs:
+  - id: TC-13.1.1
+    title: Identity is deterministic
+    kind: auto
+    steps: Put the same payload with reordered keys; put the same payload under two kinds.
+    expect: Same id for reordered keys; different ids for different kinds.
+  - id: TC-13.1.2
+    title: Tampering is rejected
+    kind: auto
+    steps: Flip a byte in a stored object and read it.
+    expect: get reports corrupt; the payload is never returned.
+  - id: TC-13.1.3
+    title: A crash leaves no partial object
+    kind: auto
+    steps: Simulate a crash after the temporary write; retry the put.
+    expect: No object under a final name after the crash; the retry succeeds.
+  - id: TC-13.1.4
+    title: Concurrent identical writes
+    kind: auto
+    steps: Put the same content from 16 threads and 4 processes.
+    expect: One object, no error.
+  - id: TC-13.1.5
+    title: Unsupported schema is not used
+    kind: auto
+    steps: Read an object whose schema version is newer than supported.
+    expect: Reported as unsupported, not corrupt, and not used.
+- id: M13.2
+  title: Event log, SQL projections and rebuild
+  gate: T1
+  tier: MUST
+  hackathon: P0
+  goal: Append-only job and evidence events; result tables written as projections of objects; a rebuild that recreates them.
+  tasks:
+  - 'Migration 0007 adds tables only: object_index, object_edge, evidence_event, pointer, ddmin_checkpoint, pair_index.'
+  - Append-only evidence_event (triggers reject UPDATE and DELETE); emit one event per job state change in the same transaction.
+  - Convert each result-table writer from DELETE then INSERT to put object, insert projection row, move pointer.
+  - Implement rebuild (discover, order, duplicates, pointers, scratch database then swap, verify).
+  - Setting FAULTLINE_EVIDENCE_STORE=on|off; off runs the original writers.
+  files:
+  - backend/faultline/storage/migrations/0007_evidence.sql
+  - backend/faultline/evidence/events.py
+  - backend/faultline/evidence/projections.py
+  - backend/faultline/evidence/rebuild.py
+  - backend/faultline/storage/jobs.py
+  - tools/fl.py
+  tcs:
+  - id: TC-13.2.1
+    title: Events are append-only
+    kind: auto
+    steps: Try UPDATE and DELETE on evidence_event.
+    expect: Both fail.
+  - id: TC-13.2.2
+    title: Every job transition is one event
+    kind: auto
+    steps: Run a normal job, a retried job and a cancelled job; read the events.
+    expect: Exactly one event per transition, in order.
+  - id: TC-13.2.3
+    title: Existing responses are unchanged
+    kind: auto
+    steps: Run the showcase analysis with the store on (needs Docker); compare findings, witnesses, attribution, remediation and evidence responses to the golden recording.
+    expect: Identical.
+  - id: TC-13.2.4
+    title: Rebuild reproduces the API
+    kind: auto
+    steps: Snapshot the responses, empty the projection tables, run tools/fl.py rebuild, compare.
+    expect: Responses identical; the object directory is byte-identical.
+  - id: TC-13.2.5
+    title: Rebuild survives bad objects
+    kind: auto
+    steps: Rebuild with one corrupt and one missing referenced object; also force a failing rebuild.
+    expect: Both reported and skipped; nothing deleted; a failed rebuild leaves the old tables in place.
+gate_exit:
+  id: T1
+  statement: Immutable content-addressed evidence is stored and verified, result tables are rebuildable from it, and every job transition is an event.
+  must_not_claim: Incremental reuse, resumable minimisation or editor support.

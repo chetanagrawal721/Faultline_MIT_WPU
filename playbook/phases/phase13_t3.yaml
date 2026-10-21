@@ -1,0 +1,113 @@
+phase: 13
+name: 'The Incremental Witness: evidence store, resumable minimisation, LSP'
+gate: T3
+release_point: 'Gate T3: DDMin recovery'
+goal: Content-addressed append-only evidence, persistent DDMin state and an LSP 3.17 server, with the SQL workflow still working.
+entry: Methodology and playbook confirmed (docs/INCREMENTAL_WITNESS_METHODOLOGY.md, docs/INCREMENTAL_WITNESS_PLAYBOOK.md).
+milestones:
+- id: M13.5
+  title: Resumable DDMin core
+  gate: T3
+  tier: MUST
+  hackathon: P0
+  goal: ddmin becomes a state machine whose state and completed tests are stored after every test and which resumes deterministically.
+  tasks:
+  - State (phase, c, n, i); keep results of the existing algorithm for uninterrupted runs.
+  - test_id = hash(minimisation_id, subset, direction); minimisation_id = hash(pair key, witness signature, candidate-set digest, algorithm version).
+  - 'Per-test protocol: lookup by test_id, STARTED event, run, store oracle_result, FINISHED event, append checkpoint, next test.'
+  - Resume from the latest valid checkpoint, fall back to the previous one, replay against stored results; budget stored as consumed.
+  - Interrupted, timeout, cancelled and unbuildable tests are INTERRUPTED or UNRESOLVED, never FAIL.
+  files:
+  - backend/faultline/attribution/ddmin.py
+  - backend/faultline/attribution/checkpoint.py
+  - backend/faultline/evidence/kinds.py
+  - tests/unit/test_ddmin_resume.py
+  tcs:
+  - id: TC-13.5.1
+    title: Same results as before
+    kind: auto
+    steps: Run the existing ddmin cases through the resumable version.
+    expect: Same minimal set, status and attempts.
+  - id: TC-13.5.2
+    title: Resume at every point
+    kind: auto
+    steps: Stop after each possible test index k, resume, compare with an uninterrupted run.
+    expect: Same final result; no stored test is run again.
+  - id: TC-13.5.3
+    title: Crash before the checkpoint
+    kind: auto
+    steps: Fault injection exits after the result is stored and before the checkpoint.
+    expect: Resume appends the missing checkpoint and does not run that test again.
+  - id: TC-13.5.4
+    title: Interrupted is not a failure
+    kind: auto
+    steps: Interrupt a test.
+    expect: Recorded INTERRUPTED, never FAIL; it runs again on resume.
+  - id: TC-13.5.5
+    title: Corrupt checkpoint
+    kind: auto
+    steps: Corrupt the latest checkpoint, then all of them.
+    expect: Falls back to the previous one; with all corrupt, an explicit error.
+  - id: TC-13.5.6
+    title: Two resumers race
+    kind: auto
+    steps: Resume the same chain from two processes.
+    expect: Only one advances seq.
+  - id: TC-13.5.7
+    title: Budget and versions
+    kind: auto
+    steps: Exhaust the budget; change the algorithm version.
+    expect: BUDGET_LIMITED with the smallest failing set and no use of the word minimal; the old chain is not resumed.
+- id: M13.6
+  title: Recovery in the pipeline and the eight-candidate fixture
+  gate: T3
+  tier: MUST
+  hackathon: P0
+  goal: Attribution in the live pipeline uses the resumable DDMin on real sandbox runs, and a fixture makes the recovery visible.
+  tasks:
+  - 'Build a producer and a consumer whose worlds differ by exactly eight packages: seven harmless, one that breaks the import; write the label first.'
+  - attribute() creates or loads the chain by minimisation_id and stores each forced-world run as an oracle_result with its test_id.
+  - Interruption by killing the worker process, and by fault injection in tests only.
+  - A retry (new analysis) finds the chain from the pair key and continues.
+  files:
+  - backend/faultline/attribution/runner.py
+  - backend/faultline/analysis/live.py
+  - backend/faultline/workers/run.py
+  - fixtures/repos/acme-bisect/
+  - fixtures/repos/bisect-svc/
+  - tests/integration/test_ddmin_recovery.py
+  tcs:
+  - id: TC-13.6.1
+    title: Uninterrupted run
+    kind: auto
+    steps: Analyse the fixture (needs Docker).
+    expect: The labelled change is the minimal set and the test count matches the label.
+  - id: TC-13.6.2
+    title: Kill the worker mid-run
+    kind: auto
+    steps: Kill the worker during a sandbox run, restart it.
+    expect: The chain resumes; the minimal set equals the label; no test with a stored result runs again (compared by sandbox run ids); the killed test runs once more.
+  - id: TC-13.6.3
+    title: Crash before the checkpoint, on real runs
+    kind: auto
+    steps: Fault injection after the result is stored and before the checkpoint.
+    expect: Resume skips that test.
+  - id: TC-13.6.4
+    title: No orphan after the kill
+    kind: auto
+    steps: List containers after the kill.
+    expect: None of the old job remains; the old attempt is marked interrupted.
+  - id: TC-13.6.5
+    title: Same result as uninterrupted
+    kind: auto
+    steps: Compare the resumed attribution with the uninterrupted one.
+    expect: Same minimal set and statuses.
+  - id: TC-13.6.6
+    title: Fixture works from GitHub
+    kind: auto
+    steps: Publish the fixtures and analyse them from their URLs.
+    expect: Correct result.
+gate_exit:
+  id: T3
+  statement: An interrupted minimisation resumes from a checkpoint without repeating tests whose results were stored.
+  must_not_claim: That minimisation is globally minimal, or that the window between a finished run and its stored result is closed.

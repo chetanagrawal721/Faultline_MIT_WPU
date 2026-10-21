@@ -1,0 +1,98 @@
+phase: 13
+name: 'The Incremental Witness: evidence store, resumable minimisation, LSP'
+gate: T2
+release_point: 'Gate T2: Incremental reuse'
+goal: Content-addressed append-only evidence, persistent DDMin state and an LSP 3.17 server, with the SQL workflow still working.
+entry: Methodology and playbook confirmed (docs/INCREMENTAL_WITNESS_METHODOLOGY.md, docs/INCREMENTAL_WITNESS_PLAYBOOK.md).
+milestones:
+- id: M13.3
+  title: Stable pair key and pair records
+  gate: T2
+  tier: MUST
+  hackathon: P0
+  goal: A producer-consumer pair has the same identity across separate analyses and changes whenever a relevant input changes.
+  tasks:
+  - PairKeyInput record with the inputs of methodology 6.1; only resolver settings that change the result enter the key.
+  - pair_key = hash of the pair/1 prefix and the canonical record; the record is stored beside the digest.
+  - explain(key_a, key_b) names the inputs that differ.
+  - plan_cells computes and stores the key; cell.id is unchanged for the existing workflow.
+  files:
+  - backend/faultline/evidence/pair_key.py
+  - backend/faultline/evidence/pairs.py
+  - backend/faultline/worlds/cells.py
+  - tests/unit/test_pair_key.py
+  tcs:
+  - id: TC-13.3.1
+    title: Key is deterministic
+    kind: auto
+    steps: Compute the key twice in separate processes and with reordered fields.
+    expect: Same key.
+  - id: TC-13.3.2
+    title: Key mutation matrix
+    kind: auto
+    steps: 'Change each input alone: producer commit, consumer commit, producer artifact byte, each lockfile, resolver version, platform, entry file hash, oracle version, image digest, witness rule, verdict
+      rule; also change run time, local path, analysis id.'
+    expect: Every real input changes the key; the incidental values do not; a resolution timestamp matches what the audit recorded.
+  - id: TC-13.3.3
+    title: Key is stable across analyses
+    kind: auto
+    steps: Analyse identical pinned inputs twice.
+    expect: The same pair key for every cell.
+  - id: TC-13.3.4
+    title: explain names the change
+    kind: auto
+    steps: Compare keys that differ in one input.
+    expect: explain names exactly that input.
+- id: M13.4
+  title: Incremental analysis and counters
+  gate: T2
+  tier: MUST
+  hackathon: P0
+  goal: A new analysis reuses stored pair results whose key matches and recomputes only the rest, with counters taken from events.
+  tasks:
+  - 'Look up the pair key before running a cell: reuse, reject (then recompute) or recompute.'
+  - A reused result is labelled REUSED_RESULT with its original runs and never joins the 3 + 3 runs of a new witness; infrastructure-inconclusive results are not stored as reusable.
+  - Counters from evidence_event only; GET counters and pairs endpoints; UI widget with per-pair reasons.
+  - Cold run on an empty store is the setup step that warms the store; its evidence is kept.
+  files:
+  - backend/faultline/analysis/live.py
+  - backend/faultline/analysis/incremental.py
+  - backend/faultline/evidence/counters.py
+  - backend/faultline/api/routers/analysis.py
+  - frontend/src/app/views/Overview.tsx
+  - frontend/src/ui/Counters.tsx
+  tcs:
+  - id: TC-13.4.1
+    title: Cold run (setup and verification)
+    kind: auto
+    steps: Run the five-pair set on an empty store (needs Docker).
+    expect: Five recomputed, none reused; counters equal the event log; output kept under evidence/M13.4/.
+  - id: TC-13.4.2
+    title: Unchanged rerun reuses everything
+    kind: auto
+    steps: Re-run the same five pairs.
+    expect: Five reused, none recomputed, zero new sandbox runs, identical findings.
+  - id: TC-13.4.3
+    title: A changed producer recomputes only its pairs
+    kind: auto
+    steps: Change one producer revision and re-run.
+    expect: Only that producer's pairs recompute; the rest are reused; counters equal the event log.
+  - id: TC-13.4.4
+    title: A corrupt pair object is rejected
+    kind: auto
+    steps: Corrupt one stored pair object and re-run.
+    expect: That pair is REJECTED and recomputed; the others are reused.
+  - id: TC-13.4.5
+    title: Reused results are never fresh runs
+    kind: auto
+    steps: Inspect run provenance of witnesses after a reused and a recomputed analysis.
+    expect: No reused run appears inside a new witness's 3 + 3.
+  - id: TC-13.4.6
+    title: UI shows the counters
+    kind: manual
+    steps: Open the analysis page after the rerun.
+    expect: Counters and per-pair reasons are visible; screenshot saved.
+gate_exit:
+  id: T2
+  statement: Unchanged pairs are reused and only pairs whose key changed are recomputed, with counters taken from stored events.
+  must_not_claim: That cached results are fresh witness executions, or any speedup not measured by the counters.

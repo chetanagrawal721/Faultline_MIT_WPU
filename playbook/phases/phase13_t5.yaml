@@ -1,0 +1,95 @@
+phase: 13
+name: 'The Incremental Witness: evidence store, resumable minimisation, LSP'
+gate: T5
+release_point: 'Gate T5: Fixes and cancellation'
+goal: Content-addressed append-only evidence, persistent DDMin state and an LSP 3.17 server, with the SQL workflow still working.
+entry: Methodology and playbook confirmed (docs/INCREMENTAL_WITNESS_METHODOLOGY.md, docs/INCREMENTAL_WITNESS_PLAYBOOK.md).
+milestones:
+- id: M13.9
+  title: Verified code action as a WorkspaceEdit
+  gate: T5
+  tier: MUST
+  hackathon: P0
+  goal: codeAction offers a fix only when it is verified and current, and edits the correct dependency file.
+  tasks:
+  - Offer an action only for a VERIFIED fix_plan of an import witness whose recorded requirements-file hash equals the current file hash.
+  - WorkspaceEdit with a versioned TextDocumentEdit on the consumer requirements file, kind quickfix, linked to the diagnostic.
+  - No action for suggested, partial, stale, unsupported or unknown-file cases.
+  - Faultline never saves, commits or pushes; a new analysis after the edit recomputes only the affected pair.
+  files:
+  - backend/faultline/lsp/code_actions.py
+  - backend/faultline/remediation/minimal.py
+  - tests/unit/test_lsp_code_actions.py
+  tcs:
+  - id: TC-13.9.1
+    title: Verified fix gives an exact edit
+    kind: auto
+    steps: Request the action for a VERIFIED plan and apply the edit to a copy.
+    expect: The result equals the plan's diff.
+  - id: TC-13.9.2
+    title: No action when unverified or stale
+    kind: auto
+    steps: Suggested, partial, stale-hash, non-import and missing-file cases.
+    expect: No action.
+  - id: TC-13.9.3
+    title: Correct target file
+    kind: auto
+    steps: Inspect the edit.
+    expect: It targets the requirements file, not a source file.
+  - id: TC-13.9.4
+    title: Re-analysis after the fix
+    kind: auto
+    steps: Apply the edit to a consumer copy and re-run (needs Docker).
+    expect: The witness is gone and only the affected pair recomputed.
+  - id: TC-13.9.5
+    title: Fix in VS Code
+    kind: manual
+    steps: Use the lightbulb in VS Code.
+    expect: The fix edits the file and the diagnostic clears after re-analysis; recording saved.
+- id: M13.10
+  title: Cancellation
+  gate: T5
+  tier: MUST
+  hackathon: P0
+  goal: $/cancelRequest stops the actual sandbox execution and ends the job as CANCELLED.
+  tasks:
+  - faultline/analyze creates the job with an idempotency key and records request id to job id.
+  - 'On $/cancelRequest: ignore unknown ids, mark cancelled first, call the cancel endpoint, answer RequestCancelled, drop later results.'
+  - 'Idempotent and race-safe: repeat, before creation, at completion, during a DDMin test, API unreachable.'
+  - Helper listing containers by job label; record request-to-stop time.
+  files:
+  - backend/faultline/lsp/cancel.py
+  - backend/faultline/lsp/server.py
+  - backend/faultline/api/routers/jobs.py
+  - backend/faultline/sandbox/client.py
+  - tests/integration/test_lsp_cancel.py
+  tcs:
+  - id: TC-13.10.1
+    title: Container is stopped
+    kind: auto
+    steps: Cancel in the middle of a sandbox run (needs Docker).
+    expect: No job-labelled container remains; the job is CANCELLED; the events show the transitions.
+  - id: TC-13.10.2
+    title: No false failure
+    kind: auto
+    steps: Inspect the cancelled analysis.
+    expect: No witness and no dependency-failure finding from the cancelled run.
+  - id: TC-13.10.3
+    title: Races
+    kind: auto
+    steps: Repeat cancel, unknown id, cancel before creation, at completion, API unreachable.
+    expect: Each behaves as specified; nothing crashes.
+  - id: TC-13.10.4
+    title: Cancel during DDMin
+    kind: auto
+    steps: Cancel during a DDMin test, then resume.
+    expect: The checkpoint chain is valid and resumes.
+  - id: TC-13.10.5
+    title: Cancel from VS Code
+    kind: manual
+    steps: Cancel from the editor with docker ps visible.
+    expect: The container disappears; recording saved.
+gate_exit:
+  id: T5
+  statement: Only verified, current fixes are offered as WorkspaceEdits on the correct file, and a cancel request stops the real sandbox execution.
+  must_not_claim: That an applied fix is correct without a fresh analysis.

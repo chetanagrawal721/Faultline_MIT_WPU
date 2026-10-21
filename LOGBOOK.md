@@ -1090,3 +1090,29 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 ### 2026-10-14 03:15 UTC | GATE DECLARED | Gate D | by Chetan Agrawal
 - PS07-compliant MVP (every canonical MUST)
 - no waivers
+
+### 2026-10-21 15:14 UTC | START | M13.0 | by Chetan Agrawal
+- Audit, ADR 0008 and tracker setup
+
+### 2026-10-21 15:22 UTC | TC PASS | TC-13.0.1 | by Chetan Agrawal
+- Audit record is complete
+- evidence: evidence/M13.0/TC-13.0.1.txt
+
+### 2026-10-21 15:22 UTC | TC PASS | TC-13.0.2 | by Chetan Agrawal
+- Phase 13 is registered
+- evidence: evidence/M13.0/TC-13.0.2.txt
+
+### 2026-10-21 15:22 UTC | TC PASS | TC-13.0.3 | by Chetan Agrawal
+- ADR 0008 is complete
+- evidence: evidence/M13.0/TC-13.0.3.txt
+
+### 2026-10-21 15:22 UTC | TC PASS | TC-13.0.4 | by Chetan Agrawal
+- Master consistency holds
+- evidence: evidence/M13.0/TC-13.0.4.txt
+
+### 2026-10-21 15:22 UTC | NOTE | - | by Chetan Agrawal
+- M13.0 audit: the pair key must add exclude_newer/index only for uv-resolved worlds; witness reverification and verdict recompute were in-place updates; the consumer import scan is computed but not stored; pygls 2.1.1 cancels only its own future, so the job-cancel bridge is required. See docs/INCREMENTAL_WITNESS_AUDIT.md.
+
+### 2026-10-21 15:22 UTC | DONE | M13.0 | by Chetan Agrawal
+- Audit, ADR 0008 and tracker setup
+- test cases passed: 4/4

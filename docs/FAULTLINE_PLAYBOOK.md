@@ -102,7 +102,7 @@ Every one of those commands appends to `LOGBOOK.md` and refreshes `CHECKLIST.md`
 
 | Priority | Milestones (build order) |
 |---|---|
-| P0 - needed for a convincing demo | M0.1, M0.2, M0.3, M0.4, M0.5, M0.6, M1.0, M1.1, M1.2, M1.3, M1.4, M1.6, M1.7, M1.8, M2.1, M2.2, M2.3, M2.4, M3.1, M3.2, M3.3, M3.4, M4.1, M4.2, M4.3, M4.4, M4.5, M4.7, M4.G, M5.1, M5.2, M5.5, M5.6, M5.7, M8.0, M11.2, M12.1, M12.2, M12.3, M12.4 |
+| P0 - needed for a convincing demo | M0.1, M0.2, M0.3, M0.4, M0.5, M0.6, M1.0, M1.1, M1.2, M1.3, M1.4, M1.6, M1.7, M1.8, M2.1, M2.2, M2.3, M2.4, M3.1, M3.2, M3.3, M3.4, M4.1, M4.2, M4.3, M4.4, M4.5, M4.7, M4.G, M5.1, M5.2, M5.5, M5.6, M5.7, M8.0, M11.2, M12.1, M12.2, M12.3, M12.4, M13.0, M13.1, M13.2, M13.3, M13.4, M13.5, M13.6, M13.7, M13.8, M13.9, M13.10, M13.11, M13.12 |
 | P1 - strongly improves it | M1.5, M3.5, M3.6, M4.6, M5.3, M6.2, M6.3, M6.4, M7.1, M11.1, M11.3, M11.5 |
 | P2 - can be cut | M3.7, M5.4, M6.1, M7.2, M7.3, M8.1, M8.2, M8.3, M9.1, M10.1, M11.4 |
 
@@ -1750,6 +1750,384 @@ Every milestone lists tasks, files, and the **test cases that must pass before i
 **Record progress:** `python tools/track.py start M12.4`, then `python tools/track.py tc TC-12.4.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M12.4`.
 
 
+## Phase 13: The Incremental Witness: evidence store, resumable minimisation, LSP  (gate T6)
+
+### M13.0 Audit, ADR 0008 and tracker setup
+
+**Gate:** T1 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** Confirm every baseline claim against the code, freeze the provisional design decisions and register Phase 13.
+
+**Tasks**
+
+- Record the baseline (branch, commit, pins, migrations, OpenAPI hash) and run the unit tests and the three previously failing integration tests.
+- Check each baseline row of the methodology against the code; list every result-table writer, every ddmin caller, the location data of each witness type, the verdict semantics, the resolver settings that affect the result and the cancel latency.
+- Choose the five demo pairs from existing fixtures (at least two producers).
+- Decide the object-store layout, key-schema version and migration number 0007.
+- Write ADR 0008 (store, pair key, checkpoint and test_id, final severity table, cancellation path, departures from the master).
+- Verify the pygls and lsprotocol versions for LSP 3.17, Python 3.12 wheels, hash pins and cancellation behaviour.
+- Write phase13 YAML and the gates T1 to T6.
+
+**Expected files:** `docs/adr/0008-incremental-witness.md`, `docs/INCREMENTAL_WITNESS_AUDIT.md`, `playbook/phases/phase13_t1.yaml`, `playbook/phases.yaml`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.0.1 | Audit record is complete | auto | Run tests/unit/test_twist_audit.py, which parses docs/INCREMENTAL_WITNESS_AUDIT.md. | Every methodology baseline row and every result-table writer has a result (confirmed, corrected or not found); none is blank. |
+| TC-13.0.2 | Phase 13 is registered | auto | Run python tools/track.py status. | Phase 13 milestones and gates T1 to T6 are listed; gates A to E, S and X are unchanged. |
+| TC-13.0.3 | ADR 0008 is complete | auto | Run tests/unit/test_twist_audit.py ADR checks. | ADR 0008 contains the final severity table, pair-key record, checkpoint record, event types and cancellation path. |
+| TC-13.0.4 | Master consistency holds | auto | Run tests/unit/test_master_consistency.py. | Passes; the departures from the master are documented in the ADR. |
+
+**Record progress:** `python tools/track.py start M13.0`, then `python tools/track.py tc TC-13.0.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.0`.
+
+### M13.1 Content-addressed object store
+
+**Gate:** T1 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** An immutable, atomic, verifying store for evidence objects.
+
+**Tasks**
+
+- Object envelope {kind, schema_version, payload}; id = hash of kind and version prefix plus canonical bytes.
+- put: canonicalise, hash, temporary file, verify digest, atomic rename; same content returns the same id.
+- get: verify digest, schema and kind; report ok, missing, corrupt or unsupported.
+- link edges; kind registry with validators; tolerate rename onto an existing file on Windows.
+
+**Expected files:** `backend/faultline/evidence/store.py`, `backend/faultline/evidence/object_store.py`, `backend/faultline/evidence/kinds.py`, `tests/unit/test_evidence_store.py`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.1.1 | Identity is deterministic | auto | Put the same payload with reordered keys; put the same payload under two kinds. | Same id for reordered keys; different ids for different kinds. |
+| TC-13.1.2 | Tampering is rejected | auto | Flip a byte in a stored object and read it. | get reports corrupt; the payload is never returned. |
+| TC-13.1.3 | A crash leaves no partial object | auto | Simulate a crash after the temporary write; retry the put. | No object under a final name after the crash; the retry succeeds. |
+| TC-13.1.4 | Concurrent identical writes | auto | Put the same content from 16 threads and 4 processes. | One object, no error. |
+| TC-13.1.5 | Unsupported schema is not used | auto | Read an object whose schema version is newer than supported. | Reported as unsupported, not corrupt, and not used. |
+
+**Record progress:** `python tools/track.py start M13.1`, then `python tools/track.py tc TC-13.1.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.1`.
+
+### M13.2 Event log, SQL projections and rebuild
+
+**Gate:** T1 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** Append-only job and evidence events; result tables written as projections of objects; a rebuild that recreates them.
+
+**Tasks**
+
+- Migration 0007 adds tables only: object_index, object_edge, evidence_event, pointer, ddmin_checkpoint, pair_index.
+- Append-only evidence_event (triggers reject UPDATE and DELETE); emit one event per job state change in the same transaction.
+- Convert each result-table writer from DELETE then INSERT to put object, insert projection row, move pointer.
+- Implement rebuild (discover, order, duplicates, pointers, scratch database then swap, verify).
+- Setting FAULTLINE_EVIDENCE_STORE=on|off; off runs the original writers.
+
+**Expected files:** `backend/faultline/storage/migrations/0007_evidence.sql`, `backend/faultline/evidence/events.py`, `backend/faultline/evidence/projections.py`, `backend/faultline/evidence/rebuild.py`, `backend/faultline/storage/jobs.py`, `tools/fl.py`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.2.1 | Events are append-only | auto | Try UPDATE and DELETE on evidence_event. | Both fail. |
+| TC-13.2.2 | Every job transition is one event | auto | Run a normal job, a retried job and a cancelled job; read the events. | Exactly one event per transition, in order. |
+| TC-13.2.3 | Existing responses are unchanged | auto | Run the showcase analysis with the store on (needs Docker); compare findings, witnesses, attribution, remediation and evidence responses to the golden recording. | Identical. |
+| TC-13.2.4 | Rebuild reproduces the API | auto | Snapshot the responses, empty the projection tables, run tools/fl.py rebuild, compare. | Responses identical; the object directory is byte-identical. |
+| TC-13.2.5 | Rebuild survives bad objects | auto | Rebuild with one corrupt and one missing referenced object; also force a failing rebuild. | Both reported and skipped; nothing deleted; a failed rebuild leaves the old tables in place. |
+
+**Record progress:** `python tools/track.py start M13.2`, then `python tools/track.py tc TC-13.2.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.2`.
+
+### M13.3 Stable pair key and pair records
+
+**Gate:** T2 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** A producer-consumer pair has the same identity across separate analyses and changes whenever a relevant input changes.
+
+**Tasks**
+
+- PairKeyInput record with the inputs of methodology 6.1; only resolver settings that change the result enter the key.
+- pair_key = hash of the pair/1 prefix and the canonical record; the record is stored beside the digest.
+- explain(key_a, key_b) names the inputs that differ.
+- plan_cells computes and stores the key; cell.id is unchanged for the existing workflow.
+
+**Expected files:** `backend/faultline/evidence/pair_key.py`, `backend/faultline/evidence/pairs.py`, `backend/faultline/worlds/cells.py`, `tests/unit/test_pair_key.py`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.3.1 | Key is deterministic | auto | Compute the key twice in separate processes and with reordered fields. | Same key. |
+| TC-13.3.2 | Key mutation matrix | auto | Change each input alone: producer commit, consumer commit, producer artifact byte, each lockfile, resolver version, platform, entry file hash, oracle version, image digest, witness rule, verdict rule; also change run time, local path, analysis id. | Every real input changes the key; the incidental values do not; a resolution timestamp matches what the audit recorded. |
+| TC-13.3.3 | Key is stable across analyses | auto | Analyse identical pinned inputs twice. | The same pair key for every cell. |
+| TC-13.3.4 | explain names the change | auto | Compare keys that differ in one input. | explain names exactly that input. |
+
+**Record progress:** `python tools/track.py start M13.3`, then `python tools/track.py tc TC-13.3.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.3`.
+
+### M13.4 Incremental analysis and counters
+
+**Gate:** T2 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** A new analysis reuses stored pair results whose key matches and recomputes only the rest, with counters taken from events.
+
+**Tasks**
+
+- Look up the pair key before running a cell: reuse, reject (then recompute) or recompute.
+- A reused result is labelled REUSED_RESULT with its original runs and never joins the 3 + 3 runs of a new witness; infrastructure-inconclusive results are not stored as reusable.
+- Counters from evidence_event only; GET counters and pairs endpoints; UI widget with per-pair reasons.
+- Cold run on an empty store is the setup step that warms the store; its evidence is kept.
+
+**Expected files:** `backend/faultline/analysis/live.py`, `backend/faultline/analysis/incremental.py`, `backend/faultline/evidence/counters.py`, `backend/faultline/api/routers/analysis.py`, `frontend/src/app/views/Overview.tsx`, `frontend/src/ui/Counters.tsx`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.4.1 | Cold run (setup and verification) | auto | Run the five-pair set on an empty store (needs Docker). | Five recomputed, none reused; counters equal the event log; output kept under evidence/M13.4/. |
+| TC-13.4.2 | Unchanged rerun reuses everything | auto | Re-run the same five pairs. | Five reused, none recomputed, zero new sandbox runs, identical findings. |
+| TC-13.4.3 | A changed producer recomputes only its pairs | auto | Change one producer revision and re-run. | Only that producer's pairs recompute; the rest are reused; counters equal the event log. |
+| TC-13.4.4 | A corrupt pair object is rejected | auto | Corrupt one stored pair object and re-run. | That pair is REJECTED and recomputed; the others are reused. |
+| TC-13.4.5 | Reused results are never fresh runs | auto | Inspect run provenance of witnesses after a reused and a recomputed analysis. | No reused run appears inside a new witness's 3 + 3. |
+| TC-13.4.6 | UI shows the counters | manual | Open the analysis page after the rerun. | Counters and per-pair reasons are visible; screenshot saved. |
+
+**Record progress:** `python tools/track.py start M13.4`, then `python tools/track.py tc TC-13.4.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.4`.
+
+### M13.5 Resumable DDMin core
+
+**Gate:** T3 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** ddmin becomes a state machine whose state and completed tests are stored after every test and which resumes deterministically.
+
+**Tasks**
+
+- State (phase, c, n, i); keep results of the existing algorithm for uninterrupted runs.
+- test_id = hash(minimisation_id, subset, direction); minimisation_id = hash(pair key, witness signature, candidate-set digest, algorithm version).
+- Per-test protocol: lookup by test_id, STARTED event, run, store oracle_result, FINISHED event, append checkpoint, next test.
+- Resume from the latest valid checkpoint, fall back to the previous one, replay against stored results; budget stored as consumed.
+- Interrupted, timeout, cancelled and unbuildable tests are INTERRUPTED or UNRESOLVED, never FAIL.
+
+**Expected files:** `backend/faultline/attribution/ddmin.py`, `backend/faultline/attribution/checkpoint.py`, `backend/faultline/evidence/kinds.py`, `tests/unit/test_ddmin_resume.py`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.5.1 | Same results as before | auto | Run the existing ddmin cases through the resumable version. | Same minimal set, status and attempts. |
+| TC-13.5.2 | Resume at every point | auto | Stop after each possible test index k, resume, compare with an uninterrupted run. | Same final result; no stored test is run again. |
+| TC-13.5.3 | Crash before the checkpoint | auto | Fault injection exits after the result is stored and before the checkpoint. | Resume appends the missing checkpoint and does not run that test again. |
+| TC-13.5.4 | Interrupted is not a failure | auto | Interrupt a test. | Recorded INTERRUPTED, never FAIL; it runs again on resume. |
+| TC-13.5.5 | Corrupt checkpoint | auto | Corrupt the latest checkpoint, then all of them. | Falls back to the previous one; with all corrupt, an explicit error. |
+| TC-13.5.6 | Two resumers race | auto | Resume the same chain from two processes. | Only one advances seq. |
+| TC-13.5.7 | Budget and versions | auto | Exhaust the budget; change the algorithm version. | BUDGET_LIMITED with the smallest failing set and no use of the word minimal; the old chain is not resumed. |
+
+**Record progress:** `python tools/track.py start M13.5`, then `python tools/track.py tc TC-13.5.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.5`.
+
+### M13.6 Recovery in the pipeline and the eight-candidate fixture
+
+**Gate:** T3 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** Attribution in the live pipeline uses the resumable DDMin on real sandbox runs, and a fixture makes the recovery visible.
+
+**Tasks**
+
+- Build a producer and a consumer whose worlds differ by exactly eight packages: seven harmless, one that breaks the import; write the label first.
+- attribute() creates or loads the chain by minimisation_id and stores each forced-world run as an oracle_result with its test_id.
+- Interruption by killing the worker process, and by fault injection in tests only.
+- A retry (new analysis) finds the chain from the pair key and continues.
+
+**Expected files:** `backend/faultline/attribution/runner.py`, `backend/faultline/analysis/live.py`, `backend/faultline/workers/run.py`, `fixtures/repos/acme-bisect/`, `fixtures/repos/bisect-svc/`, `tests/integration/test_ddmin_recovery.py`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.6.1 | Uninterrupted run | auto | Analyse the fixture (needs Docker). | The labelled change is the minimal set and the test count matches the label. |
+| TC-13.6.2 | Kill the worker mid-run | auto | Kill the worker during a sandbox run, restart it. | The chain resumes; the minimal set equals the label; no test with a stored result runs again (compared by sandbox run ids); the killed test runs once more. |
+| TC-13.6.3 | Crash before the checkpoint, on real runs | auto | Fault injection after the result is stored and before the checkpoint. | Resume skips that test. |
+| TC-13.6.4 | No orphan after the kill | auto | List containers after the kill. | None of the old job remains; the old attempt is marked interrupted. |
+| TC-13.6.5 | Same result as uninterrupted | auto | Compare the resumed attribution with the uninterrupted one. | Same minimal set and statuses. |
+| TC-13.6.6 | Fixture works from GitHub | auto | Publish the fixtures and analyse them from their URLs. | Correct result. |
+
+**Record progress:** `python tools/track.py start M13.6`, then `python tools/track.py tc TC-13.6.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.6`.
+
+### M13.7 Stdio LSP server and VS Code vertical slice
+
+**Gate:** T4 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** One real Faultline diagnostic appears at a real line in VS Code through a clean stdio LSP 3.17 server.
+
+**Tasks**
+
+- Pin pygls and lsprotocol, update uv.lock, run check-pins.
+- Server over stdio in binary mode with logs on stderr; initialize, initialized, shutdown, exit, didOpen, didChange, didClose with bounded state.
+- REST client for the API; if it is unreachable, report unavailable and never publish a clean result.
+- Publish diagnostics for a Python file of a known consumer (first slice: the import line).
+- VS Code extension with vscode-languageclient, launched from the repository in the Extension Development Host.
+
+**Expected files:** `backend/faultline/lsp/server.py`, `backend/faultline/lsp/client_api.py`, `editors/vscode/`, `pyproject.toml`, `uv.lock`, `tests/unit/test_lsp_framing.py`, `tests/integration/test_lsp_protocol.py`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.7.1 | Framing on Windows and Linux | auto | Spawn the real server and send frames containing newlines, CRLF and non-ASCII text. | Every response parses and stdout holds only frames. |
+| TC-13.7.2 | Lifecycle | auto | initialize, initialized, shutdown, exit. | Completes; exit code 0 after shutdown and 1 without. |
+| TC-13.7.3 | Bad requests | auto | Send a malformed request and an unsupported method. | JSON-RPC error; the server keeps running. |
+| TC-13.7.4 | API down | auto | Stop the API and open a file. | Reported unavailable; no clean result published. |
+| TC-13.7.5 | Pins | auto | Run tools/fl.py check-pins. | Passes with the new dependencies; LSP version 3.17. |
+| TC-13.7.6 | Diagnostic in VS Code | manual | Open the consumer fixture in the Extension Development Host. | A Faultline diagnostic appears; recording saved. |
+
+**Record progress:** `python tools/track.py start M13.7`, then `python tools/track.py tc TC-13.7.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.7`.
+
+### M13.8 Diagnostic locations, severities and freshness
+
+**Gate:** T4 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** Diagnostics sit on lines derived from data, carry the severity of the final mapping, and become stale when the code changes.
+
+**Tasks**
+
+- Location from the O-bind site, then usage_ref, then the import statement of the failing entry, else none; record the source used.
+- One-based to zero-based conversion; tabs, non-ASCII, CRLF, Windows drive-letter URIs, URI encoding and case.
+- Severity function from ADR 0008; unknown verdict raises.
+- Diagnostic fields: source faultline, code = finding id, data with verdict, pinned commit, file hash, evidence summary, location source.
+- Freshness by file hash; no duplicates after reopen.
+
+**Expected files:** `backend/faultline/lsp/diagnostics.py`, `backend/faultline/lsp/locations.py`, `backend/faultline/lsp/severity.py`, `tests/unit/test_lsp_locations.py`, `tests/unit/test_lsp_severity.py`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.8.1 | Positions are exact | auto | Golden positions for call-site, import and no-location cases. | Expected zero-based line and column. |
+| TC-13.8.2 | URIs and encodings | auto | Windows drive letters, spaces, encoded characters, case, CRLF and non-ASCII lines. | Correct ranges. |
+| TC-13.8.3 | Severity per verdict | auto | Map every verdict. | Severity equals ADR 0008; an unknown verdict raises. |
+| TC-13.8.4 | Staleness and duplicates | auto | Edit the file; reopen it. | Diagnostics marked stale on edit; none duplicated on reopen. |
+| TC-13.8.5 | Four severities from real analyses | auto | Run the fixtures (needs Docker). | At least four distinct severities. |
+| TC-13.8.6 | Severities in VS Code | manual | Open the fixtures in VS Code. | Four severities at the right lines; screenshot saved. |
+
+**Record progress:** `python tools/track.py start M13.8`, then `python tools/track.py tc TC-13.8.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.8`.
+
+### M13.9 Verified code action as a WorkspaceEdit
+
+**Gate:** T5 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** codeAction offers a fix only when it is verified and current, and edits the correct dependency file.
+
+**Tasks**
+
+- Offer an action only for a VERIFIED fix_plan of an import witness whose recorded requirements-file hash equals the current file hash.
+- WorkspaceEdit with a versioned TextDocumentEdit on the consumer requirements file, kind quickfix, linked to the diagnostic.
+- No action for suggested, partial, stale, unsupported or unknown-file cases.
+- Faultline never saves, commits or pushes; a new analysis after the edit recomputes only the affected pair.
+
+**Expected files:** `backend/faultline/lsp/code_actions.py`, `backend/faultline/remediation/minimal.py`, `tests/unit/test_lsp_code_actions.py`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.9.1 | Verified fix gives an exact edit | auto | Request the action for a VERIFIED plan and apply the edit to a copy. | The result equals the plan's diff. |
+| TC-13.9.2 | No action when unverified or stale | auto | Suggested, partial, stale-hash, non-import and missing-file cases. | No action. |
+| TC-13.9.3 | Correct target file | auto | Inspect the edit. | It targets the requirements file, not a source file. |
+| TC-13.9.4 | Re-analysis after the fix | auto | Apply the edit to a consumer copy and re-run (needs Docker). | The witness is gone and only the affected pair recomputed. |
+| TC-13.9.5 | Fix in VS Code | manual | Use the lightbulb in VS Code. | The fix edits the file and the diagnostic clears after re-analysis; recording saved. |
+
+**Record progress:** `python tools/track.py start M13.9`, then `python tools/track.py tc TC-13.9.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.9`.
+
+### M13.10 Cancellation
+
+**Gate:** T5 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** $/cancelRequest stops the actual sandbox execution and ends the job as CANCELLED.
+
+**Tasks**
+
+- faultline/analyze creates the job with an idempotency key and records request id to job id.
+- On $/cancelRequest: ignore unknown ids, mark cancelled first, call the cancel endpoint, answer RequestCancelled, drop later results.
+- Idempotent and race-safe: repeat, before creation, at completion, during a DDMin test, API unreachable.
+- Helper listing containers by job label; record request-to-stop time.
+
+**Expected files:** `backend/faultline/lsp/cancel.py`, `backend/faultline/lsp/server.py`, `backend/faultline/api/routers/jobs.py`, `backend/faultline/sandbox/client.py`, `tests/integration/test_lsp_cancel.py`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.10.1 | Container is stopped | auto | Cancel in the middle of a sandbox run (needs Docker). | No job-labelled container remains; the job is CANCELLED; the events show the transitions. |
+| TC-13.10.2 | No false failure | auto | Inspect the cancelled analysis. | No witness and no dependency-failure finding from the cancelled run. |
+| TC-13.10.3 | Races | auto | Repeat cancel, unknown id, cancel before creation, at completion, API unreachable. | Each behaves as specified; nothing crashes. |
+| TC-13.10.4 | Cancel during DDMin | auto | Cancel during a DDMin test, then resume. | The checkpoint chain is valid and resumes. |
+| TC-13.10.5 | Cancel from VS Code | manual | Cancel from the editor with docker ps visible. | The container disappears; recording saved. |
+
+**Record progress:** `python tools/track.py start M13.10`, then `python tools/track.py tc TC-13.10.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.10`.
+
+### M13.11 SQL backward support and regression
+
+**Gate:** T6 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** The original workflow, API, UI and tests keep working with the store on and off.
+
+**Tasks**
+
+- Run the unit and integration suites with FAULTLINE_EVIDENCE_STORE off and on.
+- Parity test: identical pinned inputs give identical findings, witnesses, attribution and remediation with the store off and on.
+- Frontend type-check, build and browser tests with the store on; replay of the committed bundle; security tests unchanged.
+
+**Expected files:** `tests/integration/test_store_parity.py`, `.github/workflows/ci.yml`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.11.1 | Unit tests, both settings | auto | Run tests/unit with the store off and on. | All pass. |
+| TC-13.11.2 | Integration tests, both settings | auto | Run tests/integration including test_durable, test_remediation and test_rerun with the store off and on (needs Docker). | All pass. |
+| TC-13.11.3 | Parity | auto | Run test_store_parity. | Identical outputs apart from ids and timestamps. |
+| TC-13.11.4 | Frontend and types | auto | Run the type-check and build; regenerate the OpenAPI types. | Pass; existing endpoint types unchanged. |
+| TC-13.11.5 | CI | manual | Check GitHub Actions on both repositories. | Green, including the replay step; link or screenshot saved. |
+
+**Record progress:** `python tools/track.py start M13.11`, then `python tools/track.py tc TC-13.11.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.11`.
+
+### M13.12 Jury demonstrations, instructions and final report
+
+**Gate:** T6 | **Tier:** MUST | **Hackathon priority:** P0
+
+**Goal.** Two reproducible demos from a genuinely warm store, written instructions and a report that separates verified from unverified.
+
+**Tasks**
+
+- Warm the store with a real cold run (the M13.4 setup run); keep the evidence; package the store with a checksum.
+- scripts/twist_demo.py with --preflight, --demo A and --demo B.
+- Demo A: start warm, rerun unchanged (all reused), change one producer, rerun (only affected pairs recompute), show events and explain.
+- Demo B: interrupt attribution on the eight-candidate fixture, restart, show the checkpoint and the unchanged sandbox run ids.
+- Editor script; final report with verified, implemented-not-verified and not-done lists; prompt book, build status and conformance updates.
+
+**Expected files:** `docs/INCREMENTAL_WITNESS_DEMO.md`, `docs/INCREMENTAL_WITNESS_REPORT.md`, `scripts/twist_demo.py`, `evidence/M13.12/`
+
+
+**Validation test cases** (all must pass before `done`)
+
+| ID | Test | Kind | Steps | Expected result |
+|---|---|---|---|---|
+| TC-13.12.1 | Demo A passes | auto | Run scripts/twist_demo.py --demo A on a clean checkout with the warm store. | All checks pass. |
+| TC-13.12.2 | Demo B passes | auto | Run scripts/twist_demo.py --demo B. | Interruption, restart and resume work; no completed test repeats. |
+| TC-13.12.3 | Editor sequence recorded | manual | Record the full VS Code sequence once. | Diagnostics, fix and cancel shown from start to finish. |
+| TC-13.12.4 | Report claims have evidence | auto | Check every claim in the final report against evidence files. | Each claim maps to an existing evidence file. |
+| TC-13.12.5 | Wording | auto | Scan the twist docs and UI strings. | No banned wording; exact verdict words used. |
+
+**Record progress:** `python tools/track.py start M13.12`, then `python tools/track.py tc TC-13.12.1 pass --evidence <file-or-url>` for each test case, then `python tools/track.py done M13.12`.
+
+
 ---
 
 # PART D - GATE EXIT CRITERIA
@@ -1777,6 +2155,24 @@ Every milestone lists tasks, files, and the **test cases that must pass before i
 
 **Gate E.** The deployment boundary, security, regression, reliability and clean-machine replay checks are green on the actual demo deployment.  
 *Must not claim:* Any security guarantee beyond the tested disposable-VM and Docker configuration.
+
+**Gate T1.** Immutable content-addressed evidence is stored and verified, result tables are rebuildable from it, and every job transition is an event.  
+*Must not claim:* Incremental reuse, resumable minimisation or editor support.
+
+**Gate T2.** Unchanged pairs are reused and only pairs whose key changed are recomputed, with counters taken from stored events.  
+*Must not claim:* That cached results are fresh witness executions, or any speedup not measured by the counters.
+
+**Gate T3.** An interrupted minimisation resumes from a checkpoint without repeating tests whose results were stored.  
+*Must not claim:* That minimisation is globally minimal, or that the window between a finished run and its stored result is closed.
+
+**Gate T4.** Diagnostics appear in VS Code on lines derived from Faultline data, with severities from the documented mapping.  
+*Must not claim:* Fixes, cancellation, or support for editors other than VS Code.
+
+**Gate T5.** Only verified, current fixes are offered as WorkspaceEdits on the correct file, and a cancel request stops the real sandbox execution.  
+*Must not claim:* That an applied fix is correct without a fresh analysis.
+
+**Gate T6.** The original SQL workflow passes with the store on and off, and both jury demos run from a warm store with recorded evidence.  
+*Must not claim:* Anything not listed as verified in the final report.
 
 
 

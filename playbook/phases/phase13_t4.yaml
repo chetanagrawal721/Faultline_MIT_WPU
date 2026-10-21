@@ -1,0 +1,111 @@
+phase: 13
+name: 'The Incremental Witness: evidence store, resumable minimisation, LSP'
+gate: T4
+release_point: 'Gate T4: LSP diagnostics'
+goal: Content-addressed append-only evidence, persistent DDMin state and an LSP 3.17 server, with the SQL workflow still working.
+entry: Methodology and playbook confirmed (docs/INCREMENTAL_WITNESS_METHODOLOGY.md, docs/INCREMENTAL_WITNESS_PLAYBOOK.md).
+milestones:
+- id: M13.7
+  title: Stdio LSP server and VS Code vertical slice
+  gate: T4
+  tier: MUST
+  hackathon: P0
+  goal: One real Faultline diagnostic appears at a real line in VS Code through a clean stdio LSP 3.17 server.
+  tasks:
+  - Pin pygls and lsprotocol, update uv.lock, run check-pins.
+  - Server over stdio in binary mode with logs on stderr; initialize, initialized, shutdown, exit, didOpen, didChange, didClose with bounded state.
+  - REST client for the API; if it is unreachable, report unavailable and never publish a clean result.
+  - 'Publish diagnostics for a Python file of a known consumer (first slice: the import line).'
+  - VS Code extension with vscode-languageclient, launched from the repository in the Extension Development Host.
+  files:
+  - backend/faultline/lsp/server.py
+  - backend/faultline/lsp/client_api.py
+  - editors/vscode/
+  - pyproject.toml
+  - uv.lock
+  - tests/unit/test_lsp_framing.py
+  - tests/integration/test_lsp_protocol.py
+  tcs:
+  - id: TC-13.7.1
+    title: Framing on Windows and Linux
+    kind: auto
+    steps: Spawn the real server and send frames containing newlines, CRLF and non-ASCII text.
+    expect: Every response parses and stdout holds only frames.
+  - id: TC-13.7.2
+    title: Lifecycle
+    kind: auto
+    steps: initialize, initialized, shutdown, exit.
+    expect: Completes; exit code 0 after shutdown and 1 without.
+  - id: TC-13.7.3
+    title: Bad requests
+    kind: auto
+    steps: Send a malformed request and an unsupported method.
+    expect: JSON-RPC error; the server keeps running.
+  - id: TC-13.7.4
+    title: API down
+    kind: auto
+    steps: Stop the API and open a file.
+    expect: Reported unavailable; no clean result published.
+  - id: TC-13.7.5
+    title: Pins
+    kind: auto
+    steps: Run tools/fl.py check-pins.
+    expect: Passes with the new dependencies; LSP version 3.17.
+  - id: TC-13.7.6
+    title: Diagnostic in VS Code
+    kind: manual
+    steps: Open the consumer fixture in the Extension Development Host.
+    expect: A Faultline diagnostic appears; recording saved.
+- id: M13.8
+  title: Diagnostic locations, severities and freshness
+  gate: T4
+  tier: MUST
+  hackathon: P0
+  goal: Diagnostics sit on lines derived from data, carry the severity of the final mapping, and become stale when the code changes.
+  tasks:
+  - Location from the O-bind site, then usage_ref, then the import statement of the failing entry, else none; record the source used.
+  - One-based to zero-based conversion; tabs, non-ASCII, CRLF, Windows drive-letter URIs, URI encoding and case.
+  - Severity function from ADR 0008; unknown verdict raises.
+  - 'Diagnostic fields: source faultline, code = finding id, data with verdict, pinned commit, file hash, evidence summary, location source.'
+  - Freshness by file hash; no duplicates after reopen.
+  files:
+  - backend/faultline/lsp/diagnostics.py
+  - backend/faultline/lsp/locations.py
+  - backend/faultline/lsp/severity.py
+  - tests/unit/test_lsp_locations.py
+  - tests/unit/test_lsp_severity.py
+  tcs:
+  - id: TC-13.8.1
+    title: Positions are exact
+    kind: auto
+    steps: Golden positions for call-site, import and no-location cases.
+    expect: Expected zero-based line and column.
+  - id: TC-13.8.2
+    title: URIs and encodings
+    kind: auto
+    steps: Windows drive letters, spaces, encoded characters, case, CRLF and non-ASCII lines.
+    expect: Correct ranges.
+  - id: TC-13.8.3
+    title: Severity per verdict
+    kind: auto
+    steps: Map every verdict.
+    expect: Severity equals ADR 0008; an unknown verdict raises.
+  - id: TC-13.8.4
+    title: Staleness and duplicates
+    kind: auto
+    steps: Edit the file; reopen it.
+    expect: Diagnostics marked stale on edit; none duplicated on reopen.
+  - id: TC-13.8.5
+    title: Four severities from real analyses
+    kind: auto
+    steps: Run the fixtures (needs Docker).
+    expect: At least four distinct severities.
+  - id: TC-13.8.6
+    title: Severities in VS Code
+    kind: manual
+    steps: Open the fixtures in VS Code.
+    expect: Four severities at the right lines; screenshot saved.
+gate_exit:
+  id: T4
+  statement: Diagnostics appear in VS Code on lines derived from Faultline data, with severities from the documented mapping.
+  must_not_claim: Fixes, cancellation, or support for editors other than VS Code.

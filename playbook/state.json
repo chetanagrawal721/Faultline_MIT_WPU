@@ -115,6 +115,11 @@
       "started": "2026-10-13 11:20 UTC",
       "status": "in_progress"
     },
+    "M13.0": {
+      "done": "2026-10-21 15:22 UTC",
+      "started": "2026-10-21 15:14 UTC",
+      "status": "done"
+    },
     "M2.1": {
       "done": "2026-10-12 21:26 UTC",
       "started": "2026-10-12 21:17 UTC",
@@ -603,6 +608,30 @@
       "date": "2026-10-13 11:20 UTC",
       "evidence": "evidence/M12.2/TC-12.2.3.txt",
       "note": "REPLAY pack: stored mode REPLAY shown as RECORDED even with ?mode=LIVE and mode headers; actions refused with 409; works with DOCKER_HOST unreachable",
+      "status": "pass"
+    },
+    "TC-13.0.1": {
+      "date": "2026-10-21 15:22 UTC",
+      "evidence": "evidence/M13.0/TC-13.0.1.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.0.2": {
+      "date": "2026-10-21 15:22 UTC",
+      "evidence": "evidence/M13.0/TC-13.0.2.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.0.3": {
+      "date": "2026-10-21 15:22 UTC",
+      "evidence": "evidence/M13.0/TC-13.0.3.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.0.4": {
+      "date": "2026-10-21 15:22 UTC",
+      "evidence": "evidence/M13.0/TC-13.0.4.txt",
+      "note": "",
       "status": "pass"
     },
     "TC-2.1.1": {

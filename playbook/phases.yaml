@@ -7,6 +7,12 @@ gates:
   E: {name: "Release-hardened deployment", requires: [D]}
   S: {name: "Showtime: demo and submission readiness", requires: [C]}
   X: {name: "Expansion (each item independent)", requires: []}
+  T1: {name: "Twist: storage", requires: []}
+  T2: {name: "Twist: incremental reuse", requires: [T1]}
+  T3: {name: "Twist: DDMin recovery", requires: [T1]}
+  T4: {name: "Twist: LSP diagnostics", requires: []}
+  T5: {name: "Twist: fixes and cancellation", requires: [T1, T4]}
+  T6: {name: "Twist: regression and jury demonstrations", requires: [T2, T3, T5]}
 phases:
   0:  {name: "Bootstrap, contracts and runnable shell", gate: A}
   1:  {name: "Fixture-backed end-to-end differential proof", gate: B}
@@ -21,3 +27,4 @@ phases:
   10: {name: "Maven runtime expansion", gate: X}
   11: {name: "Conformance, evaluation, security release gate", gate: E}
   12: {name: "Real-world case, demo and submission", gate: S}
+  13: {name: "The Incremental Witness: evidence store, resumable minimisation, LSP", gate: T6}

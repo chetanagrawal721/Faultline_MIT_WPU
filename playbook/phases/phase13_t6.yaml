@@ -1,0 +1,93 @@
+phase: 13
+name: 'The Incremental Witness: evidence store, resumable minimisation, LSP'
+gate: T6
+release_point: 'Gate T6: Regression'
+goal: Content-addressed append-only evidence, persistent DDMin state and an LSP 3.17 server, with the SQL workflow still working.
+entry: Methodology and playbook confirmed (docs/INCREMENTAL_WITNESS_METHODOLOGY.md, docs/INCREMENTAL_WITNESS_PLAYBOOK.md).
+milestones:
+- id: M13.11
+  title: SQL backward support and regression
+  gate: T6
+  tier: MUST
+  hackathon: P0
+  goal: The original workflow, API, UI and tests keep working with the store on and off.
+  tasks:
+  - Run the unit and integration suites with FAULTLINE_EVIDENCE_STORE off and on.
+  - 'Parity test: identical pinned inputs give identical findings, witnesses, attribution and remediation with the store off and on.'
+  - Frontend type-check, build and browser tests with the store on; replay of the committed bundle; security tests unchanged.
+  files:
+  - tests/integration/test_store_parity.py
+  - .github/workflows/ci.yml
+  tcs:
+  - id: TC-13.11.1
+    title: Unit tests, both settings
+    kind: auto
+    steps: Run tests/unit with the store off and on.
+    expect: All pass.
+  - id: TC-13.11.2
+    title: Integration tests, both settings
+    kind: auto
+    steps: Run tests/integration including test_durable, test_remediation and test_rerun with the store off and on (needs Docker).
+    expect: All pass.
+  - id: TC-13.11.3
+    title: Parity
+    kind: auto
+    steps: Run test_store_parity.
+    expect: Identical outputs apart from ids and timestamps.
+  - id: TC-13.11.4
+    title: Frontend and types
+    kind: auto
+    steps: Run the type-check and build; regenerate the OpenAPI types.
+    expect: Pass; existing endpoint types unchanged.
+  - id: TC-13.11.5
+    title: CI
+    kind: manual
+    steps: Check GitHub Actions on both repositories.
+    expect: Green, including the replay step; link or screenshot saved.
+- id: M13.12
+  title: Jury demonstrations, instructions and final report
+  gate: T6
+  tier: MUST
+  hackathon: P0
+  goal: Two reproducible demos from a genuinely warm store, written instructions and a report that separates verified from unverified.
+  tasks:
+  - Warm the store with a real cold run (the M13.4 setup run); keep the evidence; package the store with a checksum.
+  - scripts/twist_demo.py with --preflight, --demo A and --demo B.
+  - 'Demo A: start warm, rerun unchanged (all reused), change one producer, rerun (only affected pairs recompute), show events and explain.'
+  - 'Demo B: interrupt attribution on the eight-candidate fixture, restart, show the checkpoint and the unchanged sandbox run ids.'
+  - Editor script; final report with verified, implemented-not-verified and not-done lists; prompt book, build status and conformance updates.
+  files:
+  - docs/INCREMENTAL_WITNESS_DEMO.md
+  - docs/INCREMENTAL_WITNESS_REPORT.md
+  - scripts/twist_demo.py
+  - evidence/M13.12/
+  tcs:
+  - id: TC-13.12.1
+    title: Demo A passes
+    kind: auto
+    steps: Run scripts/twist_demo.py --demo A on a clean checkout with the warm store.
+    expect: All checks pass.
+  - id: TC-13.12.2
+    title: Demo B passes
+    kind: auto
+    steps: Run scripts/twist_demo.py --demo B.
+    expect: Interruption, restart and resume work; no completed test repeats.
+  - id: TC-13.12.3
+    title: Editor sequence recorded
+    kind: manual
+    steps: Record the full VS Code sequence once.
+    expect: Diagnostics, fix and cancel shown from start to finish.
+  - id: TC-13.12.4
+    title: Report claims have evidence
+    kind: auto
+    steps: Check every claim in the final report against evidence files.
+    expect: Each claim maps to an existing evidence file.
+  - id: TC-13.12.5
+    title: Wording
+    kind: auto
+    steps: Scan the twist docs and UI strings.
+    expect: No banned wording; exact verdict words used.
+gate_exit:
+  id: T6
+  statement: The original SQL workflow passes with the store on and off, and both jury demos run from a warm store with recorded evidence.
+  must_not_claim: Anything not listed as verified in the final report.
