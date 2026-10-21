@@ -4,6 +4,7 @@ import type { AppView } from "../../lib/route";
 import { Bars, Donut, type Slice } from "../../ui/charts";
 import { AppAction, DataTable, Panel, Status } from "../../ui/primitives";
 import { useWorkspace } from "../context";
+import { ReusePanel } from "./Reuse";
 import { Loading, ModeStatus, StateBlock, StateNote, VerdictStatus } from "../shared";
 
 type Go = (view: AppView, id?: string | null) => void;
@@ -104,6 +105,7 @@ export function OverviewView({ go }: { go: Go }) {
               {jobs.data ? <Bars slices={jobSlices} onBar={() => go("jobs")} testid="chart-jobs" /> : <Loading what="jobs" />}
             </Panel>
           </div>
+          {analysis && <ReusePanel analysisId={analysis.id} status={analysis.status} go={go} />}
           <div className="work-grid two-one">
             <div data-testid="dashboard">
               <Panel title="Analysis funnel" meta={project ? `${project.name} · persisted stages` : "Persisted stages"}>

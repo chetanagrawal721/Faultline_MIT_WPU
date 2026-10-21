@@ -362,3 +362,42 @@ class InventoryGraph(View):
     project_id: str
     nodes: list[GraphNode]
     edges: list[GraphEdge]
+
+
+# ---- reuse and recomputation counters (M13.4) ----------------------------------------------------------------------
+
+class PairCounters(View):
+    reused: int                       # a stored result was found for the pair key and no oracle ran
+    recomputed: int                   # the pipeline ran for the pair and finished
+    unfinished: int                   # started and not finished (cancelled, interrupted or failed)
+    rejected_objects: int             # a stored object was damaged or missing and was not used
+
+
+class WorldCounters(View):
+    reused: int
+    built: int
+
+
+class DdminCounters(View):
+    tests_resumed: int
+    tests_run: int
+
+
+class CountersView(View):
+    analysis_id: str
+    pairs: PairCounters
+    worlds: WorldCounters
+    ddmin: DdminCounters
+    events: int
+
+
+class PairStatus(View):
+    cell_id: str
+    pair_key: str
+    status: str                       # REUSED | RECOMPUTED | UNFINISHED
+    reason: str                       # REUSED | NEW | CHANGED | REJECTED
+    changed: list[str] = []           # the inputs that differ from the most recent earlier pair of the same repositories
+    detail: list[dict] = []
+    from_analysis: str | None = None
+    verdict: str | None = None
+

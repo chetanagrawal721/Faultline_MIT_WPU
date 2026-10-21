@@ -5,7 +5,8 @@ from ...analysis.whypath import inventory_graph, why_path
 from ...core.errors import InvalidTransitionError, NotFoundError
 from ...core.ids import new_id
 from ...core.models import Job
-from ...core.views import AnalysisView, InventoryGraph, WhyPath
+from ...core.views import AnalysisView, CountersView, InventoryGraph, PairStatus, WhyPath
+from ...evidence.counters import counters, pair_statuses
 from ...ingestion import service
 from ...storage import jobs
 from ..deps import fresh_conn, get_conn, require_token
@@ -16,6 +17,20 @@ router = APIRouter(prefix="/api", tags=["analysis"])
 @router.get("/analyses/{analysis_id}", response_model=AnalysisView)
 def get_analysis(analysis_id: str, conn=Depends(fresh_conn)) -> AnalysisView:
     return analysis_view(conn, analysis_id)
+
+
+@router.get("/analyses/{analysis_id}/counters", response_model=CountersView)
+def get_counters(analysis_id: str, conn=Depends(fresh_conn)) -> CountersView:
+    """How many pairs this analysis reused and recomputed, counted from the event log only."""
+    analysis_view(conn, analysis_id)
+    return CountersView.model_validate(counters(conn, analysis_id))
+
+
+@router.get("/analyses/{analysis_id}/pairs", response_model=list[PairStatus])
+def get_pairs(analysis_id: str, conn=Depends(fresh_conn)) -> list[PairStatus]:
+    """Each pair of this analysis: reused or recomputed, and which inputs differ from the last time."""
+    analysis_view(conn, analysis_id)
+    return [PairStatus.model_validate(p) for p in pair_statuses(conn, analysis_id)]
 
 
 @router.get("/projects/{project_id}/analysis", response_model=AnalysisView)

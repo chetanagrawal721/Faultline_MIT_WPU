@@ -412,6 +412,56 @@
         "title": "CellView",
         "type": "object"
       },
+      "CountersView": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_id": {
+            "title": "Analysis Id",
+            "type": "string"
+          },
+          "ddmin": {
+            "$ref": "#/components/schemas/DdminCounters"
+          },
+          "events": {
+            "title": "Events",
+            "type": "integer"
+          },
+          "pairs": {
+            "$ref": "#/components/schemas/PairCounters"
+          },
+          "worlds": {
+            "$ref": "#/components/schemas/WorldCounters"
+          }
+        },
+        "required": [
+          "analysis_id",
+          "pairs",
+          "worlds",
+          "ddmin",
+          "events"
+        ],
+        "title": "CountersView",
+        "type": "object"
+      },
+      "DdminCounters": {
+        "additionalProperties": false,
+        "properties": {
+          "tests_resumed": {
+            "title": "Tests Resumed",
+            "type": "integer"
+          },
+          "tests_run": {
+            "title": "Tests Run",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tests_resumed",
+          "tests_run"
+        ],
+        "title": "DdminCounters",
+        "type": "object"
+      },
       "DeclaredView": {
         "additionalProperties": false,
         "properties": {
@@ -1652,6 +1702,103 @@
         "title": "PackageView",
         "type": "object"
       },
+      "PairCounters": {
+        "additionalProperties": false,
+        "properties": {
+          "recomputed": {
+            "title": "Recomputed",
+            "type": "integer"
+          },
+          "rejected_objects": {
+            "title": "Rejected Objects",
+            "type": "integer"
+          },
+          "reused": {
+            "title": "Reused",
+            "type": "integer"
+          },
+          "unfinished": {
+            "title": "Unfinished",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reused",
+          "recomputed",
+          "unfinished",
+          "rejected_objects"
+        ],
+        "title": "PairCounters",
+        "type": "object"
+      },
+      "PairStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "cell_id": {
+            "title": "Cell Id",
+            "type": "string"
+          },
+          "changed": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Changed",
+            "type": "array"
+          },
+          "detail": {
+            "default": [],
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Detail",
+            "type": "array"
+          },
+          "from_analysis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Analysis"
+          },
+          "pair_key": {
+            "title": "Pair Key",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verdict"
+          }
+        },
+        "required": [
+          "cell_id",
+          "pair_key",
+          "status",
+          "reason"
+        ],
+        "title": "PairStatus",
+        "type": "object"
+      },
       "ProjectCreate": {
         "additionalProperties": false,
         "properties": {
@@ -2446,6 +2593,25 @@
         "title": "WitnessView",
         "type": "object"
       },
+      "WorldCounters": {
+        "additionalProperties": false,
+        "properties": {
+          "built": {
+            "title": "Built",
+            "type": "integer"
+          },
+          "reused": {
+            "title": "Reused",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reused",
+          "built"
+        ],
+        "title": "WorldCounters",
+        "type": "object"
+      },
       "WorldDetail": {
         "additionalProperties": false,
         "properties": {
@@ -2617,6 +2783,96 @@
           }
         },
         "summary": "Get Analysis",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "/api/analyses/{analysis_id}/counters": {
+      "get": {
+        "description": "How many pairs this analysis reused and recomputed, counted from the event log only.",
+        "operationId": "get_counters_api_analyses__analysis_id__counters_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "analysis_id",
+            "required": true,
+            "schema": {
+              "title": "Analysis Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountersView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Counters",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "/api/analyses/{analysis_id}/pairs": {
+      "get": {
+        "description": "Each pair of this analysis: reused or recomputed, and which inputs differ from the last time.",
+        "operationId": "get_pairs_api_analyses__analysis_id__pairs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "analysis_id",
+            "required": true,
+            "schema": {
+              "title": "Analysis Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PairStatus"
+                  },
+                  "title": "Response Get Pairs Api Analyses  Analysis Id  Pairs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Pairs",
         "tags": [
           "analysis"
         ]

@@ -21,6 +21,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/analyses/{analysis_id}/counters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Counters
+         * @description How many pairs this analysis reused and recomputed, counted from the event log only.
+         */
+        get: operations["get_counters_api_analyses__analysis_id__counters_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/analyses/{analysis_id}/pairs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Pairs
+         * @description Each pair of this analysis: reused or recomputed, and which inputs differ from the last time.
+         */
+        get: operations["get_pairs_api_analyses__analysis_id__pairs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/capabilities": {
         parameters: {
             query?: never;
@@ -639,6 +679,23 @@ export interface components {
              */
             visibility: string;
         };
+        /** CountersView */
+        CountersView: {
+            /** Analysis Id */
+            analysis_id: string;
+            ddmin: components["schemas"]["DdminCounters"];
+            /** Events */
+            events: number;
+            pairs: components["schemas"]["PairCounters"];
+            worlds: components["schemas"]["WorldCounters"];
+        };
+        /** DdminCounters */
+        DdminCounters: {
+            /** Tests Resumed */
+            tests_resumed: number;
+            /** Tests Run */
+            tests_run: number;
+        };
         /** DeclaredView */
         DeclaredView: {
             /** Group */
@@ -1028,6 +1085,44 @@ export interface components {
              */
             visible_to: string[];
         };
+        /** PairCounters */
+        PairCounters: {
+            /** Recomputed */
+            recomputed: number;
+            /** Rejected Objects */
+            rejected_objects: number;
+            /** Reused */
+            reused: number;
+            /** Unfinished */
+            unfinished: number;
+        };
+        /** PairStatus */
+        PairStatus: {
+            /** Cell Id */
+            cell_id: string;
+            /**
+             * Changed
+             * @default []
+             */
+            changed: string[];
+            /**
+             * Detail
+             * @default []
+             */
+            detail: {
+                [key: string]: unknown;
+            }[];
+            /** From Analysis */
+            from_analysis?: string | null;
+            /** Pair Key */
+            pair_key: string;
+            /** Reason */
+            reason: string;
+            /** Status */
+            status: string;
+            /** Verdict */
+            verdict?: string | null;
+        };
         /** ProjectCreate */
         ProjectCreate: {
             /** Name */
@@ -1287,6 +1382,13 @@ export interface components {
             /** Witness Id */
             witness_id: string;
         };
+        /** WorldCounters */
+        WorldCounters: {
+            /** Built */
+            built: number;
+            /** Reused */
+            reused: number;
+        };
         /** WorldDetail */
         WorldDetail: {
             /** Cutoff */
@@ -1354,6 +1456,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AnalysisView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_counters_api_analyses__analysis_id__counters_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                analysis_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountersView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_pairs_api_analyses__analysis_id__pairs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                analysis_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PairStatus"][];
                 };
             };
             /** @description Validation Error */
