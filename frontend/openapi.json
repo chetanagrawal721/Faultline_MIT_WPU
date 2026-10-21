@@ -3774,7 +3774,7 @@
     },
     "/api/projects/{project_id}/analyze": {
       "post": {
-        "description": "Run the live cross-repository analysis over the repositories already ingested into this project.",
+        "description": "Run the live cross-repository analysis over the repositories already ingested into this project.\n\n`key` is an idempotency key: the same key returns the same job instead of starting another (the editor sends one per request).",
         "operationId": "analyze_project_api_projects__project_id__analyze_post",
         "parameters": [
           {
@@ -3784,6 +3784,22 @@
             "schema": {
               "title": "Project Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Key"
             }
           },
           {

@@ -133,6 +133,11 @@
       "started": "2026-10-21 15:24 UTC",
       "status": "done"
     },
+    "M13.10": {
+      "done": "2026-10-21 20:10 UTC",
+      "started": "2026-10-21 19:15 UTC",
+      "status": "done"
+    },
     "M13.2": {
       "done": "2026-10-21 17:04 UTC",
       "started": "2026-10-21 15:28 UTC",
@@ -166,8 +171,9 @@
       "status": "in_progress"
     },
     "M13.9": {
+      "done": "2026-10-21 20:13 UTC",
       "started": "2026-10-21 18:56 UTC",
-      "status": "in_progress"
+      "status": "done"
     },
     "M2.1": {
       "done": "2026-10-12 21:26 UTC",
@@ -713,6 +719,36 @@
       "note": "",
       "status": "pass"
     },
+    "TC-13.10.1": {
+      "date": "2026-10-21 20:10 UTC",
+      "evidence": "evidence/M13.10/TC-13.10.1.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.10.2": {
+      "date": "2026-10-21 20:10 UTC",
+      "evidence": "evidence/M13.10/TC-13.10.2.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.10.3": {
+      "date": "2026-10-21 20:10 UTC",
+      "evidence": "evidence/M13.10/TC-13.10.3.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.10.4": {
+      "date": "2026-10-21 20:10 UTC",
+      "evidence": "evidence/M13.10/TC-13.10.4.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.10.5": {
+      "date": "2026-10-21 20:10 UTC",
+      "evidence": "evidence/M13.10/TC-13.10.5.txt",
+      "note": "",
+      "status": "pass"
+    },
     "TC-13.2.1": {
       "date": "2026-10-21 17:04 UTC",
       "evidence": "evidence/M13.2/TC-13.2.1.txt",
@@ -956,6 +992,18 @@
     "TC-13.9.3": {
       "date": "2026-10-21 19:15 UTC",
       "evidence": "evidence/M13.9/TC-13.9.3.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.9.4": {
+      "date": "2026-10-21 19:24 UTC",
+      "evidence": "evidence/M13.9/TC-13.9.4.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.9.5": {
+      "date": "2026-10-21 20:12 UTC",
+      "evidence": "evidence/M13.9/TC-13.9.5.txt",
       "note": "",
       "status": "pass"
     },

@@ -24,9 +24,15 @@ def cell(**kw) -> dict:
 
 class FakeApi:
     def __init__(self, findings: list[dict], analyses: dict[str, list[dict]], imports: dict[str, list[dict]] | None = None,
-                 fixes: dict[str, dict] | None = None, projects: list[dict] | None = None, project_analyses: dict[str, dict] | None = None):
+                 fixes: dict[str, dict] | None = None, projects: list[dict] | None = None, project_analyses: dict[str, dict] | None = None,
+                 job_script: list[str] | None = None, create_delay: float = 0.0):
         self.findings, self.analyses, self.imports, self.fixes = findings, analyses, imports or {}, fixes or {}
         self.projects, self.project_analyses = projects or [], project_analyses or {}
+        self.job_script, self.create_delay = list(job_script or ['DONE']), create_delay
+        self.jobs_by_key: dict[str, str] = {}
+        self.created: list[str] = []                   # job ids, in the order they were created
+        self.cancelled: list[str] = []                 # job ids a cancel was sent for
+        self.polls: dict[str, int] = {}
         self.requests: list[str] = []
         outer = self
 
@@ -35,6 +41,12 @@ class FakeApi:
                 outer.requests.append(self.path)
                 if self.path == "/api/findings":
                     body = outer.findings
+                elif self.path.startswith("/api/jobs/"):
+                    jid = self.path.split("/")[3]
+                    n = outer.polls.get(jid, 0)
+                    outer.polls[jid] = n + 1
+                    status = "CANCELLED" if jid in outer.cancelled else outer.job_script[min(n, len(outer.job_script) - 1)]
+                    body = {"job_id": jid, "status": status, "result": {"ok": True} if status == "DONE" else None, "error": None}
                 elif self.path == "/api/projects":
                     body = outer.projects
                 elif self.path.startswith("/api/projects/") and self.path.endswith("/analysis"):
@@ -61,6 +73,33 @@ class FakeApi:
                     return
                 data = json.dumps(body).encode()
                 self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def do_POST(self):                                            # noqa: N802
+                outer.requests.append("POST " + self.path)
+                if self.path.startswith("/api/projects/") and "/analyze" in self.path:
+                    import time
+                    from urllib.parse import parse_qs, urlparse
+                    time.sleep(outer.create_delay)
+                    key = parse_qs(urlparse(self.path).query).get("key", [f"auto{len(outer.created)}"])[0]
+                    if key not in outer.jobs_by_key:
+                        outer.jobs_by_key[key] = f"job_{len(outer.created) + 1}"
+                        outer.created.append(outer.jobs_by_key[key])
+                    body = {"job_id": outer.jobs_by_key[key], "status": "QUEUED"}
+                elif self.path.startswith("/api/jobs/") and self.path.endswith("/cancel"):
+                    jid = self.path.split("/")[3]
+                    if jid not in outer.cancelled:
+                        outer.cancelled.append(jid)
+                    body = {"job_id": jid, "status": "CANCELLED"}
+                else:
+                    self.send_response(404)
+                    self.end_headers()
+                    return
+                data = json.dumps(body).encode()
+                self.send_response(202)
                 self.send_header("Content-Type", "application/json")
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()

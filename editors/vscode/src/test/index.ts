@@ -20,6 +20,7 @@ type Step = {
   target?: string;
   expect_last_line?: string;
   set_api?: string;
+  analyze_then_cancel?: { after_ms: number };
 };
 
 function faultlineDiagnostics(uri: vscode.Uri): vscode.Diagnostic[] {
@@ -94,6 +95,22 @@ async function runStep(s: Step): Promise<void> {
     const eol = after.includes("\r\n") ? "\r\n" : "\n";
     if (!after.startsWith(before) || after.slice(before.length) !== s.expect_last_line + eol) throw new Error(`unexpected content added: ${JSON.stringify(after.slice(before.length))}`);
     note({ event: "checks passed", file: s.target, appended: s.expect_last_line });
+  } else if (s.analyze_then_cancel) {
+    // start an analysis from the editor, cancel it after a while through the editor's own cancellation, and check how the request ends
+    const started = Date.now();
+    note({ event: "analysis requested from VS Code" });
+    const pending = Promise.resolve(vscode.commands.executeCommand("faultline.analyze")).then(
+      (r) => ({ ok: true, r }),
+      (e: { code?: number; message?: string }) => ({ ok: false, code: e?.code, message: String(e?.message ?? e) }),
+    );
+    await sleep(s.analyze_then_cancel.after_ms);
+    note({ event: "cancelling from VS Code", afterMs: Date.now() - started });
+    await vscode.commands.executeCommand("faultline.cancelAnalysis");
+    const outcome = (await pending) as { ok: boolean; code?: number; message?: string };
+    note({ event: "the request ended", ...outcome, ms: Date.now() - started });
+    // the language client surfaces the server's RequestCancelled (-32800) as a CancellationError whose message names the request; the job and container are checked outside
+    if (outcome.ok || !(outcome.code === -32800 || /cancel/i.test(outcome.message ?? ""))) throw new Error(`the request did not end as cancelled: ${JSON.stringify(outcome)}`);
+    note({ event: "checks passed", cancelled: true });
   } else if (s.set_api) {
     await vscode.workspace.getConfiguration("faultline").update("api", s.set_api, vscode.ConfigurationTarget.Global);
     note({ event: "api switched (as after a new analysis)", api: s.set_api });

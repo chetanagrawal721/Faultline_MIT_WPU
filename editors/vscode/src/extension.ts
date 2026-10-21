@@ -7,6 +7,7 @@ import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } f
 
 let client: LanguageClient | undefined;
 let status: vscode.StatusBarItem | undefined;
+let running: vscode.CancellationTokenSource | undefined;     // the analysis this window is waiting for, if any
 
 // A value the user set (workspace or user settings) wins; then the environment variable the launcher sets; then the default.
 function setting(name: string, env: string, fallback = ""): string {
@@ -73,8 +74,28 @@ function recordDiagnostics(context: vscode.ExtensionContext): void {
   );
 }
 
+// Starts an analysis of the open repository and waits for it. Cancelling (the progress notification's button, or the cancel command) sends
+// $/cancelRequest, which stops the running sandbox containers; the server answers the request as cancelled.
+async function analyze(): Promise<unknown> {
+  if (!client) throw new Error("the Faultline language server is not running");
+  const source = new vscode.CancellationTokenSource();
+  running = source;
+  try {
+    return await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Faultline: analysing", cancellable: true }, async (_p, token) => {
+      token.onCancellationRequested(() => source.cancel());
+      return client!.sendRequest("faultline/analyze", {}, source.token);
+    });
+  } finally {
+    running = undefined;
+  }
+}
+
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   recordDiagnostics(context);
+  context.subscriptions.push(
+    vscode.commands.registerCommand("faultline.analyze", () => analyze()),
+    vscode.commands.registerCommand("faultline.cancelAnalysis", () => running?.cancel()),
+  );
   context.subscriptions.push(
     vscode.commands.registerCommand("faultline.restart", async () => {
       await client?.stop();

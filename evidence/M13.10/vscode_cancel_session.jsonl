@@ -1,0 +1,7 @@
+{"at":"2026-10-21T20:08:44.469Z","event":"analysis requested from VS Code"}
+{"at":"2026-10-21T20:08:44.895Z","event":"starting the language server","command":"C:\\Users\\Chetan\\AppData\\Roaming\\uv\\python\\cpython-3.12.15-windows-x86_64-none\\python.exe","pythonpath":"C:\\Users\\Chetan\\Hackethopia\\backend;C:\\Users\\Chetan\\Hackethopia\\.venv\\Lib\\site-packages"}
+{"at":"2026-10-21T20:09:54.485Z","event":"cancelling from VS Code","afterMs":70016}
+{"at":"2026-10-21T20:09:54.624Z","event":"the request ended","ok":false,"message":"Request with id \"1\" is canceled","ms":70155}
+{"at":"2026-10-21T20:09:54.637Z","event":"checks passed","cancelled":true}
+{"at":"2026-10-21T20:09:54.638Z","event":"all steps passed","steps":1}
+{"event": "container timeline from docker ps", "samples": 138, "last_seen_running_s": 83.92, "session_ended_s": 79.61, "no_container_after_s": 84.27, "job": "job_01M5G198XYK850ASTR7CEEKNX8", "job_events": ["JOB_QUEUED", "JOB_CLAIMED", "JOB_CANCEL_REQUESTED", "JOB_CANCELLED"]}

@@ -334,6 +334,8 @@ export interface paths {
         /**
          * Analyze Project
          * @description Run the live cross-repository analysis over the repositories already ingested into this project.
+         *
+         *     `key` is an idempotency key: the same key returns the same job instead of starting another (the editor sends one per request).
          */
         post: operations["analyze_project_api_projects__project_id__analyze_post"];
         delete?: never;
@@ -2106,7 +2108,9 @@ export interface operations {
     };
     analyze_project_api_projects__project_id__analyze_post: {
         parameters: {
-            query?: never;
+            query?: {
+                key?: string | null;
+            };
             header?: {
                 authorization?: string | null;
             };

@@ -22,6 +22,14 @@
       {
         "command": "faultline.restart",
         "title": "Faultline: Restart the language server"
+      },
+      {
+        "command": "faultline.analyze",
+        "title": "Faultline: Analyse this repository"
+      },
+      {
+        "command": "faultline.cancelAnalysis",
+        "title": "Faultline: Cancel the running analysis"
       }
     ],
     "configuration": {

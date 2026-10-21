@@ -1,0 +1,12 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chetan\Hackethopia\.venv\Scripts\python.exe
+rootdir: C:\Users\Chetan\Hackethopia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 1 item
+
+tests/integration/test_vscode_cancel_session.py::test_tc_13_10_5_cancelling_from_vs_code_stops_the_container 
+{"event": "container timeline from docker ps", "samples": 138, "last_seen_running_s": 83.92, "session_ended_s": 79.61, "no_container_after_s": 84.27, "job": "job_01M5G198XYK850ASTR7CEEKNX8", "job_events": ["JOB_QUEUED", "JOB_CLAIMED", "JOB_CANCEL_REQUESTED", "JOB_CANCELLED"]}
+PASSED
+
+======================== 1 passed in 107.23s (0:01:47) ========================

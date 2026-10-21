@@ -76,6 +76,18 @@ class LspClient:
         self.send({"jsonrpc": "2.0", "id": rid, "method": method, "params": params})
         return self.wait(lambda m: m.get("id") == rid and ("result" in m or "error" in m), timeout)
 
+    def send_request(self, method: str, params: dict | None = None) -> int:
+        """Send a request and return its id without waiting for the answer (for cancelling it)."""
+        self._id += 1
+        self.send({"jsonrpc": "2.0", "id": self._id, "method": method, "params": params})
+        return self._id
+
+    def cancel(self, rid: int) -> None:
+        self.notify("$/cancelRequest", {"id": rid})
+
+    def response(self, rid: int, timeout: float = 20.0) -> dict:
+        return self.wait(lambda m: m.get("id") == rid and ("result" in m or "error" in m), timeout)
+
     def notify(self, method: str, params: dict | None = None) -> None:
         self.send({"jsonrpc": "2.0", "method": method, "params": params})
 

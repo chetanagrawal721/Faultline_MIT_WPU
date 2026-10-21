@@ -89,11 +89,13 @@ def retry_ingest(repository_id: str, conn=Depends(get_conn)) -> RepositoryView:
 
 
 @router.post("/projects/{project_id}/analyze", response_model=Job, status_code=202, dependencies=[Depends(require_token)])
-def analyze_project(project_id: str, conn=Depends(get_conn)) -> Job:
-    """Run the live cross-repository analysis over the repositories already ingested into this project."""
+def analyze_project(project_id: str, key: str | None = None, conn=Depends(get_conn)) -> Job:
+    """Run the live cross-repository analysis over the repositories already ingested into this project.
+
+    `key` is an idempotency key: the same key returns the same job instead of starting another (the editor sends one per request)."""
     service.get_project(conn, project_id)
     ingested = conn.execute("SELECT COUNT(*) FROM repository WHERE analysis_project_id=? AND status='INGESTED'", (project_id,)).fetchone()[0]
     if ingested < 2:
         raise InvalidTransitionError(f"a cross-repository analysis needs at least 2 ingested repositories (this project has {ingested})")
-    job, _ = jobs.create_job(conn, "live_analysis", {"analysis_project_id": project_id}, f"live:{project_id}:{new_id('r')}")
+    job, _ = jobs.create_job(conn, "live_analysis", {"analysis_project_id": project_id}, f"live:{project_id}:{key or new_id('r')}")
     return job

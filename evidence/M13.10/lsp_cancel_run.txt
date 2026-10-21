@@ -1,0 +1,13 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chetan\Hackethopia\.venv\Scripts\python.exe
+rootdir: C:\Users\Chetan\Hackethopia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 2 items
+
+tests/integration/test_lsp_cancel.py::test_tc_13_10_1_a_cancel_from_the_editor_removes_the_running_container_and_the_job_is_cancelled 
+CANCEL: request answered after 0.02 s, containers ['fl-oj-01m5fyr0v7qfh2aq44pa1zq5h7-qsh5zw'] gone after 1.39 s from the cancel
+PASSED
+tests/integration/test_lsp_cancel.py::test_tc_13_10_4_a_cancel_during_a_minimisation_test_leaves_a_chain_that_resumes PASSED
+
+======================== 2 passed in 245.82s (0:04:05) ========================

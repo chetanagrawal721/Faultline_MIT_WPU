@@ -1380,3 +1380,45 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 
 ### 2026-10-21 19:15 UTC | NOTE | - | by Chetan Agrawal
 - M13.8: import sites are stored with each analysis and served (GET /api/analyses/{id}/imports); the server shows a consumer finding on the stored line while the file still has its analysed hash, re-reads the text and marks it stale when the file changed, and uses only the newest analysis of the repository. Three of the four severities come from real analyses (live test). Information needs static analysis in the live run: TC-13.8.5 is recorded as failed and waits for the user's decision. M13.9: the fix is stored with its target file and that file's hash; found a CRLF bug (read_text turned CRLF into LF) through a test.
+
+### 2026-10-21 19:15 UTC | START | M13.10 | by Chetan Agrawal
+- Cancellation
+
+### 2026-10-21 19:24 UTC | TC PASS | TC-13.9.4 | by Chetan Agrawal
+- Re-analysis after the fix
+- evidence: evidence/M13.9/TC-13.9.4.txt
+
+### 2026-10-21 20:10 UTC | TC PASS | TC-13.10.1 | by Chetan Agrawal
+- Container is stopped
+- evidence: evidence/M13.10/TC-13.10.1.txt
+
+### 2026-10-21 20:10 UTC | TC PASS | TC-13.10.2 | by Chetan Agrawal
+- No false failure
+- evidence: evidence/M13.10/TC-13.10.2.txt
+
+### 2026-10-21 20:10 UTC | TC PASS | TC-13.10.3 | by Chetan Agrawal
+- Races
+- evidence: evidence/M13.10/TC-13.10.3.txt
+
+### 2026-10-21 20:10 UTC | TC PASS | TC-13.10.4 | by Chetan Agrawal
+- Cancel during DDMin
+- evidence: evidence/M13.10/TC-13.10.4.txt
+
+### 2026-10-21 20:10 UTC | TC PASS | TC-13.10.5 | by Chetan Agrawal
+- Cancel from VS Code
+- evidence: evidence/M13.10/TC-13.10.5.txt
+
+### 2026-10-21 20:10 UTC | DONE | M13.10 | by Chetan Agrawal
+- Cancellation
+- test cases passed: 5/5
+
+### 2026-10-21 20:13 UTC | TC PASS | TC-13.9.5 | by Chetan Agrawal
+- Fix in VS Code
+- evidence: evidence/M13.9/TC-13.9.5.txt
+
+### 2026-10-21 20:13 UTC | DONE | M13.9 | by Chetan Agrawal
+- Verified code action as a WorkspaceEdit
+- test cases passed: 5/5
+
+### 2026-10-21 20:16 UTC | NOTE | - | by Chetan Agrawal
+- Information severity: severity mapping and the static verdict rules (verdicts/engine.py rules 7-8, usage/exposure.py, diff/) exist and are unit-tested, but live analysis never builds a usage index or API delta (live.py passes no exposures), so no live finding is EXPOSED or POTENTIAL. Wiring it changes live verdict generation; not done, reported as a blocker.

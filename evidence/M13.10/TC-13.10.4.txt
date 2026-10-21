@@ -1,0 +1,5 @@
+# TC-13.10.1/2/4: pytest tests/integration/test_lsp_cancel.py (real Docker)
+CANCEL: request answered after 0.02 s, containers ['fl-oj-01m5fyr0v7qfh2aq44pa1zq5h7-qsh5zw'] gone after 1.39 s from the cancel
+PASSED
+tests/integration/test_lsp_cancel.py::test_tc_13_10_4_a_cancel_during_a_minimisation_test_leaves_a_chain_that_resumes PASSED
+======================== 2 passed in 245.82s (0:04:05) ========================

@@ -103,9 +103,12 @@ def run_one(conn, worker: str, settings: Settings) -> bool:
     except TransientError as exc:
         jobs.fail(conn, job.job_id, worker, {"code": "TRANSIENT", "message": str(exc)}, retryable=True)
     except Exception as exc:  # noqa: BLE001 - any handler error is recorded, never crashes the worker
-        log.error("job %s (%s) failed: %s", job.job_id, job.kind, exc)
-        jobs.fail(conn, job.job_id, worker, {"code": "HANDLER_ERROR", "message": str(exc),
-                                             "trace": traceback.format_exc(limit=5)}, retryable=False)
+        if state["cancel"] and not state["lost"]:
+            log.warning("job %s (%s) stopped by its cancellation (%s)", job.job_id, job.kind, exc)
+            jobs.mark_cancelled(conn, job.job_id, worker)             # a stopped container can make the handler fail on its way out: the job is cancelled, not failed
+        else:
+            log.error("job %s (%s) failed: %s", job.job_id, job.kind, exc)
+            jobs.fail(conn, job.job_id, worker, {"code": "HANDLER_ERROR", "message": str(exc), "trace": traceback.format_exc(limit=5)}, retryable=False)
     finally:
         CORRELATION.reset(correlation)
         stop.set()

@@ -8,9 +8,11 @@ workspace's `.git/config` (the origin URL). The repository may be a consumer of 
 (the diagnostic is on a call site checked by O-bind).
 """
 import asyncio
+import itertools
 import logging
 import os
 import re
+import uuid
 from pathlib import Path
 
 from lsprotocol import types
@@ -46,6 +48,9 @@ class FaultlineServer(LanguageServer):
         self.roots: list[Path] = []
         self.findings: list[FindingInfo] | None = None
         self.available: bool | None = None
+        self.session = uuid.uuid4().hex[:12]            # part of the idempotency key of every analysis this editor session starts
+        self.requests = itertools.count(1)
+        self.running: dict[str, str] = {}               # job id -> repository, for the analyses this session is waiting for
         self.shut_down = False                       # the exit code is 0 only after a shutdown request (LSP 3.17, lifecycle)
 
     def status(self, state: str, detail: str = "") -> None:
@@ -55,6 +60,14 @@ class FaultlineServer(LanguageServer):
             if state == "unavailable":
                 self.window_show_message(types.ShowMessageParams(type=types.MessageType.Warning,
                                                                  message=f"Faultline: the API is not reachable ({detail}). No result is shown, which is not a clean result."))
+
+    def cancel_job(self, job_id: str) -> None:
+        """Ask the API to cancel the job (idempotent). The worker's heartbeat sees the flag and removes the job's containers. Never raises: a cancel that cannot be sent is reported."""
+        try:
+            self.api.post(f"/api/jobs/{job_id}/cancel")
+        except ApiUnavailable as e:
+            log.warning("could not send the cancel for %s: %s", job_id, e)
+            self.status("unavailable", str(e))
 
     async def refresh_findings(self) -> list[FindingInfo] | None:
         """Read the findings of this consumer. None when the API cannot be reached (and the state says so)."""
@@ -87,6 +100,20 @@ class FaultlineServer(LanguageServer):
             self.status("unavailable", str(e))
             return
         self.text_document_publish_diagnostics(types.PublishDiagnosticsParams(uri=uri, diagnostics=diagnostics, version=doc.version))
+
+
+FINAL_JOB_STATES = ("DONE", "FAILED", "CANCELLED")
+
+
+def _project_for(api: Api, repo: str) -> str:
+    """The newest project of the API that contains this repository (owner/name)."""
+    best = None
+    for p in api.get("/api/projects"):
+        if any(f"{r['owner']}/{r['name']}" == repo for r in p.get("repositories", [])) and (best is None or p.get("created_at", "") > best.get("created_at", "")):
+            best = p
+    if best is None:
+        raise ApiUnavailable(f"no project of the API contains {repo}")
+    return best["id"]
 
 
 def build_server() -> FaultlineServer:
@@ -132,6 +159,54 @@ def build_server() -> FaultlineServer:
             if action is not None:
                 out.append(action)
         return out
+
+    @server.feature("faultline/analyze")
+    async def on_analyze(ls: FaultlineServer, params: object = None) -> dict:
+        """Start an analysis of this repository's project and wait for it. `$/cancelRequest` for this request cancels the job, which stops the sandbox.
+
+        The job is created with an idempotency key made of this session and this request. Cancelling before the job exists lets the creation finish and
+        then cancels the job it made, so nothing is left running. A cancel that arrives after the job finished changes nothing."""
+        repo = (params.get("repository") if isinstance(params, dict) else getattr(params, "repository", None)) or ls.consumer
+        if not repo:
+            raise ValueError("the repository is not known: set initializationOptions.repository or give the workspace a git origin")
+        key = f"lsp-{ls.session}-{next(ls.requests)}"
+
+        def create() -> dict:
+            return ls.api.post(f"/api/projects/{_project_for(ls.api, repo)}/analyze?key={key}")
+        creating = asyncio.ensure_future(asyncio.to_thread(create))
+        try:
+            job = await asyncio.shield(creating)
+        except asyncio.CancelledError:
+            try:
+                job = await creating                                           # the creation cannot be taken back: wait for it, then cancel what it made
+                ls.cancel_job(job["job_id"])
+            except Exception as e:                                             # noqa: BLE001 - the cancel must still be answered
+                log.warning("cancel before the job existed: %s", e)
+            raise
+        job_id = job["job_id"]
+        ls.running[job_id] = repo
+        ls.protocol.notify("faultline/analysis", {"job_id": job_id, "state": "started", "repository": repo})
+        try:
+            while True:
+                j = await asyncio.to_thread(ls.api.get, f"/api/jobs/{job_id}")
+                if j["status"] in FINAL_JOB_STATES:
+                    break
+                await asyncio.sleep(0.5)
+        except asyncio.CancelledError:
+            ls.cancel_job(job_id)
+            ls.protocol.notify("faultline/analysis", {"job_id": job_id, "state": "cancel requested", "repository": repo})
+            raise
+        except ApiUnavailable as e:
+            ls.status("unavailable", str(e))
+            raise
+        finally:
+            ls.running.pop(job_id, None)
+        ls.protocol.notify("faultline/analysis", {"job_id": job_id, "state": j["status"].lower(), "repository": repo})
+        if j["status"] == "DONE":
+            ls.findings = None
+            for uri in list(ls.workspace.text_documents):
+                await ls.publish(uri, refresh=True)
+        return {"job_id": job_id, "status": j["status"], "result": j.get("result"), "error": j.get("error")}
 
     @server.feature(types.TEXT_DOCUMENT_DID_OPEN)
     async def on_open(ls: FaultlineServer, params: types.DidOpenTextDocumentParams) -> None:

@@ -44,7 +44,8 @@ class Attribution:
 
 
 def make_tester(sbx, image, store_hash: str, builder: WorldBuilder, *, entry: str, top_level: str, pythonpath: str, signature: FailureSignature,
-                ref: list[PinnedRequirement], consumer: list[PinnedRequirement], log: list[dict], run: Callable[..., OracleRunResult] | None = None):
+                ref: list[PinnedRequirement], consumer: list[PinnedRequirement], log: list[dict], run: Callable[..., OracleRunResult] | None = None,
+                checkpoint: Callable[[], None] | None = None):
     """Returns test functions for the sufficiency (ref + S) and necessity (consumer - S) directions."""
     run = run or run_o_import
 
@@ -56,6 +57,8 @@ def make_tester(sbx, image, store_hash: str, builder: WorldBuilder, *, entry: st
         except WorldBuildError as e:
             return Outcome.UNRESOLVED, f"forced world could not be built: {e.message}", None
         r = run(sbx, image, world_hash=w.world_hash, artifact_hash=store_hash, top_level=top_level, modules=[entry], pythonpath=(pythonpath,))
+        if checkpoint is not None:
+            checkpoint()                    # raises Cancelled when the job was cancelled: a container stopped by that is not a result, so no outcome is stored for it
         e = next((x for x in r.entries if x.entry == entry), None)
         if e is None:
             return Outcome.UNRESOLVED, f"no result for the entry ({r.failure_class.value})", w.world_hash
@@ -83,12 +86,12 @@ def make_tester(sbx, image, store_hash: str, builder: WorldBuilder, *, entry: st
 def attribute(sbx, image, builder: WorldBuilder, *, artifact_hash: str, entry: str, top_level: str, pythonpath: str, signature: FailureSignature,
               ref: list[PinnedRequirement], consumer: list[PinnedRequirement], delta: list[str], budget: Budget | None = None,
               run: Callable[..., OracleRunResult] | None = None, conn: sqlite3.Connection | None = None, pair_key: str | None = None,
-              analysis_id: str | None = None, hook=None) -> Attribution:
+              analysis_id: str | None = None, hook=None, checkpoint: Callable[[], None] | None = None) -> Attribution:
     """With `conn` and `pair_key` the search is resumable: every finished test is stored, and a repeat of the same pair, witness and delta (even in
     a new analysis after the worker died) answers the stored tests from the store and runs only what is left. Without them it is the plain search."""
     log: list[dict] = []
     suff, nec = make_tester(sbx, image, artifact_hash, builder, entry=entry, top_level=top_level, pythonpath=pythonpath, signature=signature,
-                            ref=ref, consumer=consumer, log=log, run=run)
+                            ref=ref, consumer=consumer, log=log, run=run, checkpoint=checkpoint)
     chain: ResumableDdmin | None = None
     if conn is not None and pair_key is not None:
         def search_test(subset):

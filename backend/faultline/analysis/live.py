@@ -339,7 +339,7 @@ def execute_cell(conn, sbx, image, store, builder, aid, cell_id, plan, layout, p
             with phase("attribute (two-sided ddmin)", cell=cell_id, entry=dec.entry):
                 a = attribute(sbx, image, builder, artifact_hash=artifact, entry=dec.entry, top_level=pkg, pythonpath=pythonpath, signature=dec.signature,
                               ref=list(plan.reference.pinned), consumer=list(plan.projection.pinned), delta=delta_names, run=runner,
-                              conn=conn, pair_key=pair, analysis_id=aid)
+                              conn=conn, pair_key=pair, analysis_id=aid, checkpoint=lambda: say(base + 0.1 / n, "checking whether the job was cancelled"))
             persist(conn, dec.witness_id, a)
     fid = write_live_finding(conn, aid, cell, v, layout, plan, steps, rels, sites=site_by_entry, unchecked_sites=len(unchecked), contract=contract_scope)
     state = "ANALYZED" if v.decisions else "INCONCLUSIVE"

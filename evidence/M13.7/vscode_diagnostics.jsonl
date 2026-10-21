@@ -3,3 +3,25 @@
 {"at":"2026-10-21T18:42:29.739Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\app\\main.py","diagnostics":[{"line":2,"column":0,"endColumn":32,"severity":"Error","code":"fnd_01M5FTYFN65XB73CZ25KPA67BD","message":"BREAK WITNESSED: Reproduced: importing `acme_models.web` fails with `ImportError: cannot import name 'url_quote' from 'werkzeug.urls' (<site>/werkzeug/urls.py)` when acme-models runs with the dependencies of faultline-demo/notify-svc. It passes with acme-models's own dependencies. 3 of 3 fresh runs on each side."}]}
 {"at":"2026-10-21T18:42:29.837Z","event":"diagnostic held by VS Code","file":"C:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\app\\main.py","count":1,"line":2,"column":0,"endColumn":32,"severity":"Error","code":"fnd_01M5FTYFN65XB73CZ25KPA67BD","message":"BREAK WITNESSED: Reproduced: importing `acme_models.web` fails with `ImportError: cannot import name 'url_quote' from 'werkzeug.urls' (<site>/werkzeug/urls.py)` when acme-models runs with the dependencies of faultline-demo/notify-svc. It passes with acme-models's own dependencies. 3 of 3 fresh runs on each side.","lineText":"import acme_models.web as shared"}
 {"at":"2026-10-21T18:42:29.838Z","event":"checks passed","file":"C:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\app\\main.py","line":2,"severity":"Error"}
+{"at":"2026-10-21T18:47:16.372Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\README.md","diagnostics":[]}
+{"at":"2026-10-21T18:47:16.374Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\requirements.lock.txt","diagnostics":[]}
+{"at":"2026-10-21T18:47:16.474Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\requirements.lock.txt","diagnostics":[]}
+{"at":"2026-10-21T18:47:16.475Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\README.md","diagnostics":[]}
+{"at":"2026-10-21T18:47:16.780Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\README.md","diagnostics":[]}
+{"at":"2026-10-21T18:54:46.729Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\app\\main.py","diagnostics":[]}
+{"at":"2026-10-21T18:57:31.904Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\README.md","diagnostics":[]}
+{"at":"2026-10-21T18:57:32.788Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\requirements.lock.txt","diagnostics":[]}
+{"at":"2026-10-21T18:57:37.870Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\requirements.lock.txt","diagnostics":[]}
+{"at":"2026-10-21T18:57:38.625Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\requirements.txt","diagnostics":[]}
+{"at":"2026-10-21T18:57:39.781Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\requirements.txt","diagnostics":[]}
+{"at":"2026-10-21T18:57:40.943Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\requirements.lock.txt","diagnostics":[]}
+{"at":"2026-10-21T18:57:46.530Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\requirements.lock.txt","diagnostics":[]}
+{"at":"2026-10-21T18:57:47.529Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\requirements.in","diagnostics":[]}
+{"at":"2026-10-21T18:57:48.793Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\README.md","diagnostics":[]}
+{"at":"2026-10-21T18:57:48.816Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\requirements.in","diagnostics":[]}
+{"at":"2026-10-21T18:57:48.873Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\README.md","diagnostics":[]}
+{"at":"2026-10-21T18:57:49.132Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\README.md","diagnostics":[]}
+{"at":"2026-10-21T18:57:50.225Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\README.md","diagnostics":[]}
+{"at":"2026-10-21T19:39:14.890Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\README.md","diagnostics":[]}
+{"at":"2026-10-21T19:55:41.060Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\app\\main.py","diagnostics":[]}
+{"at":"2026-10-21T19:55:41.768Z","file":"c:\\Users\\Chetan\\Hackethopia\\fixtures\\repos\\notify-svc\\D\\app\\main.py","diagnostics":[]}
