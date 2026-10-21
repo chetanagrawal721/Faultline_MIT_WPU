@@ -1116,3 +1116,33 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 ### 2026-10-21 15:22 UTC | DONE | M13.0 | by Chetan Agrawal
 - Audit, ADR 0008 and tracker setup
 - test cases passed: 4/4
+
+### 2026-10-21 15:24 UTC | START | M13.1 | by Chetan Agrawal
+- Content-addressed object store
+
+### 2026-10-21 15:27 UTC | TC PASS | TC-13.1.1 | by Chetan Agrawal
+- Identity is deterministic
+- evidence: evidence/M13.1/TC-13.1.1.txt
+
+### 2026-10-21 15:27 UTC | TC PASS | TC-13.1.2 | by Chetan Agrawal
+- Tampering is rejected
+- evidence: evidence/M13.1/TC-13.1.2.txt
+
+### 2026-10-21 15:27 UTC | TC PASS | TC-13.1.3 | by Chetan Agrawal
+- A crash leaves no partial object
+- evidence: evidence/M13.1/TC-13.1.3.txt
+
+### 2026-10-21 15:27 UTC | TC PASS | TC-13.1.4 | by Chetan Agrawal
+- Concurrent identical writes
+- evidence: evidence/M13.1/TC-13.1.4.txt
+
+### 2026-10-21 15:27 UTC | TC PASS | TC-13.1.5 | by Chetan Agrawal
+- Unsupported schema is not used
+- evidence: evidence/M13.1/TC-13.1.5.txt
+
+### 2026-10-21 15:27 UTC | NOTE | - | by Chetan Agrawal
+- M13.1: reading an object while another thread renamed over it raised PermissionError on Windows; reads now retry briefly. put() repairs a corrupt object; get() never returns an unverified payload.
+
+### 2026-10-21 15:27 UTC | DONE | M13.1 | by Chetan Agrawal
+- Content-addressed object store
+- test cases passed: 5/5

@@ -1,0 +1,14 @@
+# TC-13.1.2
+# command: pytest tests/unit/test_evidence_store.py -k tampering or wrong_name or repairs -v
+============================= test session starts =============================
+platform win32 -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chetan\Hackethopia\.venv\Scripts\python.exe
+rootdir: C:\Users\Chetan\Hackethopia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 13 items / 10 deselected / 3 selected
+
+tests/unit/test_evidence_store.py::test_tampering_is_rejected PASSED     [ 33%]
+tests/unit/test_evidence_store.py::test_a_valid_envelope_with_the_wrong_name_is_corrupt PASSED [ 66%]
+tests/unit/test_evidence_store.py::test_put_repairs_a_corrupt_object PASSED [100%]
+
+====================== 3 passed, 10 deselected in 0.42s =======================

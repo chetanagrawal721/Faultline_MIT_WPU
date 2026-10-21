@@ -1,0 +1,14 @@
+# TC-13.1.4
+# command: pytest tests/unit/test_evidence_store.py tests/integration/test_evidence_concurrency.py -k threads or processes -v
+============================= test session starts =============================
+platform win32 -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chetan\Hackethopia\.venv\Scripts\python.exe
+rootdir: C:\Users\Chetan\Hackethopia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 15 items / 12 deselected / 3 selected
+
+tests/unit/test_evidence_store.py::test_threads_writing_the_same_content_make_one_object PASSED [ 33%]
+tests/integration/test_evidence_concurrency.py::test_four_processes_and_many_writes_make_one_object PASSED [ 66%]
+tests/integration/test_evidence_concurrency.py::test_processes_writing_different_content_do_not_interfere PASSED [100%]
+
+====================== 3 passed, 12 deselected in 2.32s =======================

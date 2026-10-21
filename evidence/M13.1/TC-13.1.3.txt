@@ -1,0 +1,13 @@
+# TC-13.1.3
+# command: pytest tests/unit/test_evidence_store.py -k crash_leaves or killed_process -v
+============================= test session starts =============================
+platform win32 -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chetan\Hackethopia\.venv\Scripts\python.exe
+rootdir: C:\Users\Chetan\Hackethopia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 13 items / 11 deselected / 2 selected
+
+tests/unit/test_evidence_store.py::test_a_crash_leaves_no_partial_object PASSED [ 50%]
+tests/unit/test_evidence_store.py::test_a_killed_process_leaves_only_a_temporary_file PASSED [100%]
+
+====================== 2 passed, 11 deselected in 1.00s =======================
