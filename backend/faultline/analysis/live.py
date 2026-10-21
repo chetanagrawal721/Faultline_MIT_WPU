@@ -15,6 +15,8 @@ from ..core.ids import new_id
 from ..core.logging import phase
 from ..core.models import OracleRunResult
 from ..evidence import pairs, projections
+from ..evidence.events import append_event
+from ..evidence.pair_key import record
 from ..ingestion.clone import load_inventory
 from ..oracles import o_contract, planner
 from ..oracles.artifacts import prepare_artifact
@@ -37,6 +39,7 @@ from ..witnesses.verify import INFRA_CLASSES, Verification, verify_cell
 from ..worlds.builder import WorldBuilder, WorldBuildError
 from ..worlds.cells import CellPlan, persist_cell, plan_cells
 from ..worlds.overlay import overlay_lock
+from . import incremental
 from .bind import artifact_sources, find_sites, module_of
 from .fixture import FixtureCell
 from .lifecycle import mark_partial, reconcile_abandoned
@@ -137,7 +140,7 @@ def _run_live(conn, sbx, image, store, analysis_project_id, aid, say) -> LiveRes
             if ref_key not in ref_built:
                 text = render_lock(list(plan.reference.pinned))
                 ref_world = builder.materialize(text, WorldKind.REFERENCE)
-                if builder.build(ref_world, text).status == "FAILED":
+                if _built(conn, aid, builder.build(ref_world, text)).status == "FAILED":
                     raise WorldBuildError("the reference world could not be built offline", details={"reason": "reference_build_failed"})
                 ref_built[ref_key] = ref_world.world_hash
             plan = CellPlan(plan.producer_project_id, plan.projection, _with_hash(plan.reference, ref_built[ref_key]), plan.consumers)
@@ -146,7 +149,7 @@ def _run_live(conn, sbx, image, store, analysis_project_id, aid, say) -> LiveRes
                 say(base + 0.02 / n, "building the projected consumer world")
                 text = plan.projection.lock_text
                 w = builder.materialize(text, WorldKind.PROJECTED)
-                if builder.build(w, text).status == "FAILED":
+                if _built(conn, aid, builder.build(w, text)).status == "FAILED":
                     raise WorldBuildError("the projected world could not be built offline", details={"reason": "world_build_failed"})
                 test_hash = w.world_hash
         except WorldBuildError as e:
@@ -176,6 +179,13 @@ def _run_live(conn, sbx, image, store, analysis_project_id, aid, say) -> LiveRes
     conn.execute("UPDATE analysis SET status='DONE', finished_at=?, stats_json=? WHERE id=?",
                  (_now(), json.dumps({"failed_consumers": failed}, sort_keys=True), aid))
     return LiveResult(aid, out_cells, funnel(conn, aid))
+
+
+def _built(conn: sqlite3.Connection, analysis_id: str, result):
+    """Count a world build as reused (already built, no container ran) or built (a container ran); a failure is neither."""
+    if result.status in ("REUSED", "BUILT"):
+        append_event(conn, "WORLD_REUSED" if result.status == "REUSED" else "WORLD_BUILT", analysis_id=analysis_id, subject=result.world_hash)
+    return result
 
 
 def _bind_runner(payload: dict):
@@ -212,7 +222,13 @@ def execute_cell(conn, sbx, image, store, builder, aid, cell_id, plan, layout, p
     modules = plan_modules(pkg, sorted({m for ms in imported.values() for m in ms if m != pkg}))
     env_id = builder.env_profile_id if hasattr(builder, "env_profile_id") else _env_id(builder)
     cell = FixtureCell(aid, cell_id, plan.producer_project_id, plan.reference.world_hash, test_hash, artifact, env_id)
-    pairs.record_pair(conn, cell_id, aid, pairs.collect_inputs(conn, cell_id, artifact_sha256=artifact, image=image))
+    inp = pairs.collect_inputs(conn, cell_id, artifact_sha256=artifact, image=image)
+    pair = pairs.record_pair(conn, cell_id, aid, inp)
+    decision = incremental.decide(conn, pair, record(inp), cell_id, aid)
+    if isinstance(decision, incremental.Reuse):
+        say(base + 0.1 / n, "reusing the stored result of this pair: none of its inputs changed, so no oracle runs")
+        return incremental.apply_reuse(conn, aid, cell_id, plan, decision)
+    incremental.started(conn, aid, cell_id, pair, decision)
     say(base + 0.05 / n, f"running O-import (3 + 3 fresh runs) on {', '.join(modules)}")
 
     def run(world_hash: str, modules=modules, artifact=artifact, pkg=pkg, pythonpath=pythonpath):
@@ -256,7 +272,7 @@ def execute_cell(conn, sbx, image, store, builder, aid, cell_id, plan, layout, p
             for key, text in ((cell.ref_world_hash, render_lock(list(plan.reference.pinned))), (cell.test_world_hash, plan.projection.lock_text)):
                 ov = overlay_lock(text, test_text)
                 w = builder.materialize(ov.lock_text, WorldKind.OVERLAY, scopes=ov.scopes())
-                if builder.build(w, ov.lock_text).status == "FAILED":
+                if _built(conn, aid, builder.build(w, ov.lock_text)).status == "FAILED":
                     raise WorldBuildError("a test overlay world could not be built offline", details={"reason": "overlay_build_failed"})
                 ovs[key] = (w.world_hash, ov)
         except WorldBuildError as e:
@@ -307,11 +323,13 @@ def execute_cell(conn, sbx, image, store, builder, aid, cell_id, plan, layout, p
                 runner = _contract_runner(item_by_entry[dec.entry])
             with phase("attribute (two-sided ddmin)", cell=cell_id, entry=dec.entry):
                 a = attribute(sbx, image, builder, artifact_hash=artifact, entry=dec.entry, top_level=pkg, pythonpath=pythonpath, signature=dec.signature,
-                              ref=list(plan.reference.pinned), consumer=list(plan.projection.pinned), delta=delta_names, run=runner)
+                              ref=list(plan.reference.pinned), consumer=list(plan.projection.pinned), delta=delta_names, run=runner,
+                              conn=conn, pair_key=pair, analysis_id=aid)
             persist(conn, dec.witness_id, a)
     fid = write_live_finding(conn, aid, cell, v, layout, plan, steps, rels, sites=site_by_entry, unchecked_sites=len(unchecked), contract=contract_scope)
     state = "ANALYZED" if v.decisions else "INCONCLUSIVE"
     conn.execute("UPDATE cell SET state=? WHERE id=?", (state, cell_id))
+    incremental.finished(conn, aid, cell_id, pair, state, conn.execute("SELECT verdict FROM finding WHERE id=?", (fid,)).fetchone()["verdict"])
     return fid, state
 
 
