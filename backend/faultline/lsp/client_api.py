@@ -27,6 +27,15 @@ class BindSiteInfo:
 
 
 @dataclass(frozen=True)
+class StaticSiteInfo:
+    file: str                                     # relative to the producer repository root
+    line: int                                     # one-based
+    col: int                                      # zero-based
+    symbol: str
+    change: str
+
+
+@dataclass(frozen=True)
 class FindingInfo:
     finding_id: str
     analysis_id: str
@@ -39,6 +48,7 @@ class FindingInfo:
     modules: tuple[str, ...]                      # the producer modules the consumer imports (the entry modules of the cell)
     sites: tuple[ImportSiteInfo, ...] = ()        # where the consumer imports them, from the analysis
     bind_sites: tuple[BindSiteInfo, ...] = ()     # call sites in the producer that were checked (O-bind)
+    static_sites: tuple[StaticSiteInfo, ...] = ()  # references in the producer to a changed API (EXPOSED), read from source
     extra: dict = field(default_factory=dict, compare=False)
 
 
@@ -134,5 +144,6 @@ class Api:
                         if m:
                             binds.append(BindSiteInfo(m.group(1), int(m.group(2)), int(m.group(3))))
             out.append(FindingInfo(f["finding_id"], aid, f["cell_id"], f["verdict"], f["headline"], f["artifact"], role, tuple(cell["consumers"]),
-                                   tuple(cell["imported_modules"]), sites, tuple(binds)))
+                                   tuple(cell["imported_modules"]), sites, tuple(binds),
+                                   tuple(StaticSiteInfo(x["file"], x["line"], x["col"], x["symbol"], x["change"]) for x in cell.get("static_sites", []))))
         return out

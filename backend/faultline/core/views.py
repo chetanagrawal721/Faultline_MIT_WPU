@@ -284,6 +284,16 @@ class OraclePlanStep(View):
     entries: list[str] = []
 
 
+class StaticSiteView(View):
+    """A reference in the artifact to an API that changed between the two worlds. Read from source; nothing was executed for it."""
+    file: str
+    line: int
+    col: int
+    symbol: str
+    change: str
+    package: str
+
+
 class CellView(View):
     id: str
     state: str
@@ -297,6 +307,7 @@ class CellView(View):
     headline: str | None
     attribution: AttributionView | None = None
     oracle_plan: list[OraclePlanStep] = []      # what was planned and run for this cell, from the stored finding
+    static_sites: list[StaticSiteView] = []     # references behind an EXPOSED verdict (static evidence only), from the stored finding
     runtime: str = "cpython 3.12.15"
     platform: str = "linux/amd64 (x86_64-unknown-linux-gnu)"
     visibility: str = "flat site-packages: the importer sees the resolved version"

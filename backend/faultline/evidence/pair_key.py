@@ -42,6 +42,7 @@ class PairKeyInput:
     resolver_logic: str = ""                     # which files count and how locks are read (resolvers.python.LOGIC_VERSION)
     witness_rule: str = WITNESS_RULE
     verdict_rule: str = ""
+    static_rule: str = ""                        # how static exposure is read and when it may change an INCONCLUSIVE verdict (analysis.static)
 
 
 def record(inp: PairKeyInput) -> dict:

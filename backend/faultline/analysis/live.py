@@ -5,7 +5,7 @@ import json
 import sqlite3
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from ..attribution.runner import attribute, persist
@@ -33,13 +33,13 @@ from ..sandbox.client import SandboxClient
 from ..storage.store import Store
 from ..usage.consumer_imports import artifact_modules, scan_imports
 from ..verdicts import templates
-from ..verdicts.engine import LIVE_POLICY_VERSION, LIVE_PRIORITY, Evidence, decide, split_silent
+from ..verdicts.engine import LIVE_POLICY_VERSION, LIVE_PRIORITY, STATIC_RULE, Evidence, split_silent
 from ..verdicts.stats import funnel
 from ..witnesses.verify import INFRA_CLASSES, Verification, verify_cell
 from ..worlds.builder import WorldBuilder, WorldBuildError
 from ..worlds.cells import CellPlan, persist_cell, plan_cells
 from ..worlds.overlay import overlay_lock
-from . import incremental
+from . import incremental, static
 from .bind import artifact_sources, find_sites, module_of
 from .fixture import FixtureCell
 from .lifecycle import mark_partial, reconcile_abandoned
@@ -341,7 +341,8 @@ def execute_cell(conn, sbx, image, store, builder, aid, cell_id, plan, layout, p
                               ref=list(plan.reference.pinned), consumer=list(plan.projection.pinned), delta=delta_names, run=runner,
                               conn=conn, pair_key=pair, analysis_id=aid, checkpoint=lambda: say(base + 0.1 / n, "checking whether the job was cancelled"))
             persist(conn, dec.witness_id, a)
-    fid = write_live_finding(conn, aid, cell, v, layout, plan, steps, rels, sites=site_by_entry, unchecked_sites=len(unchecked), contract=contract_scope)
+    fid = write_live_finding(conn, aid, cell, v, layout, plan, steps, rels, sites=site_by_entry, unchecked_sites=len(unchecked), contract=contract_scope,
+                            static_source=lambda: static.collect(builder, plan.projection.delta, list(plan.reference.pinned), list(plan.projection.pinned), artifact_sources(art_dir)))
     state = "ANALYZED" if v.decisions else "INCONCLUSIVE"
     conn.execute("UPDATE cell SET state=? WHERE id=?", (state, cell_id))
     incremental.finished(conn, aid, cell_id, pair, state, conn.execute("SELECT verdict FROM finding WHERE id=?", (fid,)).fetchone()["verdict"])
@@ -372,14 +373,15 @@ def _env_id(builder: WorldBuilder) -> str:
 
 
 def write_live_finding(conn: sqlite3.Connection, analysis_id: str, cell: FixtureCell, v: Verification, layout: dict, plan: CellPlan,
-                       steps: list[planner.Step], rels, sites: dict | None = None, unchecked_sites: int = 0, contract: dict | None = None) -> str:
+                       steps: list[planner.Step], rels, sites: dict | None = None, unchecked_sites: int = 0, contract: dict | None = None, static_source=None) -> str:
     consumers = [conn.execute("SELECT p.rel_path, r.owner, r.name FROM project p JOIN snapshot s ON s.id=p.snapshot_id JOIN repository r ON r.id=s.repository_id "
                               "WHERE p.id=?", (c,)).fetchone() for c, _ in plan.consumers]
     names = [f"{c['owner']}/{c['name']}" for c in consumers]
     rel_levels = {r.consumer_project_id: r.level for r in rels if r.producer_project_id == plan.producer_project_id}
     level = "L2" if all(rel_levels.get(c) in ("L2", "L3", "L4", "L5") for c, _ in plan.consumers) else "L1"
     plain, silent = split_silent(v.decisions)
-    out = decide(Evidence(relationship_level=level, cell_state="PENDING", decisions=plain, run_problem=v.problem, silent_entries=silent))
+    base_evidence = Evidence(relationship_level=level, cell_state="PENDING", decisions=plain, run_problem=v.problem, silent_entries=silent)
+    out, st, static_note = static.settle(base_evidence, static_source)
     artifact = layout["name"] or layout["rel_path"]
     sites = sites or {}
     ran_bind = any(s.oracle == "o_bind" and s.status == "RAN" for s in steps)
@@ -398,14 +400,19 @@ def write_live_finding(conn: sqlite3.Connection, analysis_id: str, cell: Fixture
         if dec.entry in sites:
             s = sites[dec.entry]
             kw["site"] = {"id": s.site_id, "callee": s.callee, "n_positional": s.n_positional, "keyword_names": list(s.keyword_names)}
-    headline = templates.live_headline(out.outcome, **kw)
+    headline = static.headline(out, st, artifact) if st is not None else templates.live_headline(out.outcome, **kw)
     fid = new_id("fnd")
     verdict = out.verdict
     scope = {"exercised": list(out.exercised), "not_applicable": list(out.not_applicable), "not_checked": list(not_checked), "bind_sites": {e: {"id": s.site_id, "callee": s.callee, "n_positional": s.n_positional, "keyword_names": list(s.keyword_names)} for e, s in sites.items()},
              "reasons": list(out.reasons), "policy": LIVE_POLICY_VERSION, "oracle_plan": planner.as_json(steps), "consumers": names, "contract": contract,
              "delta": [{"name": d.name, "reference": d.reference, "consumer": d.consumer} for d in plan.projection.delta]}
+    if static_note is not None:                                               # static evidence was read and did not change the verdict: say why
+        scope["static_not_used"] = static_note
+    if st is not None:
+        scope["static"] = st.to_json()
+        scope["static_rule"] = STATIC_RULE
     row = {"id": fid, "analysis_id": analysis_id, "scope_kind": "ARTIFACT_CELL", "cell_id": cell.cell_id, "relationship_id": None, "verdict": verdict.value,
-           "sub_label": out.sub_label, "headline": headline, "scope_json": json.dumps(scope, sort_keys=True), "coverage": None,
+           "sub_label": out.sub_label, "headline": headline, "scope_json": json.dumps(scope, sort_keys=True), "coverage": out.coverage,
            "priority": LIVE_PRIORITY[verdict], "created_at": _now()}
     evidence: list[list[str]] = []
     for d in v.decisions:
@@ -413,9 +420,13 @@ def write_live_finding(conn: sqlite3.Connection, analysis_id: str, cell: Fixture
             evidence.append(["WITNESS", d.witness_id])
     for r in v.ref_runs + v.test_runs:
         evidence.append(["ORACLE_RUN", r.run_id])
+    if st is not None:                                                        # the static evidence this verdict rests on, so it can be recomputed and explained
+        evidence += [["EXPOSURE", e.exposure_id] for e in st.result.breaking_exposures]
+        evidence += [["API_CHANGE", f"{p['distribution']}:{p['from']}->{p['to']}"] for p in st.packages if p["breaking"]]
     for _c, rid in plan.consumers:
         evidence.append(["RELATIONSHIP", rid])
-    projections.write(conn, "verdict", {"finding": row, "verdict": verdict.value, "policy": LIVE_POLICY_VERSION, "evidence": evidence},
+    projections.write(conn, "verdict", {"finding": row, "verdict": verdict.value, "policy": LIVE_POLICY_VERSION, "evidence": evidence,
+                                    **({"static": {"rule": STATIC_RULE, **st.to_json()}} if st is not None else {})},
                       slot=f"finding:{cell.cell_id}", analysis_id=analysis_id)
     return fid
 

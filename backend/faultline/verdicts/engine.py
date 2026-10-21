@@ -44,6 +44,9 @@ def fixture_verdict(v: Verification) -> VerdictResult:
 # ---------------------------------------------------------------------------------------------------------------
 
 LIVE_POLICY_VERSION = "verdict-policy/1"
+# Live analysis lets static exposure (rows 6 and 7 of the table above) replace an INCONCLUSIVE outcome, and only that outcome and only by EXPOSED or POTENTIAL:
+# a witnessed or observed result is never changed, and static evidence never lowers a verdict. Part of the pair key.
+STATIC_RULE = "static-exposure/1"
 OUTCOMES = ("HYGIENE", "NO_DRIFT", "NOT_APPLICABLE", *(v.value for v in Verdict))
 LIVE_PRIORITY = {Verdict.BREAK_WITNESSED: 1, Verdict.SILENT_DIVERGENCE_WITNESSED: 2, Verdict.EXPOSED: 3, Verdict.POTENTIAL: 4,
                  Verdict.INCONCLUSIVE: 6, Verdict.NO_DIVERGENCE_OBSERVED: 7, Verdict.NOT_EXPOSED: 8, Verdict.HYGIENE: 9}

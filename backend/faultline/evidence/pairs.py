@@ -4,7 +4,7 @@ import sqlite3
 
 from ..oracles import o_bind, o_contract, o_import, o_tests
 from ..resolvers.python import LOGIC_VERSION
-from ..verdicts.engine import LIVE_POLICY_VERSION
+from ..verdicts.engine import LIVE_POLICY_VERSION, STATIC_RULE
 from . import projections
 from .pair_key import PairKeyInput, Side, pair_key, record
 
@@ -40,7 +40,7 @@ def collect_inputs(conn: sqlite3.Connection, cell_id: str, *, artifact_sha256: s
         reference_world_hash=cell["ref_world_hash"], consumer_world_hash=cell["test_world_hash"],
         producer_artifact_sha256=artifact_sha256, entries=tuple(entries),
         oracles={"o_import": o_import.ORACLE_VERSION, "o_tests": o_tests.ORACLE_VERSION, "o_bind": o_bind.ORACLE_VERSION, "o_contract": o_contract.ORACLE_VERSION},
-        image=image, resolver_logic=LOGIC_VERSION, verdict_rule=LIVE_POLICY_VERSION)
+        image=image, resolver_logic=LOGIC_VERSION, verdict_rule=LIVE_POLICY_VERSION, static_rule=STATIC_RULE)
 
 
 def record_pair(conn: sqlite3.Connection, cell_id: str, analysis_id: str, inp: PairKeyInput) -> str:

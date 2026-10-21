@@ -11,7 +11,14 @@ import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from ..core.hashing import content_hash, object_hash
+try:
+    from ..core.hashing import content_hash, object_hash
+except ImportError:                              # inside the sandbox harness (standard library only): the control plane computes every hash
+    def content_hash(_b: bytes) -> str:
+        return ""
+
+    def object_hash(_o: object) -> str:
+        return ""
 
 EXTRACTOR_VERSION = "surface/1"
 MAX_FILE_BYTES = 2 * 1024 * 1024

@@ -711,6 +711,11 @@ export interface components {
             runtime: string;
             /** State */
             state: string;
+            /**
+             * Static Sites
+             * @default []
+             */
+            static_sites: components["schemas"]["StaticSiteView"][];
             /** Test World Hash */
             test_world_hash: string;
             /** Verdict */
@@ -1405,6 +1410,24 @@ export interface components {
             truncated: boolean;
             /** Warnings */
             warnings: string[];
+        };
+        /**
+         * StaticSiteView
+         * @description A reference in the artifact to an API that changed between the two worlds. Read from source; nothing was executed for it.
+         */
+        StaticSiteView: {
+            /** Change */
+            change: string;
+            /** Col */
+            col: number;
+            /** File */
+            file: string;
+            /** Line */
+            line: number;
+            /** Package */
+            package: string;
+            /** Symbol */
+            symbol: string;
         };
         /** ValidationError */
         ValidationError: {

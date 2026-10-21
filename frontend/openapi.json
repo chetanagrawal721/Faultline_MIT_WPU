@@ -376,6 +376,14 @@
             "title": "State",
             "type": "string"
           },
+          "static_sites": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/StaticSiteView"
+            },
+            "title": "Static Sites",
+            "type": "array"
+          },
           "test_world_hash": {
             "title": "Test World Hash",
             "type": "string"
@@ -2558,6 +2566,46 @@
           "manifests"
         ],
         "title": "SnapshotSummary",
+        "type": "object"
+      },
+      "StaticSiteView": {
+        "additionalProperties": false,
+        "description": "A reference in the artifact to an API that changed between the two worlds. Read from source; nothing was executed for it.",
+        "properties": {
+          "change": {
+            "title": "Change",
+            "type": "string"
+          },
+          "col": {
+            "title": "Col",
+            "type": "integer"
+          },
+          "file": {
+            "title": "File",
+            "type": "string"
+          },
+          "line": {
+            "title": "Line",
+            "type": "integer"
+          },
+          "package": {
+            "title": "Package",
+            "type": "string"
+          },
+          "symbol": {
+            "title": "Symbol",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file",
+          "line",
+          "col",
+          "symbol",
+          "change",
+          "package"
+        ],
+        "title": "StaticSiteView",
         "type": "object"
       },
       "ValidationError": {

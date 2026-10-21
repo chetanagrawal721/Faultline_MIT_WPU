@@ -8,6 +8,7 @@ from ..core.views import (
     AttemptView,
     AttributionView,
     CellView,
+    StaticSiteView,
     DeltaLine,
     EvidenceLine,
     FailedConsumer,
@@ -57,10 +58,13 @@ def analysis_view(conn: sqlite3.Connection, analysis_id: str) -> AnalysisView:
         plan = [OraclePlanStep(oracle=p["oracle"], status=p["status"], reason=p.get("reason", ""), entries=list(p.get("entries", [])))
                 for p in (json.loads(f["scope_json"] or "{}").get("oracle_plan", []) if f else [])]
         att = _attribution(conn, c["id"])
+        sites = [StaticSiteView(file=x["ref"]["id"].rsplit(":", 2)[0], line=int(x["ref"]["id"].rsplit(":", 2)[1]), col=int(x["ref"]["id"].rsplit(":", 2)[2]),
+                                symbol=x["symbol"], change=x["change"], package=x["ref"]["package"] or "")
+                 for x in (json.loads(f["scope_json"] or "{}").get("static") or {}).get("exposures", [])] if f else []
         cells.append(CellView(id=c["id"], state=c["state"], ref_world_hash=c["ref_world_hash"], test_world_hash=c["test_world_hash"],
                               consumers=[_label(conn, x["consumer_project_id"]) for x in cons], imported_modules=mods, delta=delta,
                               finding_id=f["id"] if f else None, verdict=f["verdict"] if f else None, headline=f["headline"] if f else None,
-                              attribution=att, oracle_plan=plan))
+                              attribution=att, oracle_plan=plan, static_sites=sites))
     stats = json.loads(a["stats_json"] or "{}")
     failed = [FailedConsumer(consumer=_label(conn, x["consumer"]), producer=_label(conn, x["producer"]), side=x["side"], reason=x["reason"], text=x["text"])
               for x in stats.get("failed_consumers", [])]

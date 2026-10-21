@@ -19,5 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git ca-certific
 RUN mkdir -p /opt/world /wheelhouse && chown 65534:65534 /opt/world /wheelhouse
 
 COPY backend/faultline/oracles/harness/ /faultline_harness/
+# the static API surface extractor (standard library only); wheel_surface.py reads wheels with it, parsing and never importing them
+COPY backend/faultline/diff/surface.py /faultline_harness/surface.py
 WORKDIR /work
 # Always run as a non-root user chosen at run time (--user 65534:65534); nothing here assumes root.

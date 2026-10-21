@@ -111,6 +111,9 @@ def place(text: str, rel_path: str | None, f: FindingInfo) -> Placed | None:
         for b in f.bind_sites:
             if rel_path is not None and b.file == rel_path and 1 <= b.line <= len(lines):
                 return Placed(_line_range(lines, b.line - 1, b.col, "the call site checked by O-bind, from the analysis"), None)
+        for x in f.static_sites:
+            if rel_path is not None and x.file == rel_path and 1 <= x.line <= len(lines):
+                return Placed(_line_range(lines, x.line - 1, x.col, f"the reference to {x.symbol} ({x.change}), read from source by the analysis"), None)
         return None
     here = [s for s in f.sites if rel_path is not None and s.file == rel_path]
     digest = sha256_of(text)

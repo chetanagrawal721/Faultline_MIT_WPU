@@ -147,6 +147,22 @@ class WorldBuilder:
             raise WorldBuildError("could not read wheel metadata", details={"tail": r.get("error", "")})
         return data["metadata"]
 
+    def read_surface(self, wheel_file: str, package: str, wheel_sha256: str):
+        """The static public API surface of `package` in a wheel of the wheelhouse, parsed offline in the sandbox (no wheel code is imported or run)."""
+        import base64
+        import json
+        import zlib
+
+        from ..diff.surface import Surface
+        r = self.sandbox.submit({"image": self.image, "zone": "exec", "script": "wheel_surface.py", "args": {"file": wheel_file, "package": package},
+                                 "limits": {"timeout_s": 120, "memory_mb": 1024}, "mounts": {"/wheelhouse": {}}})
+        data = r.get("data") or {}
+        if r["failure_class"] != "NONE" or "surface_z" not in data:
+            raise WorldBuildError("could not read the API surface of a wheel", details={"wheel": wheel_file, "error": data.get("error") or r.get("error", "")})
+        s = Surface.from_json(json.loads(zlib.decompress(base64.b64decode(data["surface_z"]))))
+        s.package_hash = wheel_sha256                      # the wheel's own digest identifies the content the surface was read from
+        return s
+
     def edges(self, pinned: list[PinnedRequirement]) -> dict[str, list[str]]:
         """Dependency edges of a pinned world, from the wheels' own metadata."""
         from .closure import fetch_edges
