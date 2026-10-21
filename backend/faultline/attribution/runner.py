@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from ..core.enums import WorldKind
 from ..core.hashing import object_hash
 from ..core.models import FailureSignature, OracleRunResult
+from ..evidence import projections
 from ..oracles.o_import import run_o_import
 from ..resolvers.pinned import PinnedRequirement
 from ..witnesses.signature import signature_of
@@ -127,14 +128,14 @@ def attribute(sbx, image, builder: WorldBuilder, *, artifact_hash: str, entry: s
 
 def persist(conn: sqlite3.Connection, witness_id: str, a: Attribution) -> str:
     aid = "att_" + object_hash([witness_id, list(a.minimal or [])])[:24]
-    conn.execute("DELETE FROM attribution_attempt WHERE attribution_id IN (SELECT id FROM attribution WHERE witness_id=?)", (witness_id,))
-    conn.execute("DELETE FROM attribution WHERE witness_id=?", (witness_id,))
-    conn.execute("INSERT INTO attribution(id, witness_id, status, minimal_set_json, sidedness, forced_worlds_used, runs, notes_json) VALUES (?,?,?,?,?,?,?,?)",
-                 (aid, witness_id, a.status, json.dumps(list(a.minimal or [])), a.sidedness, 1, a.runs,
-                  json.dumps({"notes": a.notes, "alternatives": [list(x) for x in a.alternatives], "label": LABEL,
-                              "sufficiency": a.sufficiency, "necessity": a.necessity})))
-    for i, att in enumerate(a.attempts, 1):
-        conn.execute("INSERT INTO attribution_attempt(attribution_id, seq, direction, subset_json, world_hash, outcome, note) VALUES (?,?,?,?,?,?,?)",
-                     (aid, i, att["direction"], json.dumps(att["subset"]), att["world_hash"], att["outcome"], att["note"]))
+    wk = conn.execute("SELECT witness_key FROM witness WHERE id=?", (witness_id,)).fetchone()["witness_key"]
+    row = {"id": aid, "witness_id": witness_id, "status": a.status, "minimal_set_json": json.dumps(list(a.minimal or [])), "sidedness": a.sidedness,
+           "forced_worlds_used": 1, "runs": a.runs,
+           "notes_json": json.dumps({"notes": a.notes, "alternatives": [list(x) for x in a.alternatives], "label": LABEL,
+                                     "sufficiency": a.sufficiency, "necessity": a.necessity})}
+    attempts = [{"attribution_id": aid, "seq": i, "direction": att["direction"], "subset_json": json.dumps(att["subset"]), "world_hash": att["world_hash"],
+                 "outcome": att["outcome"], "note": att["note"]} for i, att in enumerate(a.attempts, 1)]
+    projections.write(conn, "attribution", {"witness_key": wk, "status": a.status, "minimal": list(a.minimal or []), "row": row, "attempts": attempts},
+                      slot=f"attribution:{wk}")
     a.attribution_id = aid
     return aid

@@ -14,11 +14,11 @@ class Kind:
 
 
 KINDS: dict[str, Kind] = {k.name: k for k in (
-    Kind("oracle_result", 1, ("oracle", "oracle_version", "world_hash", "result")),
-    Kind("witness", 1, ("witness_key", "oracle", "entry_point", "signature")),
-    Kind("attribution", 1, ("witness_key", "status", "minimal")),
-    Kind("verdict", 1, ("pair_key", "verdict", "policy")),
-    Kind("fix_plan", 1, ("finding_id", "target_path", "target_sha256", "label")),
+    Kind("oracle_result", 1, ("oracle", "oracle_version", "world_hash", "run")),
+    Kind("witness", 1, ("witness_key", "oracle", "entry_point", "signature", "row", "slot", "seq")),
+    Kind("attribution", 1, ("witness_key", "status", "minimal", "row", "attempts", "slot", "seq")),
+    Kind("verdict", 1, ("finding", "verdict", "policy", "evidence", "slot", "seq")),
+    Kind("fix_plan", 1, ("finding_id", "label", "row", "slot", "seq")),
     Kind("pair_record", 1, ("pair_key", "inputs")),
     Kind("ddmin_checkpoint", 1, ("minimisation_id", "seq", "state")),
     Kind("consumer_imports", 1, ("consumer_commit", "sites")),

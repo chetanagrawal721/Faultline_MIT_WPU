@@ -17,6 +17,7 @@ from ..core.enums import FailureClass, RunProvenance, WitnessClass
 from ..core.hashing import object_hash
 from ..core.ids import new_id
 from ..core.models import EntryOutcome, FailureSignature, OracleRunResult, Witness
+from ..evidence import projections
 from .runs import RunRecord, execute_run
 from .signature import signature_of
 
@@ -126,12 +127,15 @@ def _save_witness(conn: sqlite3.Connection, cell: FixtureCell, oracle: str, vers
     meta = meta or {}
     key = witness_key(cell, oracle, version, dec.entry, cell.env_profile_id, meta.get("sha256"))
     silent = oracle == "o_contract" and dec.signature is not None and dec.signature.exc_type == SILENT_EXC
-    existing = conn.execute("SELECT id, body_json FROM witness WHERE witness_key=?", (key,)).fetchone()
-    if existing:                                             # already witnessed: record the re-verification
+    existing = conn.execute("SELECT * FROM witness WHERE witness_key=?", (key,)).fetchone()
+    if existing:                                             # already witnessed: record the re-verification as a new version of the witness object
         body = json.loads(existing["body_json"])
         body.setdefault("reverifications", []).append({"ref_run_ids": list(dec.ref_run_ids),
                                                        "test_run_ids": list(dec.test_run_ids)})
-        conn.execute("UPDATE witness SET body_json=? WHERE id=?", (json.dumps(body, sort_keys=True), existing["id"]))
+        row = projections.row_of(existing)
+        row["body_json"] = json.dumps(body, sort_keys=True)
+        projections.write(conn, "witness", {"witness_key": key, "oracle": oracle, "entry_point": row["entry_point"], "signature": json.loads(row["signature_json"]),
+                                            "row": row}, slot=f"witness:{key}", analysis_id=cell.analysis_id)
         return existing["id"]
     wid = new_id("wit")
     w = Witness(witness_id=wid, witness_class=WitnessClass.SILENT_DIVERGENCE if silent else WitnessClass.BREAK, cell_id=cell.cell_id, oracle=oracle,
@@ -140,11 +144,13 @@ def _save_witness(conn: sqlite3.Connection, cell: FixtureCell, oracle: str, vers
     body = w.model_dump(mode="json")
     if meta:
         body["input"] = meta                                     # the exact bytes (base64), their hash, the tier and the options
-    conn.execute("INSERT INTO witness(id, analysis_id, cell_id, class, divergence, oracle, oracle_version, entry_point, input_tier, input_hash, "
-                 "witness_key, signature_json, ref_pass, test_fail, body_json) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                 (wid, cell.analysis_id, cell.cell_id, "SILENT_DIVERGENCE" if silent else "BREAK", "VALUE_DIVERGENCE" if silent else DIVERGENCE.get(oracle, "UNKNOWN"),
-                  oracle, version, dec.entry, meta.get("tier"), meta.get("sha256"), key, dec.signature.model_dump_json(), len(dec.ref_run_ids),
-                  len(dec.test_run_ids), json.dumps(body, sort_keys=True)))
+    row = {"id": wid, "analysis_id": cell.analysis_id, "cell_id": cell.cell_id, "class": "SILENT_DIVERGENCE" if silent else "BREAK",
+           "divergence": "VALUE_DIVERGENCE" if silent else DIVERGENCE.get(oracle, "UNKNOWN"), "oracle": oracle, "oracle_version": version,
+           "entry_point": dec.entry, "input_tier": meta.get("tier"), "input_hash": meta.get("sha256"), "witness_key": key,
+           "signature_json": dec.signature.model_dump_json(), "ref_pass": len(dec.ref_run_ids), "test_fail": len(dec.test_run_ids),
+           "body_json": json.dumps(body, sort_keys=True)}
+    projections.write(conn, "witness", {"witness_key": key, "oracle": oracle, "entry_point": dec.entry, "signature": json.loads(row["signature_json"]),
+                                        "row": row}, slot=f"witness:{key}", analysis_id=cell.analysis_id)
     return wid
 
 

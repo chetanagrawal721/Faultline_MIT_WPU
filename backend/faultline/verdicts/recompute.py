@@ -8,6 +8,7 @@ import json
 import sqlite3
 
 from ..core.models import OracleRunResult
+from ..evidence import projections
 from ..witnesses.runs import RunRecord
 from ..witnesses.verify import Decision, EntryDecision, decide_entry
 from . import templates
@@ -79,8 +80,12 @@ def recompute_finding(conn: sqlite3.Connection, finding: sqlite3.Row) -> str:
     scope.update(exercised=list(out.exercised), not_applicable=list(out.not_applicable), reasons=list(out.reasons), policy=LIVE_POLICY_VERSION,
                  recomputed_from_stored_evidence=True)
     verdict = out.verdict
-    conn.execute("UPDATE finding SET verdict=?, sub_label=?, headline=?, scope_json=?, priority=? WHERE id=?",
-                 (verdict.value, out.sub_label, headline, json.dumps(scope, sort_keys=True), LIVE_PRIORITY[verdict], finding["id"]))
+    row = projections.row_of(finding)
+    row.update(verdict=verdict.value, sub_label=out.sub_label, headline=headline, scope_json=json.dumps(scope, sort_keys=True), priority=LIVE_PRIORITY[verdict])
+    evidence = [[r["evidence_kind"], r["evidence_id"]] for r in conn.execute(
+        "SELECT evidence_kind, evidence_id FROM finding_evidence WHERE finding_id=? ORDER BY evidence_kind, evidence_id", (finding["id"],))]
+    projections.write(conn, "verdict", {"finding": row, "verdict": verdict.value, "policy": LIVE_POLICY_VERSION, "evidence": evidence},
+                      slot=f"finding:{row['cell_id']}", analysis_id=row["analysis_id"])
     return verdict.value
 
 

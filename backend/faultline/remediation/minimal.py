@@ -14,6 +14,7 @@ from pathlib import Path
 from ..analysis.fixture import FixtureCell
 from ..core.enums import WorldKind
 from ..core.hashing import env_profile_id, object_hash
+from ..evidence import projections
 from ..ingestion.clone import load_inventory
 from ..oracles.o_import import ORACLE, ORACLE_VERSION, plan_modules, run_o_import
 from ..parsers.common import SnapshotFS
@@ -177,11 +178,11 @@ def _save(conn: sqlite3.Connection, store: Store, finding_id: str, r: Remediatio
     d.mkdir(parents=True, exist_ok=True)
     diff_path = d / f"{pid}.diff"
     diff_path.write_text(r.diff, encoding="utf-8", newline="\n")
-    conn.execute("DELETE FROM remediation_plan WHERE id=?", (pid,))
-    conn.execute("INSERT INTO remediation_plan(id, finding_id, moves_json, gates_json, label, rank, diff_path, world_hashes_json) VALUES (?,?,?,?,?,?,?,?)",
-                 (pid, finding_id, json.dumps([{"kind": "CONSTRAINT", "constraint": r.constraint}]),
-                  json.dumps({"G1_resolves": True, "G2_witness_gone": not r.witnesses_after, "G3_no_new_witness": True, "G4": None}),
-                  "VERIFIED" if r.label == "VERIFIED" else "SUGGESTED", 1, str(diff_path), json.dumps([world_hash] if world_hash else [])))
+    row = {"id": pid, "finding_id": finding_id, "moves_json": json.dumps([{"kind": "CONSTRAINT", "constraint": r.constraint}]),
+           "gates_json": json.dumps({"G1_resolves": True, "G2_witness_gone": not r.witnesses_after, "G3_no_new_witness": True, "G4": None}),
+           "label": "VERIFIED" if r.label == "VERIFIED" else "SUGGESTED", "rank": 1, "diff_path": str(diff_path),
+           "world_hashes_json": json.dumps([world_hash] if world_hash else [])}
+    projections.write(conn, "fix_plan", {"finding_id": finding_id, "label": row["label"], "row": row, "diff": r.diff}, slot=f"fix_plan:{pid}")
     r.plan_id = pid
     return r
 

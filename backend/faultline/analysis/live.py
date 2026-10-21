@@ -14,6 +14,7 @@ from ..core.errors import Cancelled, LeaseLost
 from ..core.ids import new_id
 from ..core.logging import phase
 from ..core.models import OracleRunResult
+from ..evidence import projections
 from ..ingestion.clone import load_inventory
 from ..oracles import o_contract, planner
 from ..oracles.artifacts import prepare_artifact
@@ -364,23 +365,24 @@ def write_live_finding(conn: sqlite3.Connection, analysis_id: str, cell: Fixture
             s = sites[dec.entry]
             kw["site"] = {"id": s.site_id, "callee": s.callee, "n_positional": s.n_positional, "keyword_names": list(s.keyword_names)}
     headline = templates.live_headline(out.outcome, **kw)
-    conn.execute("DELETE FROM finding_evidence WHERE finding_id IN (SELECT id FROM finding WHERE cell_id=?)", (cell.cell_id,))
-    conn.execute("DELETE FROM finding WHERE cell_id=?", (cell.cell_id,))
     fid = new_id("fnd")
     verdict = out.verdict
     scope = {"exercised": list(out.exercised), "not_applicable": list(out.not_applicable), "not_checked": list(not_checked), "bind_sites": {e: {"id": s.site_id, "callee": s.callee, "n_positional": s.n_positional, "keyword_names": list(s.keyword_names)} for e, s in sites.items()},
              "reasons": list(out.reasons), "policy": LIVE_POLICY_VERSION, "oracle_plan": planner.as_json(steps), "consumers": names, "contract": contract,
              "delta": [{"name": d.name, "reference": d.reference, "consumer": d.consumer} for d in plan.projection.delta]}
-    conn.execute("INSERT INTO finding(id, analysis_id, scope_kind, cell_id, verdict, sub_label, headline, scope_json, priority, created_at) "
-                 "VALUES (?,?, 'ARTIFACT_CELL', ?,?,?,?,?,?,?)",
-                 (fid, analysis_id, cell.cell_id, verdict.value, out.sub_label, headline, json.dumps(scope, sort_keys=True), LIVE_PRIORITY[verdict], _now()))
+    row = {"id": fid, "analysis_id": analysis_id, "scope_kind": "ARTIFACT_CELL", "cell_id": cell.cell_id, "relationship_id": None, "verdict": verdict.value,
+           "sub_label": out.sub_label, "headline": headline, "scope_json": json.dumps(scope, sort_keys=True), "coverage": None,
+           "priority": LIVE_PRIORITY[verdict], "created_at": _now()}
+    evidence: list[list[str]] = []
     for d in v.decisions:
         if d.witness_id:
-            conn.execute("INSERT OR IGNORE INTO finding_evidence(finding_id, evidence_kind, evidence_id) VALUES (?, 'WITNESS', ?)", (fid, d.witness_id))
+            evidence.append(["WITNESS", d.witness_id])
     for r in v.ref_runs + v.test_runs:
-        conn.execute("INSERT OR IGNORE INTO finding_evidence(finding_id, evidence_kind, evidence_id) VALUES (?, 'ORACLE_RUN', ?)", (fid, r.run_id))
+        evidence.append(["ORACLE_RUN", r.run_id])
     for _c, rid in plan.consumers:
-        conn.execute("INSERT OR IGNORE INTO finding_evidence(finding_id, evidence_kind, evidence_id) VALUES (?, 'RELATIONSHIP', ?)", (fid, rid))
+        evidence.append(["RELATIONSHIP", rid])
+    projections.write(conn, "verdict", {"finding": row, "verdict": verdict.value, "policy": LIVE_POLICY_VERSION, "evidence": evidence},
+                      slot=f"finding:{cell.cell_id}", analysis_id=analysis_id)
     return fid
 
 

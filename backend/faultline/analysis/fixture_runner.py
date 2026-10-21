@@ -14,6 +14,7 @@ from ..core.config import repo_root
 from ..core.enums import Verdict, WorldKind
 from ..core.ids import new_id
 from ..core.scenario import Scenario, load_scenario
+from ..evidence import projections
 from ..oracles.artifacts import prepare_artifact
 from ..oracles.o_import import ORACLE, ORACLE_VERSION, plan_modules, run_o_import
 from ..sandbox import images
@@ -102,20 +103,18 @@ def _write_finding(conn, sc: Scenario, consumer: str, cell: FixtureCell, v: Veri
         d = next(x for x in v.decisions if x.entry == vr.witness_entries[0])
         kw.update(entry=d.entry, exc=d.signature.exc_type, message=d.signature.message_norm)
     head = templates.headline(vr.verdict, **kw)
-    conn.execute("DELETE FROM finding_evidence WHERE finding_id IN (SELECT id FROM finding WHERE cell_id=?)", (cell.cell_id,))
-    conn.execute("DELETE FROM finding WHERE cell_id=?", (cell.cell_id,))
     fid = new_id("fnd")
     scope = {"exercised": list(vr.exercised), "not_applicable": list(vr.not_applicable),
              "not_checked": list(templates.NOT_CHECKED_PHASE1), "reasons": list(vr.reasons), "policy": POLICY_VERSION}
-    conn.execute("INSERT INTO finding(id, analysis_id, scope_kind, cell_id, verdict, headline, scope_json, priority, created_at) "
-                 "VALUES (?,?, 'ARTIFACT_CELL', ?,?,?,?,?,?)",
-                 (fid, cell.analysis_id, cell.cell_id, vr.verdict.value, head, json.dumps(scope, sort_keys=True),
-                  PRIORITY[vr.verdict], time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())))
+    row = {"id": fid, "analysis_id": cell.analysis_id, "scope_kind": "ARTIFACT_CELL", "cell_id": cell.cell_id, "relationship_id": None,
+           "verdict": vr.verdict.value, "sub_label": None, "headline": head, "scope_json": json.dumps(scope, sort_keys=True), "coverage": None,
+           "priority": PRIORITY[vr.verdict], "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    evidence: list[list[str]] = []
     for d in v.decisions:
         if d.witness_id:
-            conn.execute("INSERT OR IGNORE INTO finding_evidence(finding_id, evidence_kind, evidence_id) VALUES (?, 'WITNESS', ?)",
-                         (fid, d.witness_id))
+            evidence.append(["WITNESS", d.witness_id])
     for r in v.ref_runs + v.test_runs:
-        conn.execute("INSERT OR IGNORE INTO finding_evidence(finding_id, evidence_kind, evidence_id) VALUES (?, 'ORACLE_RUN', ?)",
-                     (fid, r.run_id))
+        evidence.append(["ORACLE_RUN", r.run_id])
+    projections.write(conn, "verdict", {"finding": row, "verdict": vr.verdict.value, "policy": POLICY_VERSION, "evidence": evidence},
+                      slot=f"finding:{cell.cell_id}", analysis_id=cell.analysis_id)
     return fid
