@@ -11,6 +11,8 @@ dependencies = [
   "packaging==26.3",
   "jsonschema==4.26.0",
   "defusedxml==0.7.1",
+  "pygls==2.1.1",              # the LSP server (M13.7); LSP 3.17 through lsprotocol
+  "lsprotocol==2025.0.0",
 ]
 
 [dependency-groups]
