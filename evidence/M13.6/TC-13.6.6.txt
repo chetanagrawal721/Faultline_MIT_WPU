@@ -1,0 +1,47 @@
+Preflight
+  ok    the API and database are healthy  mode LIVE, schema v8
+  ok    the sandbox boundary is verified (Docker is up)  boundary checks passed (13 checks) on the running deployment
+  ok    oracle o_import is enabled
+  ok    oracle o_bind is enabled
+  ok    oracle o_contract is enabled
+  ok    witness verification is enabled
+  ok    GitHub API quota for this machine  60 of 60 calls left, resets in 59 min
+  ok    GitHub serves faultline-fixture-acme-bisect
+  ok    GitHub serves faultline-fixture-acme-contracts
+  ok    GitHub serves faultline-fixture-acme-http
+  ok    GitHub serves faultline-fixture-acme-models
+  ok    GitHub serves faultline-fixture-acme-showcase
+  ok    GitHub serves faultline-fixture-billing-svc-contract
+  ok    GitHub serves faultline-fixture-billing-svc-union
+  ok    GitHub serves faultline-fixture-bisect-svc
+  ok    GitHub serves faultline-fixture-fulfilment-svc
+  ok    GitHub serves faultline-fixture-notify-svc
+  ok    GitHub serves faultline-fixture-orders-svc
+  ok    GitHub serves faultline-fixture-reporting-svc
+
+Case 'bisect': Eight packages differ and one of them causes the break: the minimisation finds Werkzeug (a library imported alone, Flask 2.2.2 with Werkzeug 3)
+  ok    pinned faultline-fixture-acme-bisect  commit cb92e08d29
+  ok    pinned faultline-fixture-bisect-svc  commit 18b25a0d25
+  ok    fetched faultline-fixture-acme-bisect in the sandbox  INGESTED, 8 s
+  ok    fetched faultline-fixture-bisect-svc in the sandbox  INGESTED, 10 s
+        RUNNING 0% 
+        RUNNING 17% discovering projects and building worlds (2 of 2)
+        RUNNING 5% discovering relationships
+        RUNNING 12% building the projected consumer world
+        RUNNING 15% running O-import (3 + 3 fresh runs) on acme_bisect, acme_bisect.util, acme_bisect.web
+        RUNNING 20% attributing the break in acme_bisect.web (two-sided search)
+        RUNNING 20% checking whether the job was cancelled
+        DONE 100% done
+  ok    the analysis job finished  DONE in 159 s
+  ok    a finding was produced
+  ok    verdict is BREAK_WITNESSED  BREAK_WITNESSED
+  ok    the exact delta names the cause  certifi, charset-normalizer, click, idna, itsdangerous, packaging, pyparsing, werkzeug
+  ok    the scoped statement quotes the real failure  Reproduced: importing `acme_bisect.web` fails with `ImportError: cannot import name 'url_quote' from 'werkzeug.urls' (<site>/werkzeug/urls.p
+  ok    fresh runs only (6 per oracle), none reused  6 fresh, 0 reused
+  ok    two-sided attribution names the cause  ['werkzeug'] COMPLETE
+  ok    a witness exists
+  ok    the evidence bundle verifies (hashes, paths, sizes)  34 files
+
+  Open it: http://127.0.0.1:8000/#/app/finding/fnd_01M5G9V45F1QCFKGT3KPTY4J31   (total 160 s)
+
+Ready to demo.

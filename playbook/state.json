@@ -24,6 +24,10 @@
       "declared": "2026-10-21 18:29 UTC",
       "waivers": []
     },
+    "T3": {
+      "declared": "2026-10-21 22:38 UTC",
+      "waivers": []
+    },
     "T4": {
       "declared": "2026-10-21 22:29 UTC",
       "waivers": []
@@ -142,6 +146,10 @@
       "started": "2026-10-21 19:15 UTC",
       "status": "done"
     },
+    "M13.11": {
+      "started": "2026-10-21 22:38 UTC",
+      "status": "in_progress"
+    },
     "M13.2": {
       "done": "2026-10-21 17:04 UTC",
       "started": "2026-10-21 15:28 UTC",
@@ -163,7 +171,8 @@
       "status": "done"
     },
     "M13.6": {
-      "status": "in_progress"
+      "done": "2026-10-21 22:38 UTC",
+      "status": "done"
     },
     "M13.7": {
       "done": "2026-10-21 18:46 UTC",
@@ -754,6 +763,18 @@
       "note": "",
       "status": "pass"
     },
+    "TC-13.11.1": {
+      "date": "2026-10-21 22:56 UTC",
+      "evidence": "evidence/M13.11/TC-13.11.1.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.11.4": {
+      "date": "2026-10-21 22:56 UTC",
+      "evidence": "evidence/M13.11/TC-13.11.4.txt",
+      "note": "",
+      "status": "pass"
+    },
     "TC-13.2.1": {
       "date": "2026-10-21 17:04 UTC",
       "evidence": "evidence/M13.2/TC-13.2.1.txt",
@@ -913,6 +934,12 @@
     "TC-13.6.5": {
       "date": "2026-10-21 18:55 UTC",
       "evidence": "evidence/M13.6/TC-13.6.5.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.6.6": {
+      "date": "2026-10-21 22:38 UTC",
+      "evidence": "evidence/M13.6/TC-13.6.6.txt",
       "note": "",
       "status": "pass"
     },

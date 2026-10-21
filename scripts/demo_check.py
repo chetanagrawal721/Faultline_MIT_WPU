@@ -56,6 +56,14 @@ CASES = {
         "cause": ["pydantic"],
         "says": 'reference=42, consumer="42"',
     },
+    "bisect": {
+        "title": "Eight packages differ and one of them causes the break: the minimisation finds Werkzeug (a library imported alone, Flask 2.2.2 with Werkzeug 3)",
+        "repos": [OWNER + "acme-bisect", OWNER + "bisect-svc"],
+        "verdict": "BREAK_WITNESSED",
+        "delta": {"werkzeug"},
+        "cause": ["werkzeug"],
+        "says": "cannot import name 'url_quote'",
+    },
     "hero": {
         "title": "A shared library that imports fine alone and fails under a consumer's dependencies (Flask 2.2.2 with Werkzeug 3)",
         "repos": [HERO_ARTIFACT, HERO_CONSUMER],

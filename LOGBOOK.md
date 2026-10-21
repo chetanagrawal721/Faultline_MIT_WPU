@@ -1441,3 +1441,26 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 ### 2026-10-21 22:29 UTC | GATE DECLARED | Gate T4 | by Chetan Agrawal
 - Twist: LSP diagnostics
 - no waivers
+
+### 2026-10-21 22:38 UTC | TC PASS | TC-13.6.6 | by Chetan Agrawal
+- Fixture works from GitHub
+- evidence: evidence/M13.6/TC-13.6.6.txt
+
+### 2026-10-21 22:38 UTC | DONE | M13.6 | by Chetan Agrawal
+- Recovery in the pipeline and the eight-candidate fixture
+- test cases passed: 6/6
+
+### 2026-10-21 22:38 UTC | GATE DECLARED | Gate T3 | by Chetan Agrawal
+- Twist: DDMin recovery
+- no waivers
+
+### 2026-10-21 22:38 UTC | START | M13.11 | by Chetan Agrawal
+- SQL backward support and regression
+
+### 2026-10-21 22:56 UTC | TC PASS | TC-13.11.1 | by Chetan Agrawal
+- Unit tests, both settings
+- evidence: evidence/M13.11/TC-13.11.1.txt
+
+### 2026-10-21 22:56 UTC | TC PASS | TC-13.11.4 | by Chetan Agrawal
+- Frontend and types
+- evidence: evidence/M13.11/TC-13.11.4.txt

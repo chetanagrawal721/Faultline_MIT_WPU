@@ -35,8 +35,10 @@ DEMO = {
     "acme-showcase": ("acme-showcase", "One library with four modules: an import break, a call-site break, a data-contract break and a silent divergence."),
     "fulfilment-svc": ("fulfilment-svc", "Consumer on Werkzeug 3, urllib3 2 and pydantic 2 that uses all four modules."),
     "reporting-svc": ("reporting-svc", "Control consumer: resolves exactly the library's own dependencies."),
+    "acme-bisect": ("acme-bisect", "A library whose web module needs Flask 2.2, which imports a Werkzeug function that Werkzeug 3 removed."),
+    "bisect-svc": ("bisect-svc", "Consumer with eight differing packages; only Werkzeug causes the break, which the minimisation finds."),
 }
-LOCAL_TO_PUBLISHED = {"acme-http": "acme-http", "acme-contracts": "acme-contracts", "acme-models": "acme-models", "acme-showcase": "acme-showcase"}
+LOCAL_TO_PUBLISHED = {"acme-bisect": "acme-bisect", "acme-http": "acme-http", "acme-contracts": "acme-contracts", "acme-models": "acme-models", "acme-showcase": "acme-showcase"}
 
 
 def git(cwd: Path, *args: str) -> str:
@@ -47,11 +49,11 @@ def git(cwd: Path, *args: str) -> str:
 
 
 def rewrite_urls(text: str, owner: str) -> str:
-    """git+https://github.com/faultline-demo/<repo>@scenario-X  ->  git+https://github.com/<owner>/faultline-fixture-<repo>@main"""
+    """git+https://github.com/faultline-demo/<repo>@scenario-X (or @main)  ->  git+https://github.com/<owner>/faultline-fixture-<repo>@main"""
     def sub(m: re.Match) -> str:
         name = LOCAL_TO_PUBLISHED.get(m.group(1), m.group(1))
         return f"github.com/{owner}/{PREFIX}{name}@main"
-    return re.sub(r"github\.com/faultline-demo/([\w.-]+)@scenario-\w+", sub, text)
+    return re.sub(r"github\.com/faultline-demo/([\w.-]+)@(?:scenario-\w+|main)", sub, text)
 
 
 def build(name: str, tree: str, desc: str, owner: str, dest: Path) -> Path:
