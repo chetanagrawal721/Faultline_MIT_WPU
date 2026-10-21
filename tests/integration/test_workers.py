@@ -2,6 +2,7 @@
 import os
 import subprocess
 import sys
+import tempfile
 import time
 
 from faultline.core.enums import JobStatus
@@ -16,7 +17,21 @@ def spawn_worker(db_path, once=False):
     env = {**os.environ, "FAULTLINE_DB": str(db_path), **ENV_KEYS,
            "PYTHONPATH": os.path.join(os.path.dirname(__file__), "..", "..", "backend")}
     args = [sys.executable, "-m", "faultline.workers.run"] + (["--once"] if once else [])
-    return subprocess.Popen(args, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    log = tempfile.TemporaryFile()                       # a pipe nobody reads fills up (4 KB on Windows) and stops the worker after a few jobs
+    proc = subprocess.Popen(args, env=env, stdout=log, stderr=subprocess.STDOUT)
+    proc.stdout = _Log(log)
+    return proc
+
+
+class _Log:
+    """Reads what the worker wrote, for failure messages."""
+
+    def __init__(self, f):
+        self._f = f
+
+    def read(self) -> bytes:
+        self._f.seek(0)
+        return self._f.read()
 
 
 def wait_for(cond, timeout=20.0, step=0.05):
