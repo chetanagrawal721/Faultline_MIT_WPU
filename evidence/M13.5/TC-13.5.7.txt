@@ -1,0 +1,10 @@
+# TC-13.5.7
+# command: pytest tests/unit/test_ddmin_resume.py -k "budget or algorithm_version or minimisation_id_depends or finished_chain or counters_show or store_off" -v
+tests/unit/test_ddmin_resume.py::test_a_budget_that_runs_out_gives_a_limited_result_and_a_later_run_continues PASSED
+tests/unit/test_ddmin_resume.py::test_the_budget_counts_tests_run_before_a_stop PASSED
+tests/unit/test_ddmin_resume.py::test_a_new_algorithm_version_starts_a_new_chain PASSED
+tests/unit/test_ddmin_resume.py::test_the_minimisation_id_depends_on_every_input PASSED
+tests/unit/test_ddmin_resume.py::test_a_finished_chain_run_again_runs_nothing_and_adds_no_checkpoint PASSED
+tests/unit/test_ddmin_resume.py::test_the_counters_show_resumed_and_run_tests PASSED
+tests/unit/test_ddmin_resume.py::test_with_the_store_off_the_plain_search_runs PASSED
+====================== 7 passed, 18 deselected in 6.20s =======================

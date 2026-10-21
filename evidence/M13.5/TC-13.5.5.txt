@@ -1,0 +1,5 @@
+# TC-13.5.5
+# command: pytest tests/unit/test_ddmin_resume.py -k "damaged" -v
+tests/unit/test_ddmin_resume.py::test_a_damaged_latest_checkpoint_falls_back_to_the_previous_one PASSED
+tests/unit/test_ddmin_resume.py::test_when_every_checkpoint_is_damaged_the_error_is_explicit PASSED
+====================== 2 passed, 23 deselected in 3.96s =======================

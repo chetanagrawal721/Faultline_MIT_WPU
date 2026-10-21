@@ -1206,3 +1206,82 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 ### 2026-10-21 17:30 UTC | DONE | M13.3 | by Chetan Agrawal
 - Stable pair key and pair records
 - test cases passed: 4/4
+
+### 2026-10-21 17:30 UTC | START | M13.4 | by Chetan Agrawal
+- Incremental analysis and counters
+
+### 2026-10-21 17:46 UTC | START | M13.5 | by Chetan Agrawal
+- Resumable DDMin core
+
+### 2026-10-21 18:00 UTC | TC PASS | TC-13.5.1 | by Chetan Agrawal
+- Same results as before
+- evidence: evidence/M13.5/TC-13.5.1.txt
+
+### 2026-10-21 18:00 UTC | TC PASS | TC-13.5.2 | by Chetan Agrawal
+- Resume at every point
+- evidence: evidence/M13.5/TC-13.5.2.txt
+
+### 2026-10-21 18:00 UTC | TC PASS | TC-13.5.3 | by Chetan Agrawal
+- Crash before the checkpoint
+- evidence: evidence/M13.5/TC-13.5.3.txt
+
+### 2026-10-21 18:00 UTC | TC PASS | TC-13.5.4 | by Chetan Agrawal
+- Interrupted is not a failure
+- evidence: evidence/M13.5/TC-13.5.4.txt
+
+### 2026-10-21 18:00 UTC | TC PASS | TC-13.5.5 | by Chetan Agrawal
+- Corrupt checkpoint
+- evidence: evidence/M13.5/TC-13.5.5.txt
+
+### 2026-10-21 18:00 UTC | TC PASS | TC-13.5.6 | by Chetan Agrawal
+- Two resumers race
+- evidence: evidence/M13.5/TC-13.5.6.txt
+
+### 2026-10-21 18:00 UTC | TC PASS | TC-13.5.7 | by Chetan Agrawal
+- Budget and versions
+- evidence: evidence/M13.5/TC-13.5.7.txt
+
+### 2026-10-21 18:00 UTC | NOTE | - | by Chetan Agrawal
+- M13.5: ddmin/2 reports its state {phase,c,n,i,part} before every test and is compared with a frozen copy of the original on 40 random oracles (same attempts and results). A finished test is an immutable ddmin_test object (slot ddmin_test:<test_id>); checkpoints are objects plus a (minimisation_id, seq) row, so exactly one writer advances a chain. The function is named identity_of_test because pytest collects anything called test_*.
+
+### 2026-10-21 18:00 UTC | DONE | M13.5 | by Chetan Agrawal
+- Resumable DDMin core
+- test cases passed: 7/7
+
+### 2026-10-21 18:07 UTC | START | M13.7 | by Chetan Agrawal
+- Stdio LSP server and VS Code vertical slice
+
+### 2026-10-21 18:29 UTC | TC PASS | TC-13.4.1 | by Chetan Agrawal
+- Cold run (setup and verification)
+- evidence: evidence/M13.4/TC-13.4.1.txt
+
+### 2026-10-21 18:29 UTC | TC PASS | TC-13.4.2 | by Chetan Agrawal
+- Unchanged rerun reuses everything
+- evidence: evidence/M13.4/TC-13.4.2.txt
+
+### 2026-10-21 18:29 UTC | TC PASS | TC-13.4.3 | by Chetan Agrawal
+- A changed producer recomputes only its pairs
+- evidence: evidence/M13.4/TC-13.4.3.txt
+
+### 2026-10-21 18:29 UTC | TC PASS | TC-13.4.4 | by Chetan Agrawal
+- A corrupt pair object is rejected
+- evidence: evidence/M13.4/TC-13.4.4.txt
+
+### 2026-10-21 18:29 UTC | TC PASS | TC-13.4.5 | by Chetan Agrawal
+- Reused results are never fresh runs
+- evidence: evidence/M13.4/TC-13.4.5.txt
+
+### 2026-10-21 18:29 UTC | TC PASS | TC-13.4.6 | by Chetan Agrawal
+- UI shows the counters
+- evidence: evidence/M13.4/TC-13.4.6.txt
+
+### 2026-10-21 18:29 UTC | NOTE | - | by Chetan Agrawal
+- M13.4: five pairs on real executions. Cold run 680 s (5 recomputed, machine busy; 486 s when idle); unchanged rerun 48 s (5 reused, 0 oracle runs); one producer commit changed: 1 recomputed (reason CHANGED: producer.commit, producer_artifact_sha256), 4 reused; one stored verdict damaged: rejected, recomputed, 4 reused. The first attempt used billing-svc/H, whose finding is INCONCLUSIVE (a library test entry is skipped, so nothing is observed); an inconclusive result is never stored as reusable, so it was replaced by billing-svc/B for a definite verdict. Evidence of the first attempt is kept in evidence/M13.4/incremental_run_first_attempt_inconclusive_pair.txt.
+
+### 2026-10-21 18:29 UTC | DONE | M13.4 | by Chetan Agrawal
+- Incremental analysis and counters
+- test cases passed: 6/6
+
+### 2026-10-21 18:29 UTC | GATE DECLARED | Gate T2 | by Chetan Agrawal
+- Twist: incremental reuse
+- no waivers

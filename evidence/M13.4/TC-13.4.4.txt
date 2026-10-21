@@ -1,0 +1,5 @@
+# TC-13.4.4
+# command: pytest tests/integration/test_incremental.py -v -s (five pairs on real executions; this test's lines)
+tests/integration/test_incremental.py::test_tc_13_4_4_a_damaged_stored_result_is_rejected_and_computed_again 
+[_damaged] ingest 0.0 s, analysis 164.3 s, counters {"analysis_id": "an_ba937094c4c5e5aa38cc73dc", "pairs": {"reused": 4, "recomputed": 1, "unfinished": 0, "rejected_objects": 1}, "worlds": {"reused": 9, "built": 0}, "ddmin": {"tests_resumed": 0, "tests_run": 0}, "events": 22}
+cold analysis 680.0 s, reused rerun 47.9 s

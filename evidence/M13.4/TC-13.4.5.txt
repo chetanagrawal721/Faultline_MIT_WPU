@@ -1,0 +1,4 @@
+# TC-13.4.5
+# command: pytest tests/integration/test_incremental.py -v -s (the last test of the run)
+tests/integration/test_incremental.py::test_tc_13_4_5_no_reused_result_is_inside_a_witness PASSED
+======================= 5 passed in 1347.16s (0:22:27) ========================

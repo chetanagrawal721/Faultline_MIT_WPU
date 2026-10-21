@@ -1,0 +1,4 @@
+# TC-13.5.3
+# command: pytest tests/unit/test_ddmin_resume.py -k "between_the_stored_outcome" -v
+tests/unit/test_ddmin_resume.py::test_a_stop_between_the_stored_outcome_and_the_checkpoint_does_not_run_that_test_again PASSED
+====================== 1 passed, 24 deselected in 2.47s =======================

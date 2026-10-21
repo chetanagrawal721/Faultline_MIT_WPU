@@ -1,0 +1,83 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chetan\Hackethopia\.venv\Scripts\python.exe
+rootdir: C:\Users\Chetan\Hackethopia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 5 items
+
+tests/integration/test_incremental.py::test_tc_13_4_1_cold_run_computes_every_pair 
+[cold] ingest 77.0 s, analysis 486.1 s, counters {"analysis_id": "an_9999570e215d72e553ec813d", "pairs": {"reused": 0, "recomputed": 5, "unfinished": 0, "rejected_objects": 0}, "worlds": {"reused": 10, "built": 3}, "ddmin": {"tests_resumed": 0, "tests_run": 0}, "events": 36}
+PASSED
+tests/integration/test_incremental.py::test_tc_13_4_2_an_unchanged_rerun_reuses_everything_and_runs_nothing 
+[_rerun] ingest 0.0 s, analysis 87.1 s, counters {"analysis_id": "an_ded926a54cd02be6ff6f6583", "pairs": {"reused": 4, "recomputed": 1, "unfinished": 0, "rejected_objects": 0}, "worlds": {"reused": 11, "built": 0}, "ddmin": {"tests_resumed": 0, "tests_run": 0}, "events": 22}
+FAILED
+tests/integration/test_incremental.py::test_tc_13_4_3_a_changed_producer_recomputes_only_its_pair 
+[_new] ingest 10.2 s, analysis 348.3 s, counters {"analysis_id": "an_0441ae608e25f57586fd523f", "pairs": {"reused": 3, "recomputed": 2, "unfinished": 0, "rejected_objects": 0}, "worlds": {"reused": 11, "built": 0}, "ddmin": {"tests_resumed": 0, "tests_run": 0}, "events": 27}
+FAILED
+tests/integration/test_incremental.py::test_tc_13_4_4_a_damaged_stored_result_is_rejected_and_computed_again 
+[_damaged] ingest 0.0 s, analysis 142.2 s, counters {"analysis_id": "an_a71e842b82822d02cdcbfbf4", "pairs": {"reused": 3, "recomputed": 2, "unfinished": 0, "rejected_objects": 1}, "worlds": {"reused": 11, "built": 0}, "ddmin": {"tests_resumed": 0, "tests_run": 0}, "events": 25}
+FAILED
+tests/integration/test_incremental.py::test_tc_13_4_5_no_reused_result_is_inside_a_witness PASSED
+
+================================== FAILURES ===================================
+____ test_tc_13_4_2_an_unchanged_rerun_reuses_everything_and_runs_nothing _____
+
+env = {'conn': <sqlite3.Connection object at 0x000001A1E06509A0>, 'sbx': <faultline.sandbox.client.SandboxClient object at 0...bec5bf4b9d19ec1c135a6334c1162f5933b78482d', 'store': <faultline.storage.store.Store object at 0x000001A1E03DD940>, ...}
+cold = {'apid': 'ap_01M5FRFWQDHT687TWEM7227E31', 'res': LiveResult(analysis_id='an_9999570e215d72e553ec813d', cells=[{'cell_i...ailed': [], 'cells': 6, 'cells_by_state': {'ANALYZED': 5, 'NO_DRIFT': 1}}), 'ingest_s': 77.0, 'analysis_s': 486.1, ...}
+rerun = {'apid': 'ap_01M5FRFWQDHT687TWEM7227E31', 'res': LiveResult(analysis_id='an_ded926a54cd02be6ff6f6583', cells=[{'cell_i..._failed': [], 'cells': 6, 'cells_by_state': {'ANALYZED': 5, 'NO_DRIFT': 1}}), 'ingest_s': 0.0, 'analysis_s': 87.1, ...}
+
+    def test_tc_13_4_2_an_unchanged_rerun_reuses_everything_and_runs_nothing(env, cold, rerun):
+        c = rerun["counters"]
+>       assert c["pairs"] == {"reused": EXPECTED_PAIRS, "recomputed": 0, "unfinished": 0, "rejected_objects": 0}
+E       AssertionError: assert {'reused': 4,...d_objects': 0} == {'reused': 5,...d_objects': 0}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'reused': 4} != {'reused': 5}
+E         {'recomputed': 1} != {'recomputed': 0}
+E         
+E         Full diff:...
+E         
+E         ...Full output truncated (12 lines hidden), use '-vv' to show
+
+tests\integration\test_incremental.py:142: AssertionError
+_________ test_tc_13_4_3_a_changed_producer_recomputes_only_its_pair __________
+
+env = {'conn': <sqlite3.Connection object at 0x000001A1E06509A0>, 'sbx': <faultline.sandbox.client.SandboxClient object at 0...bec5bf4b9d19ec1c135a6334c1162f5933b78482d', 'store': <faultline.storage.store.Store object at 0x000001A1E03DD940>, ...}
+cold = {'apid': 'ap_01M5FRFWQDHT687TWEM7227E31', 'res': LiveResult(analysis_id='an_9999570e215d72e553ec813d', cells=[{'cell_i...ailed': [], 'cells': 6, 'cells_by_state': {'ANALYZED': 5, 'NO_DRIFT': 1}}), 'ingest_s': 77.0, 'analysis_s': 486.1, ...}
+rerun = {'apid': 'ap_01M5FRFWQDHT687TWEM7227E31', 'res': LiveResult(analysis_id='an_ded926a54cd02be6ff6f6583', cells=[{'cell_i..._failed': [], 'cells': 6, 'cells_by_state': {'ANALYZED': 5, 'NO_DRIFT': 1}}), 'ingest_s': 0.0, 'analysis_s': 87.1, ...}
+changed = {'apid': 'ap_01M5FS3QQ94B1QF25RJXDPQ6AQ', 'res': LiveResult(analysis_id='an_0441ae608e25f57586fd523f', cells=[{'cell_i...ailed': [], 'cells': 6, 'cells_by_state': {'ANALYZED': 5, 'NO_DRIFT': 1}}), 'ingest_s': 10.2, 'analysis_s': 348.3, ...}
+
+    def test_tc_13_4_3_a_changed_producer_recomputes_only_its_pair(env, cold, rerun, changed):
+        c = changed["counters"]
+>       assert c["pairs"] == {"reused": EXPECTED_PAIRS - 1, "recomputed": 1, "unfinished": 0, "rejected_objects": 0}
+E       AssertionError: assert {'reused': 3,...d_objects': 0} == {'reused': 4,...d_objects': 0}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'reused': 3} != {'reused': 4}
+E         {'recomputed': 2} != {'recomputed': 1}
+E         
+E         Full diff:...
+E         
+E         ...Full output truncated (12 lines hidden), use '-vv' to show
+
+tests\integration\test_incremental.py:156: AssertionError
+____ test_tc_13_4_4_a_damaged_stored_result_is_rejected_and_computed_again ____
+
+env = {'conn': <sqlite3.Connection object at 0x000001A1E06509A0>, 'sbx': <faultline.sandbox.client.SandboxClient object at 0...bec5bf4b9d19ec1c135a6334c1162f5933b78482d', 'store': <faultline.storage.store.Store object at 0x000001A1E03DD940>, ...}
+changed = {'apid': 'ap_01M5FS3QQ94B1QF25RJXDPQ6AQ', 'res': LiveResult(analysis_id='an_0441ae608e25f57586fd523f', cells=[{'cell_i...ailed': [], 'cells': 6, 'cells_by_state': {'ANALYZED': 5, 'NO_DRIFT': 1}}), 'ingest_s': 10.2, 'analysis_s': 348.3, ...}
+damaged = {'apid': 'ap_01M5FS3QQ94B1QF25RJXDPQ6AQ', 'res': LiveResult(analysis_id='an_a71e842b82822d02cdcbfbf4', cells=[{'cell_i...failed': [], 'cells': 6, 'cells_by_state': {'ANALYZED': 5, 'NO_DRIFT': 1}}), 'ingest_s': 0.0, 'analysis_s': 142.2, ...}
+
+    def test_tc_13_4_4_a_damaged_stored_result_is_rejected_and_computed_again(env, changed, damaged):
+        c = damaged["counters"]
+>       assert c["pairs"]["rejected_objects"] == 1 and c["pairs"]["recomputed"] == 1 and c["pairs"]["reused"] == EXPECTED_PAIRS - 1, c
+E       AssertionError: {'analysis_id': 'an_a71e842b82822d02cdcbfbf4', 'pairs': {'reused': 3, 'recomputed': 2, 'unfinished': 0, 'rejected_objects': 1}, 'worlds': {'reused': 11, 'built': 0}, 'ddmin': {'tests_resumed': 0, 'tests_run': 0}, ...}
+E       assert (1 == 1 and 2 == 1)
+
+tests\integration\test_incremental.py:168: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_incremental.py::test_tc_13_4_2_an_unchanged_rerun_reuses_everything_and_runs_nothing
+FAILED tests/integration/test_incremental.py::test_tc_13_4_3_a_changed_producer_recomputes_only_its_pair
+FAILED tests/integration/test_incremental.py::test_tc_13_4_4_a_damaged_stored_result_is_rejected_and_computed_again
+================== 3 failed, 2 passed in 1152.22s (0:19:12) ===================

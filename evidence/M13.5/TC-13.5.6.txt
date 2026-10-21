@@ -1,0 +1,5 @@
+# TC-13.5.6
+# command: pytest tests/unit/test_ddmin_resume.py -k "two_resumers or unique_key" -v
+tests/unit/test_ddmin_resume.py::test_two_resumers_cannot_both_advance_the_chain PASSED
+tests/unit/test_ddmin_resume.py::test_the_unique_key_lets_only_one_checkpoint_take_a_position PASSED
+====================== 2 passed, 23 deselected in 10.56s ======================

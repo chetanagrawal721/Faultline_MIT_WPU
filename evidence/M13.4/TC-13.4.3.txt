@@ -1,0 +1,5 @@
+# TC-13.4.3
+# command: pytest tests/integration/test_incremental.py -v -s (five pairs on real executions; this test's lines)
+tests/integration/test_incremental.py::test_tc_13_4_3_a_changed_producer_recomputes_only_its_pair 
+[_new] ingest 11.5 s, analysis 351.5 s, counters {"analysis_id": "an_87e67efe83b0e899365fa348", "pairs": {"reused": 4, "recomputed": 1, "unfinished": 0, "rejected_objects": 0}, "worlds": {"reused": 9, "built": 0}, "ddmin": {"tests_resumed": 0, "tests_run": 0}, "events": 24}
+cold analysis 680.0 s, reused rerun 47.9 s

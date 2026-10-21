@@ -1,0 +1,6 @@
+# TC-13.5.2
+# command: pytest tests/unit/test_ddmin_resume.py -k "stopping_after_any_test" -v
+tests/unit/test_ddmin_resume.py::test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing[single] PASSED
+tests/unit/test_ddmin_resume.py::test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing[triple] PASSED
+tests/unit/test_ddmin_resume.py::test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing[non_monotonic] PASSED
+====================== 3 passed, 22 deselected in 11.88s ======================

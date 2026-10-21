@@ -1,0 +1,11 @@
+# TC-13.5.1
+# command: pytest tests/unit/test_ddmin_resume.py -k "results_of_the_original or random_oracles or state_reported" -v
+tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[single] PASSED
+tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[pair] PASSED
+tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[triple] PASSED
+tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[independent] PASSED
+tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[non_monotonic] PASSED
+tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[none] PASSED
+tests/unit/test_ddmin_resume.py::test_random_oracles_give_the_original_results PASSED
+tests/unit/test_ddmin_resume.py::test_the_state_reported_before_each_test_names_the_phase_and_granularity PASSED
+====================== 8 passed, 17 deselected in 47.48s ======================

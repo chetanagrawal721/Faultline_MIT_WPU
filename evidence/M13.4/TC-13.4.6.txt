@@ -1,0 +1,10 @@
+# TC-13.4.6 the UI shows the counters and the per-pair reasons
+# method: the built interface (frontend/dist, `npm run build`) served by the API over the real database of the five-pair run
+#         (the last analysis, after the damaged result), opened in the browser pane; text read from the page's own elements
+#         [data-testid="reuse-counters"] and [data-testid^="reuse-pair-"]. The panel's numbers equal the event log's (tests/integration/test_incremental.py).
+counters: Pairs reused 4 | Pairs recomputed 1 | Stored objects rejected 1 | Worlds reused / built 9 / 0
+REUSED     pk_7d307abde0d  Every input of the pair key is unchanged, so the stored result was used and no oracle ran.
+REUSED     pk_21809487d07  Every input of the pair key is unchanged, so the stored result was used and no oracle ran.
+REUSED     pk_4552662e66d  Every input of the pair key is unchanged, so the stored result was used and no oracle ran.
+RECOMPUTED pk_2d2b13e0b47  A stored object was damaged or missing, so it was not used and the pair was computed again.
+REUSED     pk_d314d1f7612  Every input of the pair key is unchanged, so the stored result was used and no oracle ran.
