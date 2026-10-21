@@ -1,0 +1,19 @@
+# Expected result of analysing bisect-svc against acme-bisect, written before the first run.
+id: BISECT
+title: Eight differing packages, one breaks the import (minimisation recovery demonstration)
+producer: acme-bisect
+consumer: bisect-svc
+delta: ['certifi', 'charset-normalizer', 'click', 'idna', 'itsdangerous', 'packaging', 'pyparsing', 'werkzeug']
+expect:
+  verdict: BREAK_WITNESSED
+  entry_point: acme_bisect.web
+  signature: {exc_type: ImportError, message_contains: url_quote}
+  attribution:
+    minimal_set: [werkzeug]
+    status: COMPLETE
+    sidedness: two_sided
+  search:
+    singleton_tests: 8              # each of the eight packages alone
+    full_set_tests: 1               # the whole delta must reproduce it too
+    necessity_tests: 1              # the consumer world with the cause reverted must not fail
+    total_sandbox_tests: 10

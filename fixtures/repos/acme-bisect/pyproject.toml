@@ -1,0 +1,13 @@
+[project]
+name = "acme-bisect"
+version = "1.0.0"
+description = "A small library with several dependencies, for the Faultline minimisation recovery demonstration"
+requires-python = ">=3.9"
+dependencies = ["flask>=2.2", "idna", "pyparsing", "packaging", "certifi", "charset-normalizer"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/acme_bisect"]
