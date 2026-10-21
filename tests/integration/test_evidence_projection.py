@@ -60,11 +60,14 @@ def test_every_evidence_row_has_an_object_and_a_pointer(analysed):
         assert status.value == "OK", oid
         by_kind[st.get(oid).kind] = by_kind.get(st.get(oid).kind, 0) + 1
     rows = {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in ("oracle_run", "witness", "finding", "attribution")}
+    # kinds added by later milestones that have no SQL rows of their own: the consumer's import sites (M13.8) and the minimisation's checkpoints and tests (M13.5)
+    later = {k: by_kind.pop(k) for k in ("consumer_imports", "ddmin_checkpoint", "ddmin_test") if k in by_kind}
+    assert later.get("consumer_imports") == 1 and later.get("ddmin_checkpoint", 0) >= 1 and later.get("ddmin_test", 0) >= 1, later
     # one pair record (M13.3) for the one analysed cell; it has no SQL rows of its own
     assert by_kind == {"oracle_result": rows["oracle_run"], "witness": rows["witness"], "verdict": rows["finding"], "attribution": rows["attribution"], "pair_record": 1}
     assert rows["oracle_run"] == 12 and rows["witness"] == 2
     slots = {r["slot"] for r in conn.execute("SELECT slot FROM pointer")}
-    assert len(slots) == rows["witness"] + rows["finding"] + rows["attribution"]
+    assert len({s for s in slots if not s.startswith(("ddmin_test:", "imports:"))}) == rows["witness"] + rows["finding"] + rows["attribution"]
     moved = conn.execute("SELECT COUNT(*) FROM evidence_event WHERE kind='POINTER_MOVED'").fetchone()[0]
     assert moved >= len(slots)
 

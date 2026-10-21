@@ -155,7 +155,7 @@
     "[\"acme_models\", true, null, null]",
     "[\"acme_models.web\", false, \"ImportError\", \"cannot import name 'url_quote' from 'werkzeug.urls' (/opt/world/lib/python3.12/site-packages/werkzeug/urls.py)\"]"
    ],
-   "env_fingerprint": "6ca3209360f255ea",
+   "env_fingerprint": "130878fe8d7bb614",
    "exit_code": 0,
    "failure_class": "ARTIFACT_FAILURE",
    "oracle": "o_import",
@@ -168,7 +168,7 @@
     "[\"acme_models\", true, null, null]",
     "[\"acme_models.web\", true, null, null]"
    ],
-   "env_fingerprint": "46d4e5f139b134d8",
+   "env_fingerprint": "997c48afe6ae7a95",
    "exit_code": 0,
    "failure_class": "NONE",
    "oracle": "o_import",
@@ -182,7 +182,7 @@
     "[\"test_customer.py::test_round_trip\", true, null, null]",
     "[\"test_web.py::test_show_customer\", false, \"ImportError\", \"cannot import name 'url_quote' from 'werkzeug.urls' (/opt/world/lib/python3.12/site-packages/werkzeug/urls.py)\"]"
    ],
-   "env_fingerprint": "6ca3209360f255ea",
+   "env_fingerprint": "130878fe8d7bb614",
    "exit_code": 0,
    "failure_class": "ARTIFACT_FAILURE",
    "oracle": "o_tests",
@@ -196,7 +196,7 @@
     "[\"test_customer.py::test_round_trip\", true, null, null]",
     "[\"test_web.py::test_show_customer\", true, null, null]"
    ],
-   "env_fingerprint": "46d4e5f139b134d8",
+   "env_fingerprint": "997c48afe6ae7a95",
    "exit_code": 0,
    "failure_class": "NONE",
    "oracle": "o_tests",

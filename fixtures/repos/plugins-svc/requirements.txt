@@ -1,0 +1,2 @@
+pydantic==2.7.4
+acme-plugins @ git+https://github.com/faultline-demo/acme-plugins@main

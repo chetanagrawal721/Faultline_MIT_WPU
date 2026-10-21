@@ -423,3 +423,13 @@ def test_a_check_after_the_search_keeps_the_chain_marked_finished(conn):
     assert again.run_search().tests_run == 0
     out2, detail2 = again.check("necessity", frozenset({"p07"}), lambda s: (_ for _ in ()).throw(AssertionError("must not run again")))
     assert out2 is Outcome.PASS and detail2["world_hash"] == "w_1"
+
+
+def test_with_the_store_off_a_test_that_returns_its_detail_gives_the_same_minimal_set(conn, monkeypatch):
+    """The attribution's tests return (outcome, detail). With the store off the plain search must unpack them, or no cause is found."""
+    def culprit(subset: frozenset[str]):
+        return (Outcome.FAIL if "p03" in subset else Outcome.PASS), {"world": "w"}
+    on = ResumableDdmin(conn, minimisation=mid("detail-on"), items=ITEMS, test=culprit).run_search()
+    monkeypatch.setenv("FAULTLINE_EVIDENCE_STORE", "off")
+    off = ResumableDdmin(conn, minimisation=mid("detail-off"), items=ITEMS, test=culprit).run_search()
+    assert on.result.minimal == off.result.minimal == ("p03",) and on.status == off.status == "COMPLETE"

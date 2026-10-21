@@ -1422,3 +1422,22 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 
 ### 2026-10-21 20:16 UTC | NOTE | - | by Chetan Agrawal
 - Information severity: severity mapping and the static verdict rules (verdicts/engine.py rules 7-8, usage/exposure.py, diff/) exist and are unit-tested, but live analysis never builds a usage index or API delta (live.py passes no exposures), so no live finding is EXPOSED or POTENTIAL. Wiring it changes live verdict generation; not done, reported as a blocker.
+
+### 2026-10-21 22:29 UTC | TC PASS | TC-13.8.5 | by Chetan Agrawal
+- Four severities from real analyses
+- evidence: evidence/M13.8/TC-13.8.5.txt
+
+### 2026-10-21 22:29 UTC | TC PASS | TC-13.8.6 | by Chetan Agrawal
+- Severities in VS Code
+- evidence: evidence/M13.8/TC-13.8.6.txt
+
+### 2026-10-21 22:29 UTC | NOTE | - | by Chetan Agrawal
+- Information severity: live analysis now reads static evidence (analysis/static.py, wheel_surface.py harness, image rebuilt) only when execution left a cell INCONCLUSIVE, and may only raise it to EXPOSED or POTENTIAL (pair key input static_rule=static-exposure/1). billing-svc/H is now EXPOSED (pydantic.BaseSettings removed in pydantic 2) instead of INCONCLUSIVE; the Hint and Information cases come from new fixtures drivers-svc and plugins-svc. Also fixed: with the evidence store off, attribution returned no cause (tests return (outcome, detail)); golden env_fingerprint re-recorded after the image rebuild (only fingerprints differ).
+
+### 2026-10-21 22:29 UTC | DONE | M13.8 | by Chetan Agrawal
+- Diagnostic locations, severities and freshness
+- test cases passed: 6/6
+
+### 2026-10-21 22:29 UTC | GATE DECLARED | Gate T4 | by Chetan Agrawal
+- Twist: LSP diagnostics
+- no waivers

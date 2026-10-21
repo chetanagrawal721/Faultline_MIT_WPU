@@ -256,6 +256,7 @@ def cmd_vscode_test(args: list[str]) -> int:
         return args[args.index(flag) + 1] if flag in args else default
     folder, file, line = (args[0] if args and not args[0].startswith("--") else None), opt("--open"), opt("--line")
     steps = opt("--steps")
+    (ROOT / "editors" / "vscode" / ".vscode-test" / "user-data" / "User" / "settings.json").unlink(missing_ok=True)      # a set_api step of an earlier session must not outlive it
     if not (folder and ((file and line) or steps)):
         print(cmd_vscode_test.__doc__, file=sys.stderr)
         return 2

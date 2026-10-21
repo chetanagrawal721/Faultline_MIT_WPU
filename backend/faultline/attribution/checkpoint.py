@@ -215,7 +215,10 @@ class ResumableDdmin:
 
     def run_search(self) -> ResumeResult:
         if self.store is None:                                             # with the store off nothing can be saved: the plain search
-            plain = ddmin(self.items, self.test, self.budget)
+            def outcome_only(subset: frozenset[str]) -> Outcome:               # a test may return (outcome, detail); the plain search needs the outcome alone
+                got = self.test(subset)
+                return got[0] if isinstance(got, tuple) else got
+            plain = ddmin(self.items, outcome_only, self.budget)
             return ResumeResult(plain, self.min_id, plain.tests, 0, 0, None, plain.status)
         from_seq = self._load()
         self._close_dangling()

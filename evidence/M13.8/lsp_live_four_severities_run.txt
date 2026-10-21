@@ -1,0 +1,14 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chetan\Hackethopia\.venv\Scripts\python.exe
+rootdir: C:\Users\Chetan\Hackethopia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 3 items
+
+tests/integration/test_lsp_live.py::test_tc_13_8_5_four_live_severities_on_the_stored_import_lines 
+LIVE_SEVERITIES {"billing_e": {"code": "fnd_01M5G8GEFZ2F1E8RRXQBYQ7S7M", "file": "billing-svc/E/app/main.py", "line": 2, "repository": "faultline-demo/billing-svc-e", "severity": "Warning", "words": "SILENT DIVERGENCE WITNESSED"}, "billing_h": {"code": "fnd_01M5G8KEWZXS91CB3G85N2H3Q1", "file": "billing-svc/H/app/main.py", "line": 2, "repository": "faultline-demo/billing-svc-h", "severity": "Warning", "words": "EXPOSED"}, "drivers": {"code": "fnd_01M5G8HH0HDPY4JN869961YWES", "file": "drivers-svc/app/main.py", "line": 2, "repository": "faultline-demo/drivers-svc", "severity": "Hint", "words": "INCONCLUSIVE"}, "notify": {"code": "fnd_01M5G8NE5P30JZ634WXQ9ZXZZ5", "file": "notify-svc/D/app/main.py", "line": 2, "repository": "faultline-demo/notify-svc", "severity": "Error", "words": "BREAK WITNESSED"}, "plugins": {"code": "fnd_01M5G8PNVJAJMPESBABHA8G8QS", "file": "plugins-svc/app/main.py", "line": 2, "repository": "faultline-demo/plugins-svc", "severity": "Information", "words": "POTENTIAL"}}
+PASSED
+tests/integration/test_lsp_live.py::test_the_stored_import_sites_match_the_files_that_were_analysed PASSED
+tests/integration/test_lsp_live.py::test_static_findings_hold_no_witness_and_authorise_no_fix PASSED
+
+======================== 3 passed in 362.09s (0:06:02) ========================
