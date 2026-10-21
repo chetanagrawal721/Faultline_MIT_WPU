@@ -1,0 +1,7 @@
+# TC-13.0.3 ADR 0008 is complete
+# command: pytest tests/unit/test_twist_audit.py -k adr -v
+collecting ... collected 4 items / 3 deselected / 1 selected
+
+tests/unit/test_twist_audit.py::test_adr_has_the_frozen_decisions PASSED [100%]
+
+======================= 1 passed, 3 deselected in 0.12s =======================

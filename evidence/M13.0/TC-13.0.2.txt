@@ -1,0 +1,38 @@
+# TC-13.0.2 Phase 13 is registered
+# command: python tools/track.py status (gates and Phase 13 lines)
+Milestones 49/76 done | test cases 150/244 passed | gates declared: A, B, C, D
+Gate A (Runnable skeleton): 6/6  [DECLARED]
+Gate B (Fixture-backed proof): 9/9  [DECLARED]
+Gate C (First live vertical slice): 15/15  [DECLARED]
+  [x] M4.G   P0  3/3 Gate C acceptance: first live finding
+Gate D (PS07-compliant MVP (every canonical MUST)): 11/11  [DECLARED]
+  [x] M3.6   P1  4/4 npm manifests and lockfile worlds (inventory, MUST for Gate D)
+  [x] M3.7   P2  4/4 Maven POM inventory (MUST for Gate D)
+  [x] M4.6   P1  3/3 Targeted call-site extractor and O-bind (PC-1, MUST for Gate D)
+  [x] M5.7   P0  3/3 Conformance report and Gate D decision
+Gate E (Release-hardened deployment): 3/5
+Gate S (Showtime: demo and submission readiness): 1/5
+Gate X (Expansion (each item independent)): 4/12
+Gate T1 (Twist: storage): 0/3
+  [~] M13.0  P0  0/4 Audit, ADR 0008 and tracker setup
+  [ ] M13.1  P0  0/5 Content-addressed object store
+  [ ] M13.2  P0  0/5 Event log, SQL projections and rebuild
+Gate T2 (Twist: incremental reuse): 0/2
+  [ ] M13.3  P0  0/4 Stable pair key and pair records
+  [ ] M13.4  P0  0/6 Incremental analysis and counters
+Gate T3 (Twist: DDMin recovery): 0/2
+  [ ] M13.5  P0  0/7 Resumable DDMin core
+  [ ] M13.6  P0  0/6 Recovery in the pipeline and the eight-candidate fixture
+Gate T4 (Twist: LSP diagnostics): 0/2
+  [ ] M13.7  P0  0/6 Stdio LSP server and VS Code vertical slice
+  [ ] M13.8  P0  0/6 Diagnostic locations, severities and freshness
+Gate T5 (Twist: fixes and cancellation): 0/2
+  [ ] M13.9  P0  0/5 Verified code action as a WorkspaceEdit
+  [ ] M13.10 P0  0/5 Cancellation
+Gate T6 (Twist: regression and jury demonstrations): 0/2
+  [ ] M13.11 P0  0/5 SQL backward support and regression
+  [ ] M13.12 P0  0/5 Jury demonstrations, instructions and final report
+
+tests/unit/test_twist_audit.py::test_phase13_is_registered PASSED        [100%]
+
+======================= 1 passed, 3 deselected in 1.16s =======================

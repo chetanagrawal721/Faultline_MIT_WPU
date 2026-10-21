@@ -1,0 +1,10 @@
+# TC-13.0.1 audit record is complete
+# command: pytest tests/unit/test_twist_audit.py -k 'baseline_row or writer_is_listed' -v
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 4 items / 2 deselected / 2 selected
+
+tests/unit/test_twist_audit.py::test_every_baseline_row_has_a_result PASSED [ 50%]
+tests/unit/test_twist_audit.py::test_every_result_table_writer_is_listed PASSED [100%]
+
+======================= 2 passed, 2 deselected in 0.46s =======================
