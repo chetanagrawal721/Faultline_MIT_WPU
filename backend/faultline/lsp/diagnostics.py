@@ -2,21 +2,26 @@
 from lsprotocol import types
 
 from .client_api import FindingInfo
-from .locations import import_location
+from .locations import place
 from .severity import WORDS, severity_of
 
+STALE_NOTE = " (this file has changed since the analysis)"
 
-def to_diagnostics(text: str, findings: list[FindingInfo]) -> list[types.Diagnostic]:
+
+def to_diagnostics(text: str, rel_path: str | None, findings: list[FindingInfo]) -> list[types.Diagnostic]:
     out: list[types.Diagnostic] = []
     for f in findings:
         sev = severity_of(f.verdict)
         if sev is None:
             continue
-        loc = import_location(text, f.modules)
-        if loc is None:                                                      # no line derived from this file: no diagnostic, and no invented line
+        placed = place(text, rel_path, f)
+        if placed is None:                                                   # no line derived from data: no diagnostic, and no invented line
             continue
+        loc = placed.loc
+        stale = placed.fresh is False
         out.append(types.Diagnostic(
             range=types.Range(start=types.Position(line=loc.line, character=loc.start), end=types.Position(line=loc.line, character=loc.end)),
-            message=f"{WORDS[f.verdict]}: {f.headline}", severity=sev, source="faultline", code=f.finding_id,
-            data={"finding_id": f.finding_id, "verdict": f.verdict, "analysis_id": f.analysis_id, "cell_id": f.cell_id, "location": loc.source}))
+            message=f"{WORDS[f.verdict]}: {f.headline}{STALE_NOTE if stale else ''}", severity=sev, source="faultline", code=f.finding_id,
+            data={"finding_id": f.finding_id, "verdict": f.verdict, "analysis_id": f.analysis_id, "cell_id": f.cell_id, "location": loc.source,
+                  "role": f.role, "stale": stale}))
     return out

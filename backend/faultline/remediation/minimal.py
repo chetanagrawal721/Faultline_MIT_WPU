@@ -13,7 +13,7 @@ from pathlib import Path
 
 from ..analysis.fixture import FixtureCell
 from ..core.enums import WorldKind
-from ..core.hashing import env_profile_id, object_hash
+from ..core.hashing import content_hash, env_profile_id, object_hash
 from ..evidence import projections
 from ..ingestion.clone import load_inventory
 from ..oracles.o_import import ORACLE, ORACLE_VERSION, plan_modules, run_o_import
@@ -42,6 +42,9 @@ class Remediation:
     new_world_hash: str | None = None
     plan_id: str | None = None
     notes: list[str] = field(default_factory=list)
+    target_path: str | None = None             # the consumer's requirements file the diff applies to (relative to its repository root)
+    target_sha256: str | None = None           # that file's hash at the analysed commit: the editor offers the fix only while the file still has it
+    consumer: str | None = None                # owner/name of the consumer repository
 
 
 def _major(version: str) -> int | None:
@@ -99,6 +102,10 @@ def remediate(conn: sqlite3.Connection, sbx, image: str, store: Store, finding_i
     req_file = next((p for p in proj.manifests.get("requirements", []) if not p.endswith("lock.txt")), None) or (proj.manifests.get("requirements") or ["requirements.txt"])[0]
     diff = diff_for(req_file, fs.read_text(req_file) if fs.exists(req_file) else "", constraint)
     out = Remediation("SUGGESTED", "", constraint, diff, witnesses_before=before)
+    out.target_path = req_file
+    out.target_sha256 = content_hash((snap_dir / req_file).read_bytes()) if fs.exists(req_file) else content_hash(b"")
+    owner = conn.execute("SELECT r.owner, r.name FROM project p JOIN snapshot s ON s.id=p.snapshot_id JOIN repository r ON r.id=s.repository_id WHERE p.id=?", (target,)).fetchone()
+    out.consumer = f"{owner['owner']}/{owner['name']}"
 
     # 1. re-resolve with the native resolver (uv), the artifact itself excluded (it is mounted source, not installed)
     res = _from_uv(sbx, image, proj, fs, cp["committed_at"], {"project": proj.rel_path, "purpose": "remediation"}, drop={prod["published_name"]},
@@ -182,7 +189,9 @@ def _save(conn: sqlite3.Connection, store: Store, finding_id: str, r: Remediatio
            "gates_json": json.dumps({"G1_resolves": True, "G2_witness_gone": not r.witnesses_after, "G3_no_new_witness": True, "G4": None}),
            "label": "VERIFIED" if r.label == "VERIFIED" else "SUGGESTED", "rank": 1, "diff_path": str(diff_path),
            "world_hashes_json": json.dumps([world_hash] if world_hash else [])}
-    projections.write(conn, "fix_plan", {"finding_id": finding_id, "label": row["label"], "row": row, "diff": r.diff}, slot=f"fix_plan:{pid}")
+    projections.write(conn, "fix_plan", {"finding_id": finding_id, "label": row["label"], "row": row, "diff": r.diff, "constraint": r.constraint, "kind": "append_requirement",
+                                         "target_path": r.target_path, "target_sha256": r.target_sha256, "consumer": r.consumer, "reason": r.reason,
+                                         "fresh_runs": r.fresh_runs, "witnesses_after": list(r.witnesses_after)}, slot=f"fix_plan:{pid}")
     r.plan_id = pid
     return r
 

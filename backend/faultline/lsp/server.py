@@ -3,32 +3,27 @@
 A thin client of the REST API: it reads findings, publishes them as diagnostics on the lines of the consumer's source files, and holds no
 analysis logic. Nothing is ever executed. stdout carries protocol frames only (pygls writes to the binary stdout buffer); logs go to stderr.
 
-Initialization options: {"api": "http://127.0.0.1:8000", "consumer": "owner/name"}. Without "consumer" the repository is read from the
-workspace's `.git/config` (the origin URL).
+Initialization options: {"api": "http://127.0.0.1:8000", "consumer": "owner/name"} ("repository" is the same). Without it the repository is read from the
+workspace's `.git/config` (the origin URL). The repository may be a consumer of a pair (the diagnostic is on its import line) or the producer
+(the diagnostic is on a call site checked by O-bind).
 """
 import asyncio
 import logging
 import os
 import re
 from pathlib import Path
-from urllib.parse import unquote, urlparse
-from urllib.request import url2pathname
 
 from lsprotocol import types
 from pygls.lsp.server import LanguageServer
 
 from .client_api import Api, ApiUnavailable, FindingInfo
+from .code_actions import build_action, fix_from
 from .diagnostics import to_diagnostics
+from .locations import path_of, relative_path
 from .severity import UnknownVerdict
 
 log = logging.getLogger("faultline.lsp")
 DEFAULT_API = "http://127.0.0.1:8000"
-
-
-def path_of(uri: str) -> Path:
-    """A file URI as a path (Windows drive letters, percent-encoding and UNC forms included)."""
-    u = urlparse(uri)
-    return Path(url2pathname(unquote(u.path))) if not u.netloc else Path(f"//{u.netloc}{unquote(u.path)}")
 
 
 def repository_of(root: Path) -> str | None:
@@ -47,7 +42,8 @@ class FaultlineServer(LanguageServer):
     def __init__(self) -> None:
         super().__init__("faultline", "0.1.0")
         self.api: Api = Api(os.environ.get("FAULTLINE_API", DEFAULT_API))
-        self.consumer: str | None = None
+        self.consumer: str | None = None            # the workspace repository, owner/name
+        self.roots: list[Path] = []
         self.findings: list[FindingInfo] | None = None
         self.available: bool | None = None
         self.shut_down = False                       # the exit code is 0 only after a shutdown request (LSP 3.17, lifecycle)
@@ -78,11 +74,14 @@ class FaultlineServer(LanguageServer):
         doc = self.workspace.get_text_document(uri)
         if not doc.path or not doc.path.endswith(".py"):
             return
+        rel = relative_path(uri, self.roots)
+        if rel is None:                                                      # a file outside the workspace is not part of the analysed repository
+            return
         found = (await self.refresh_findings()) if refresh or self.findings is None else self.findings
         if found is None:                                                    # the API is down: publish nothing, never an empty list
             return
         try:
-            diagnostics = to_diagnostics(doc.source, found)
+            diagnostics = to_diagnostics(doc.source, rel, found)
         except UnknownVerdict as e:
             log.error("%s", e)
             self.status("unavailable", str(e))
@@ -98,11 +97,11 @@ def build_server() -> FaultlineServer:
         opts = params.initialization_options or {}
         if opts.get("api"):
             ls.api = Api(str(opts["api"]))
-        ls.consumer = opts.get("consumer")
+        ls.consumer = opts.get("repository") or opts.get("consumer")
+        ls.roots = [path_of(r) for r in ([w.uri for w in (params.workspace_folders or [])] or ([params.root_uri] if params.root_uri else []))]
         if not ls.consumer:
-            roots = [w.uri for w in (params.workspace_folders or [])] or ([params.root_uri] if params.root_uri else [])
-            for r in roots:
-                ls.consumer = repository_of(path_of(r))
+            for r in ls.roots:
+                ls.consumer = repository_of(r)
                 if ls.consumer:
                     break
         log.info("initialize: api=%s consumer=%s", ls.api.base, ls.consumer)
@@ -110,6 +109,29 @@ def build_server() -> FaultlineServer:
     @server.feature(types.SHUTDOWN)
     def on_shutdown(ls: FaultlineServer, params: object = None) -> None:
         ls.shut_down = True
+
+    @server.feature(types.TEXT_DOCUMENT_CODE_ACTION, types.CodeActionOptions(code_action_kinds=[types.CodeActionKind.QuickFix]))
+    async def on_code_action(ls: FaultlineServer, params: types.CodeActionParams) -> list[types.CodeAction]:
+        """A verified fix for each Faultline diagnostic in the range; nothing when the fix is unverified, stale, missing or not for this repository."""
+        def open_text(uri: str):
+            if uri in ls.workspace.text_documents:
+                d = ls.workspace.text_documents[uri]
+                return d.source, d.version
+            return None
+        out: list[types.CodeAction] = []
+        for diag in params.context.diagnostics:
+            if diag.source != "faultline" or not isinstance(diag.data, dict) or not diag.data.get("finding_id"):
+                continue
+            try:
+                raw = await asyncio.to_thread(ls.api.get_optional, f"/api/findings/{diag.data['finding_id']}/fix")
+            except ApiUnavailable as e:
+                log.warning("api unavailable while looking for a fix: %s", e)
+                ls.status("unavailable", str(e))
+                return []
+            action = build_action(diag, fix_from(raw) if raw else None, ls.roots, open_text)
+            if action is not None:
+                out.append(action)
+        return out
 
     @server.feature(types.TEXT_DOCUMENT_DID_OPEN)
     async def on_open(ls: FaultlineServer, params: types.DidOpenTextDocumentParams) -> None:

@@ -8,7 +8,7 @@ from ...core.config import Settings
 from ...core.errors import NotFoundError
 from ...core.models import Job
 from ...core.scenario import load_scenario
-from ...core.views import FindingDetail, FindingSummary, ScenarioConsumer, ScenarioInfo
+from ...core.views import FindingDetail, FindingSummary, FixView, ScenarioConsumer, ScenarioInfo
 from ...storage import findings as finding_store
 from ...storage import jobs
 from ...storage.store import Store
@@ -51,6 +51,22 @@ def run_scenario(scenario_id: str, conn=Depends(get_conn)) -> Job:
 def list_findings(verdict: str | None = None, mode: str | None = None, conn=Depends(fresh_conn)) -> list[FindingSummary]:
     """All findings, newest first. Optional filters: ?verdict=BREAK_WITNESSED&mode=LIVE."""
     return [f for f in finding_store.list_findings(conn) if (not verdict or f.verdict == verdict) and (not mode or f.mode == mode)]
+
+
+@router.get("/findings/{finding_id}/fix", response_model=FixView)
+def get_fix(finding_id: str, conn=Depends(fresh_conn)) -> FixView:
+    """The fix stored for a finding by the remediation (the most recent one, VERIFIED first); 404 when none exists."""
+    from ...evidence.runtime import store_for
+    st = store_for(conn)
+    rows = conn.execute("SELECT * FROM remediation_plan WHERE finding_id=? ORDER BY CASE label WHEN 'VERIFIED' THEN 0 ELSE 1 END, rank, id", (finding_id,)).fetchall()
+    for r in rows:
+        p = conn.execute("SELECT object_id FROM pointer WHERE slot=?", (f"fix_plan:{r['id']}",)).fetchone()
+        got = st.get(p["object_id"]) if st is not None and p is not None else None
+        if got is not None and got.ok and got.payload.get("target_path"):
+            d = got.payload
+            return FixView(finding_id=finding_id, label=r["label"], constraint=d["constraint"], consumer=d.get("consumer"), target_path=d["target_path"],
+                           target_sha256=d.get("target_sha256"), diff=d.get("diff") or "", reason=d.get("reason"), fresh_runs=d.get("fresh_runs") or 0)
+    raise NotFoundError(f"no stored fix for finding {finding_id}")
 
 
 @router.get("/findings/{finding_id}", response_model=FindingDetail)
