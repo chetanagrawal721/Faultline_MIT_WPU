@@ -1,0 +1,275 @@
+{
+ "attributions": [
+  {
+   "attempts": [
+    {
+     "direction": "search",
+     "note": "entry passed",
+     "outcome": "PASS",
+     "subset": [
+      "itsdangerous"
+     ]
+    },
+    {
+     "direction": "search",
+     "note": "witness signature reproduced exactly",
+     "outcome": "FAIL",
+     "subset": [
+      "werkzeug"
+     ]
+    },
+    {
+     "direction": "search",
+     "note": "witness signature reproduced exactly",
+     "outcome": "FAIL",
+     "subset": [
+      "itsdangerous",
+      "werkzeug"
+     ]
+    },
+    {
+     "direction": "sufficiency",
+     "note": "reference world plus the cause reproduces the failure with the exact witness signature",
+     "outcome": "FAIL",
+     "subset": [
+      "werkzeug"
+     ]
+    },
+    {
+     "direction": "necessity",
+     "note": "consumer with the cause reverted: entry passed",
+     "outcome": "PASS",
+     "subset": [
+      "werkzeug"
+     ]
+    }
+   ],
+   "forced_worlds_used": 1,
+   "minimal": [
+    "werkzeug"
+   ],
+   "notes": {
+    "alternatives": [],
+    "label": "attribution experiment (forced world)",
+    "necessity": true,
+    "notes": [
+     "search: 3 forced worlds tried over 2 differing packages; no coupled package groups were assumed",
+     "forced worlds are attribution experiments, not observed environments"
+    ],
+    "sufficiency": true
+   },
+   "runs": 4,
+   "sidedness": "two_sided",
+   "status": "COMPLETE",
+   "witness": "[\"o_import\", \"acme_models.web\"]"
+  }
+ ],
+ "finding_evidence": {
+  "ORACLE_RUN": 12,
+  "RELATIONSHIP": 1,
+  "WITNESS": 2
+ },
+ "findings": [
+  {
+   "coverage": null,
+   "headline": "Reproduced: importing `acme_models.web` fails with `ImportError: cannot import name 'url_quote' from 'werkzeug.urls' (<site>/werkzeug/urls.py)` when acme-models runs with the dependencies of faultline-demo/notify-svc. It passes with acme-models's own dependencies. 3 of 3 fresh runs on each side.",
+   "priority": 1,
+   "scope": {
+    "bind_sites": {},
+    "consumers": [
+     "faultline-demo/notify-svc"
+    ],
+    "contract": null,
+    "delta": [
+     {
+      "consumer": "2.1.2",
+      "name": "itsdangerous",
+      "reference": "2.2.0"
+     },
+     {
+      "consumer": "3.0.6",
+      "name": "werkzeug",
+      "reference": "2.2.3"
+     }
+    ],
+    "exercised": [
+     "acme_models",
+     "acme_models.web",
+     "test_customer.py::test_round_trip",
+     "test_customer.py::test_default_points",
+     "test_web.py::test_show_customer"
+    ],
+    "not_applicable": [],
+    "not_checked": [
+     "static API and usage exposure were not analysed",
+     "the artifact's own tests (O-tests) were not run unless listed as exercised",
+     "data-contract replay was not run",
+     "consumers and dependency worlds other than the ones named were not analysed"
+    ],
+    "oracle_plan": [
+     {
+      "entries": [
+       "acme_models",
+       "acme_models.web"
+      ],
+      "oracle": "o_import",
+      "reason": "",
+      "status": "RAN"
+     },
+     {
+      "entries": [
+       "test_customer.py::test_default_points",
+       "test_customer.py::test_round_trip",
+       "test_web.py::test_show_customer"
+      ],
+      "oracle": "o_tests",
+      "reason": "",
+      "status": "RAN"
+     },
+     {
+      "entries": [],
+      "oracle": "o_bind",
+      "reason": "no call site in the artifact calls into a package that differs between the worlds",
+      "status": "NOT_PLANNED"
+     },
+     {
+      "entries": [],
+      "oracle": "o_contract",
+      "reason": "pydantic does not differ between the reference world and the consumer world",
+      "status": "NOT_PLANNED"
+     }
+    ],
+    "policy": "verdict-policy/1",
+    "reasons": []
+   },
+   "scope_kind": "ARTIFACT_CELL",
+   "sub_label": null,
+   "verdict": "BREAK_WITNESSED"
+  }
+ ],
+ "remediation": [],
+ "runs": [
+  {
+   "count": 3,
+   "entries": [
+    "[\"acme_models\", true, null, null]",
+    "[\"acme_models.web\", false, \"ImportError\", \"cannot import name 'url_quote' from 'werkzeug.urls' (/opt/world/lib/python3.12/site-packages/werkzeug/urls.py)\"]"
+   ],
+   "env_fingerprint": "6ca3209360f255ea",
+   "exit_code": 0,
+   "failure_class": "ARTIFACT_FAILURE",
+   "oracle": "o_import",
+   "provenance": "FRESH_EXECUTION",
+   "side": "test"
+  },
+  {
+   "count": 3,
+   "entries": [
+    "[\"acme_models\", true, null, null]",
+    "[\"acme_models.web\", true, null, null]"
+   ],
+   "env_fingerprint": "46d4e5f139b134d8",
+   "exit_code": 0,
+   "failure_class": "NONE",
+   "oracle": "o_import",
+   "provenance": "FRESH_EXECUTION",
+   "side": "ref"
+  },
+  {
+   "count": 3,
+   "entries": [
+    "[\"test_customer.py::test_default_points\", true, null, null]",
+    "[\"test_customer.py::test_round_trip\", true, null, null]",
+    "[\"test_web.py::test_show_customer\", false, \"ImportError\", \"cannot import name 'url_quote' from 'werkzeug.urls' (/opt/world/lib/python3.12/site-packages/werkzeug/urls.py)\"]"
+   ],
+   "env_fingerprint": "6ca3209360f255ea",
+   "exit_code": 0,
+   "failure_class": "ARTIFACT_FAILURE",
+   "oracle": "o_tests",
+   "provenance": "FRESH_EXECUTION",
+   "side": "test"
+  },
+  {
+   "count": 3,
+   "entries": [
+    "[\"test_customer.py::test_default_points\", true, null, null]",
+    "[\"test_customer.py::test_round_trip\", true, null, null]",
+    "[\"test_web.py::test_show_customer\", true, null, null]"
+   ],
+   "env_fingerprint": "46d4e5f139b134d8",
+   "exit_code": 0,
+   "failure_class": "NONE",
+   "oracle": "o_tests",
+   "provenance": "FRESH_EXECUTION",
+   "side": "ref"
+  }
+ ],
+ "witnesses": [
+  {
+   "body": {
+    "entry_point": "acme_models.web",
+    "input_tier": null,
+    "oracle": "o_import",
+    "oracle_version": "1.0.0",
+    "signature": {
+     "entry_point": "acme_models.web",
+     "exc_type": "ImportError",
+     "message_norm": "cannot import name 'url_quote' from 'werkzeug.urls' (<site>/werkzeug/urls.py)",
+     "origin_module": "flask.app",
+     "origin_package": "flask"
+    },
+    "witness_class": "BREAK"
+   },
+   "class": "BREAK",
+   "divergence": "IMPORT_ERROR",
+   "entry_point": "acme_models.web",
+   "input_hash": null,
+   "input_tier": null,
+   "oracle": "o_import",
+   "oracle_version": "1.0.0",
+   "ref_pass": 3,
+   "reverifications": 0,
+   "signature": {
+    "entry_point": "acme_models.web",
+    "exc_type": "ImportError",
+    "message_norm": "cannot import name 'url_quote' from 'werkzeug.urls' (<site>/werkzeug/urls.py)",
+    "origin_module": "flask.app",
+    "origin_package": "flask"
+   },
+   "test_fail": 3
+  },
+  {
+   "body": {
+    "entry_point": "test_web.py::test_show_customer",
+    "input_tier": null,
+    "oracle": "o_tests",
+    "oracle_version": "1.0.0",
+    "signature": {
+     "entry_point": "test_web.py::test_show_customer",
+     "exc_type": "ImportError",
+     "message_norm": "cannot import name 'url_quote' from 'werkzeug.urls' (<site>/werkzeug/urls.py)",
+     "origin_module": "flask.app",
+     "origin_package": "flask"
+    },
+    "witness_class": "BREAK"
+   },
+   "class": "BREAK",
+   "divergence": "TEST_FAIL",
+   "entry_point": "test_web.py::test_show_customer",
+   "input_hash": null,
+   "input_tier": null,
+   "oracle": "o_tests",
+   "oracle_version": "1.0.0",
+   "ref_pass": 3,
+   "reverifications": 0,
+   "signature": {
+    "entry_point": "test_web.py::test_show_customer",
+    "exc_type": "ImportError",
+    "message_norm": "cannot import name 'url_quote' from 'werkzeug.urls' (<site>/werkzeug/urls.py)",
+    "origin_module": "flask.app",
+    "origin_package": "flask"
+   },
+   "test_fail": 3
+  }
+ ]
+}

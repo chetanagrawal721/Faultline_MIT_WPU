@@ -8,6 +8,7 @@
   python tools/fl.py fixtures                      run fixture scenarios (arrives with M1.1)
   python tools/fl.py e2e [SCENARIO]                end-to-end scenario run (arrives with M1.8)
   python tools/fl.py check-pins                    verify tool and dependency pins
+  python tools/fl.py rebuild [--dry-run]           recreate the evidence rows of the SQL tables from the stored objects
   python tools/fl.py gen-types                     regenerate OpenAPI JSON and TypeScript types
   python tools/fl.py check-types                   fail if the committed types are stale (the CI drift check)
   python tools/fl.py ci                            everything CI runs, in order
@@ -190,6 +191,11 @@ def cmd_up(args: list[str]) -> int:
                 shutil.rmtree(db_dir, ignore_errors=True)
 
 
+def cmd_rebuild(args: list[str]) -> int:
+    """Rebuild the evidence rows of the SQL tables from the immutable objects (--dry-run checks and rolls back)."""
+    return run([venv_python(), "-m", "faultline.evidence.cli", *args], env={"PYTHONPATH": str(ROOT / "backend")})
+
+
 def cmd_down(_: list[str]) -> int:
     f = VAR / "pids.json"
     if not f.exists():
@@ -241,7 +247,7 @@ def types_current() -> int:
 
 COMMANDS = {"up": cmd_up, "down": cmd_down, "test": cmd_test, "lint": cmd_lint, "fixtures": cmd_fixtures,
             "e2e": cmd_e2e, "check-pins": cmd_check_pins, "gen-types": cmd_gen_types,
-            "check-types": lambda a: types_current(), "images": cmd_images, "ci": cmd_ci}
+            "check-types": lambda a: types_current(), "images": cmd_images, "ci": cmd_ci, "rebuild": cmd_rebuild}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
