@@ -8,6 +8,8 @@
   python tools/fl.py fixtures                      run fixture scenarios (arrives with M1.1)
   python tools/fl.py e2e [SCENARIO]                end-to-end scenario run (arrives with M1.8)
   python tools/fl.py check-pins                    verify tool and dependency pins
+  python tools/fl.py vscode <folder>               build the VS Code extension and open the folder with it (the language server)
+  python tools/fl.py vscode-test <folder> --open FILE --line N   run a real VS Code with the extension and check the diagnostic it holds
   python tools/fl.py rebuild [--dry-run]           recreate the evidence rows of the SQL tables from the stored objects
   python tools/fl.py gen-types                     regenerate OpenAPI JSON and TypeScript types
   python tools/fl.py check-types                   fail if the committed types are stale (the CI drift check)
@@ -196,6 +198,79 @@ def cmd_rebuild(args: list[str]) -> int:
     return run([venv_python(), "-m", "faultline.evidence.cli", *args], env={"PYTHONPATH": str(ROOT / "backend")})
 
 
+def server_python() -> tuple[str, list[str]]:
+    """The interpreter VS Code starts the language server with, and what goes on its PYTHONPATH.
+
+    The virtual environment's own python.exe is a launcher that fails when VS Code starts it ("No Python at ..."), so the server is started with
+    the base interpreter the environment was made from, with the backend and the environment's site-packages on PYTHONPATH.
+    """
+    venv = ROOT / ".venv"
+    home = None
+    cfg = venv / "pyvenv.cfg"
+    if cfg.exists():
+        for line in cfg.read_text(encoding="utf-8").splitlines():
+            if line.startswith("home"):
+                home = line.split("=", 1)[1].strip()
+    for cand in ((Path(home) / "python.exe", venv / "Lib" / "site-packages"), (Path(home) / "python3", next(iter((venv / "lib").glob("python3*/site-packages")), venv / "lib"))) if home else ():
+        if cand[0].exists() and cand[1].exists():
+            return str(cand[0]), [str(ROOT / "backend"), str(cand[1])]
+    return venv_python(), [str(ROOT / "backend")]
+
+
+def cmd_vscode(args: list[str]) -> int:
+    """Build the VS Code extension and open a folder (the consumer repository) in an Extension Development Host with it loaded."""
+    folder = next((a for a in args if not a.startswith("--")), None)
+    if not folder or not Path(folder).is_dir():
+        print("usage: python tools/fl.py vscode <folder> [--open FILE] [--api URL] [--consumer owner/name] [--evidence-log FILE]", file=sys.stderr)
+        return 2
+    ext = ROOT / "editors" / "vscode"
+    if not (ext / "node_modules").exists() and run(npm("install"), cwd=ext):
+        return 1
+    if run(npm("run", "compile"), cwd=ext):
+        return 1
+    code = shutil.which("code")
+    if not code:
+        print("the `code` command is not on PATH: install VS Code and its shell command", file=sys.stderr)
+        return 1
+    py, paths = server_python()
+    env = {"FAULTLINE_PYTHON": py, "FAULTLINE_BACKEND": os.pathsep.join(paths)}
+    for flag, name in (("--api", "FAULTLINE_API"), ("--consumer", "FAULTLINE_CONSUMER")):
+        if flag in args:
+            env[name] = args[args.index(flag) + 1]
+    if "--evidence-log" in args:
+        env["FAULTLINE_EVIDENCE_LOG"] = str(Path(args[args.index("--evidence-log") + 1]).resolve())
+    opened = [str(Path(args[i + 1]).resolve()) for i, a in enumerate(args) if a == "--open"]
+    # a profile of its own: a VS Code that is already running would take the new window's environment from itself, not from this command, and
+    # the isolated instance also leaves the user's own settings and windows alone
+    profile = VAR / "vscode-profile"
+    return run([code, f"--extensionDevelopmentPath={ext}", f"--user-data-dir={profile}", "--disable-workspace-trust", "--new-window", str(Path(folder).resolve()), *opened], env=env)
+
+
+def cmd_vscode_test(args: list[str]) -> int:
+    """Run a real VS Code (a pinned build, downloaded once) with the extension and check the diagnostic it holds for a file.
+
+    python tools/fl.py vscode-test <folder> --open FILE --line N [--severity Error] [--api URL] [--consumer owner/name] [--evidence-log FILE]
+    """
+    def opt(flag: str, default: str | None = None) -> str | None:
+        return args[args.index(flag) + 1] if flag in args else default
+    folder, file, line = (args[0] if args and not args[0].startswith("--") else None), opt("--open"), opt("--line")
+    if not (folder and file and line):
+        print(cmd_vscode_test.__doc__, file=sys.stderr)
+        return 2
+    ext = ROOT / "editors" / "vscode"
+    if not (ext / "node_modules").exists() and run(npm("install"), cwd=ext):
+        return 1
+    py, paths = server_python()
+    env = {"FAULTLINE_TEST_FOLDER": str(Path(folder).resolve()), "FAULTLINE_TEST_FILE": str(Path(file).resolve()), "FAULTLINE_TEST_LINE": line,
+           "FAULTLINE_TEST_SEVERITY": opt("--severity", "Error") or "Error", "FAULTLINE_PYTHON": py, "FAULTLINE_BACKEND": os.pathsep.join(paths)}
+    for flag, name in (("--api", "FAULTLINE_API"), ("--consumer", "FAULTLINE_CONSUMER")):
+        if opt(flag):
+            env[name] = opt(flag) or ""
+    if opt("--evidence-log"):
+        env["FAULTLINE_EVIDENCE_LOG"] = str(Path(opt("--evidence-log") or "").resolve())
+    return run(npm("test"), cwd=ext, env=env)
+
+
 def cmd_down(_: list[str]) -> int:
     f = VAR / "pids.json"
     if not f.exists():
@@ -247,7 +322,7 @@ def types_current() -> int:
 
 COMMANDS = {"up": cmd_up, "down": cmd_down, "test": cmd_test, "lint": cmd_lint, "fixtures": cmd_fixtures,
             "e2e": cmd_e2e, "check-pins": cmd_check_pins, "gen-types": cmd_gen_types,
-            "check-types": lambda a: types_current(), "images": cmd_images, "ci": cmd_ci, "rebuild": cmd_rebuild}
+            "check-types": lambda a: types_current(), "images": cmd_images, "ci": cmd_ci, "rebuild": cmd_rebuild, "vscode": cmd_vscode, "vscode-test": cmd_vscode_test}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:

@@ -1,0 +1,67 @@
+{
+  "name": "faultline-vscode",
+  "displayName": "Faultline",
+  "description": "Shows Faultline findings on the lines of a consumer's Python source, through the Faultline language server.",
+  "version": "0.1.0",
+  "private": true,
+  "publisher": "faultline",
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:python"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "faultline.restart",
+        "title": "Faultline: Restart the language server"
+      }
+    ],
+    "configuration": {
+      "title": "Faultline",
+      "properties": {
+        "faultline.api": {
+          "type": "string",
+          "default": "http://127.0.0.1:8000",
+          "description": "The Faultline API the server reads findings from."
+        },
+        "faultline.consumer": {
+          "type": "string",
+          "default": "",
+          "description": "The consumer repository as owner/name. Empty: read from the workspace's git origin."
+        },
+        "faultline.pythonPath": {
+          "type": "string",
+          "default": "",
+          "description": "The Python that runs the server (the Faultline virtual environment). Empty: the FAULTLINE_PYTHON variable, then python."
+        },
+        "faultline.backendPath": {
+          "type": "string",
+          "default": "",
+          "description": "The Faultline backend folder, put on PYTHONPATH. Empty: the FAULTLINE_BACKEND variable."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -watch -p .",
+    "test": "tsc -p . && node out/test/runTest.js"
+  },
+  "dependencies": {
+    "vscode-languageclient": "9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.10",
+    "@types/vscode": "1.85.0",
+    "@vscode/test-electron": "2.4.1",
+    "typescript": "5.5.3"
+  }
+}
