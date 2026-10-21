@@ -1,0 +1,7 @@
+# TC-13.8.3
+# command: pytest tests/unit/test_lsp_locations.py -k severity or unknown_verdict or exact_verdict_words or verdict_that_is_not_shown -v
+tests/unit/test_lsp_locations.py::test_every_verdict_has_the_severity_of_the_adr PASSED
+tests/unit/test_lsp_locations.py::test_an_unknown_verdict_raises_instead_of_defaulting PASSED
+tests/unit/test_lsp_locations.py::test_messages_use_the_exact_verdict_words PASSED
+tests/unit/test_lsp_locations.py::test_a_verdict_that_is_not_shown_gives_no_diagnostic PASSED
+====================== 4 passed, 27 deselected in 0.69s =======================

@@ -1,0 +1,5 @@
+# TC-13.9.3
+# command: pytest tests/unit/test_lsp_code_actions.py -k "targets_the_requirements or leaves_the_workspace" -v
+tests/unit/test_lsp_code_actions.py::test_the_edit_targets_the_requirements_file_not_the_source_file PASSED
+tests/unit/test_lsp_code_actions.py::test_a_path_that_leaves_the_workspace_is_never_edited PASSED
+====================== 2 passed, 20 deselected in 1.97s =======================

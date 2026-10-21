@@ -1,0 +1,22 @@
+# TC-13.8.1
+# command: pytest tests/unit/test_lsp_locations.py -k import_line or stored_import_site or changed_file or removed_import or not_analysed or without_modules or producer_call_site or utf16 or forms_of_import or other_text -v
+tests/unit/test_lsp_locations.py::test_the_import_line_of_a_real_consumer_file_is_found_exactly PASSED
+tests/unit/test_lsp_locations.py::test_a_stored_import_site_is_used_when_the_file_is_as_analysed PASSED
+tests/unit/test_lsp_locations.py::test_a_changed_file_is_read_again_and_marked_stale PASSED
+tests/unit/test_lsp_locations.py::test_a_removed_import_leaves_no_diagnostic_and_no_invented_line PASSED
+tests/unit/test_lsp_locations.py::test_a_file_that_was_not_analysed_but_imports_the_module_is_shown_without_a_freshness_claim PASSED
+tests/unit/test_lsp_locations.py::test_a_finding_without_modules_or_sites_has_no_location PASSED
+tests/unit/test_lsp_locations.py::test_a_producer_call_site_is_placed_from_the_analysis PASSED
+tests/unit/test_lsp_locations.py::test_columns_are_utf16_units_for_emoji_and_cjk_before_the_import PASSED
+tests/unit/test_lsp_locations.py::test_forms_of_import_are_found[import acme_models.web as w\n-0] PASSED
+tests/unit/test_lsp_locations.py::test_forms_of_import_are_found[from acme_models import web\n-0] PASSED
+tests/unit/test_lsp_locations.py::test_forms_of_import_are_found[from acme_models.web import make_app\n-0] PASSED
+tests/unit/test_lsp_locations.py::test_forms_of_import_are_found[import os, acme_models.web\n-0] PASSED
+tests/unit/test_lsp_locations.py::test_forms_of_import_are_found[if True:\n    import acme_models.web\n-1] PASSED
+tests/unit/test_lsp_locations.py::test_forms_of_import_are_found[def f():\n    from acme_models.web import x\n-1] PASSED
+tests/unit/test_lsp_locations.py::test_other_text_is_not_an_import_of_the_module[import acme_models.customer\n] PASSED
+tests/unit/test_lsp_locations.py::test_other_text_is_not_an_import_of_the_module[from . import web\n] PASSED
+tests/unit/test_lsp_locations.py::test_other_text_is_not_an_import_of_the_module[import acme_modelsx.web\n] PASSED
+tests/unit/test_lsp_locations.py::test_other_text_is_not_an_import_of_the_module[x = 'import acme_models.web'\n] PASSED
+tests/unit/test_lsp_locations.py::test_other_text_is_not_an_import_of_the_module[def broken(:\n] PASSED
+====================== 19 passed, 12 deselected in 0.85s ======================

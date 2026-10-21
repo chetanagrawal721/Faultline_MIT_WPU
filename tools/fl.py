@@ -250,19 +250,23 @@ def cmd_vscode_test(args: list[str]) -> int:
     """Run a real VS Code (a pinned build, downloaded once) with the extension and check the diagnostic it holds for a file.
 
     python tools/fl.py vscode-test <folder> --open FILE --line N [--severity Error] [--api URL] [--consumer owner/name] [--evidence-log FILE]
+    python tools/fl.py vscode-test <folder> --steps STEPS.json [--api URL] [--consumer owner/name] [--evidence-log FILE]
     """
     def opt(flag: str, default: str | None = None) -> str | None:
         return args[args.index(flag) + 1] if flag in args else default
     folder, file, line = (args[0] if args and not args[0].startswith("--") else None), opt("--open"), opt("--line")
-    if not (folder and file and line):
+    steps = opt("--steps")
+    if not (folder and ((file and line) or steps)):
         print(cmd_vscode_test.__doc__, file=sys.stderr)
         return 2
     ext = ROOT / "editors" / "vscode"
     if not (ext / "node_modules").exists() and run(npm("install"), cwd=ext):
         return 1
     py, paths = server_python()
-    env = {"FAULTLINE_TEST_FOLDER": str(Path(folder).resolve()), "FAULTLINE_TEST_FILE": str(Path(file).resolve()), "FAULTLINE_TEST_LINE": line,
+    env = {"FAULTLINE_TEST_FOLDER": str(Path(folder).resolve()), "FAULTLINE_TEST_FILE": str(Path(file).resolve()) if file else "", "FAULTLINE_TEST_LINE": line or "0",
            "FAULTLINE_TEST_SEVERITY": opt("--severity", "Error") or "Error", "FAULTLINE_PYTHON": py, "FAULTLINE_BACKEND": os.pathsep.join(paths)}
+    if steps:
+        env["FAULTLINE_TEST_STEPS"] = str(Path(steps).resolve())
     for flag, name in (("--api", "FAULTLINE_API"), ("--consumer", "FAULTLINE_CONSUMER")):
         if opt(flag):
             env[name] = opt(flag) or ""

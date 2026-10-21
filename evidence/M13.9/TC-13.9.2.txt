@@ -1,0 +1,13 @@
+# TC-13.9.2
+# command: pytest tests/unit/test_lsp_code_actions.py -k "unverified_or_incomplete or changed_since or producer_diagnostic or no_fix_at_all or no_action_for_an_unverified or no_action_when_the_api" -v
+tests/unit/test_lsp_code_actions.py::test_an_unverified_or_incomplete_fix_gives_no_action[suggested, not verified-kw0] PASSED
+tests/unit/test_lsp_code_actions.py::test_an_unverified_or_incomplete_fix_gives_no_action[no constraint-kw1] PASSED
+tests/unit/test_lsp_code_actions.py::test_an_unverified_or_incomplete_fix_gives_no_action[no target file-kw2] PASSED
+tests/unit/test_lsp_code_actions.py::test_an_unverified_or_incomplete_fix_gives_no_action[another finding-kw3] PASSED
+tests/unit/test_lsp_code_actions.py::test_an_unverified_or_incomplete_fix_gives_no_action[no recorded hash-kw4] PASSED
+tests/unit/test_lsp_code_actions.py::test_a_file_that_changed_since_the_fix_was_verified_gives_no_action PASSED
+tests/unit/test_lsp_code_actions.py::test_a_producer_diagnostic_has_no_consumer_side_fix PASSED
+tests/unit/test_lsp_code_actions.py::test_no_fix_at_all_and_a_missing_file PASSED
+tests/unit/test_lsp_code_actions.py::test_the_server_returns_no_action_for_an_unverified_stale_or_missing_fix PASSED
+tests/unit/test_lsp_code_actions.py::test_the_server_returns_no_action_when_the_api_is_down PASSED
+===================== 10 passed, 12 deselected in 17.46s ======================

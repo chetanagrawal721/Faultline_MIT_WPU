@@ -41,6 +41,8 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
   status.text = "Faultline: starting";
   status.show();
   client.onNotification("faultline/status", (p: { state: string; detail?: string }) => {
+    const g = globalThis as unknown as { __faultline?: { seq: number; state: string } };
+    g.__faultline = { seq: (g.__faultline?.seq ?? 0) + 1, state: p.state };          // read by the VS Code session test (src/test)
     status!.text = p.state === "ready" ? "Faultline: ready" : "Faultline: unavailable";
     status!.tooltip = p.detail || "";
   });

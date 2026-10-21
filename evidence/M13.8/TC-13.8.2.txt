@@ -1,0 +1,11 @@
+# TC-13.8.2
+# command: pytest tests/unit/test_lsp_locations.py -k windows_uris or relative_paths or spaces_and_non_ascii or case_of_a_windows or outside_the_workspace or symlink or crlf_text or final_newline -v
+tests/unit/test_lsp_locations.py::test_windows_uris_become_paths PASSED
+tests/unit/test_lsp_locations.py::test_relative_paths_inside_the_workspace PASSED
+tests/unit/test_lsp_locations.py::test_names_with_spaces_and_non_ascii_letters PASSED
+tests/unit/test_lsp_locations.py::test_the_case_of_a_windows_path_does_not_matter PASSED
+tests/unit/test_lsp_locations.py::test_a_file_outside_the_workspace_or_reached_through_dotdot_is_not_in_it PASSED
+tests/unit/test_lsp_locations.py::test_a_symlink_that_leaves_the_workspace_is_outside_it SKIPPED [ 75%]
+tests/unit/test_lsp_locations.py::test_crlf_text_gives_the_same_lines_as_lf_text PASSED
+tests/unit/test_lsp_locations.py::test_a_file_without_a_final_newline_and_an_empty_file PASSED
+================= 7 passed, 1 skipped, 23 deselected in 0.89s =================

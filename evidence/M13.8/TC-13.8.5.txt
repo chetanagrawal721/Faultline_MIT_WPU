@@ -1,0 +1,7 @@
+# TC-13.8.5 four distinct severities from real analyses -- NOT MET: three of four
+# command: pytest tests/integration/test_lsp_live.py -v -s (real sandboxes; the API serves the database; the server process runs in each consumer folder)
+LIVE_SEVERITIES {"billing_e": {"code": "fnd_01M5FX8A1VQSWZ1Z0PJTY971VA", "file": "billing-svc/E/app/main.py", "line": 2, "repository": "faultline-demo/billing-svc-e", "severity": "Warning", "words": "SILENT DIVERGENCE WITNESSED"}, "billing_h": {"code": "fnd_01M5FXAHSMWYDA4PT1N0XSSAGT", "file": "billing-svc/H/app/main.py", "line": 2, "repository": "faultline-demo/billing-svc-h", "severity": "Hint", "words": "INCONCLUSIVE"}, "notify": {"code": "fnd_01M5FXD9VWW0TB92QK2MNTV2N7", "file": "notify-svc/D/app/main.py", "line": 2, "repository": "faultline-demo/notify-svc", "severity": "Error", "words": "BREAK WITNESSED"}}
+PASSED
+tests/integration/test_lsp_live.py::test_the_stored_import_sites_match_the_files_that_were_analysed PASSED
+======================== 2 passed in 342.22s (0:05:42) ========================
+# Error, Warning and Hint are shown from real analyses. Information (POTENTIAL, EXPOSED) needs static analysis, which is not wired into the live run (docs/INCREMENTAL_WITNESS_AUDIT.md section 6); that level is covered by the mapping tests only.

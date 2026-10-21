@@ -1,0 +1,13 @@
+# TC-13.9.1
+# command: pytest tests/unit/test_lsp_code_actions.py -k "applying_the_edit or crlf_file or verified_fix_for_the_current or other_line_endings or open_document or server_returns_a_verified" -v
+tests/unit/test_lsp_code_actions.py::test_applying_the_edit_gives_the_content_the_stored_diff_describes[flask==2.2.2\nclick==8.1.7\nitsdangerous==2.1.2\nbisect-svc-dep @ git+https://github.com/x/y@main\n] PASSED
+tests/unit/test_lsp_code_actions.py::test_applying_the_edit_gives_the_content_the_stored_diff_describes[flask==2.2.2\nclick==8.1.7\nitsdangerous==2.1.2\nbisect-svc-dep @ git+https://github.com/x/y@main] PASSED
+tests/unit/test_lsp_code_actions.py::test_applying_the_edit_gives_the_content_the_stored_diff_describes[] PASSED
+tests/unit/test_lsp_code_actions.py::test_applying_the_edit_gives_the_content_the_stored_diff_describes[flask==2.2.2\n] PASSED
+tests/unit/test_lsp_code_actions.py::test_applying_the_edit_gives_the_content_the_stored_diff_describes[r\xe9sum\xe9-pkg==1\n] PASSED
+tests/unit/test_lsp_code_actions.py::test_a_crlf_file_gets_a_crlf_line PASSED
+tests/unit/test_lsp_code_actions.py::test_a_verified_fix_for_the_current_file_gives_one_action PASSED
+tests/unit/test_lsp_code_actions.py::test_a_checkout_with_other_line_endings_has_the_same_content PASSED
+tests/unit/test_lsp_code_actions.py::test_an_open_document_is_used_with_its_version PASSED
+tests/unit/test_lsp_code_actions.py::test_the_server_returns_a_verified_fix_as_a_workspace_edit PASSED
+====================== 10 passed, 12 deselected in 4.14s ======================

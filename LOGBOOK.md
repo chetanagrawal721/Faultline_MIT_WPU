@@ -1342,3 +1342,41 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 
 ### 2026-10-21 18:55 UTC | NOTE | - | by Chetan Agrawal
 - M13.6: on real sandboxes the eight-candidate search ran 10 tests (8 singletons, 1 full-set, 1 necessity) as labelled. A worker killed in the middle of its fourth test resumed in a new analysis: the 3 stored tests were answered from the store, the killed test ran once more and is recorded as interrupted, every test finished exactly once, and the attribution equals the uninterrupted one. A worker that exited right after storing the third outcome and before its checkpoint: that test was found by its own stored object and not run again. Bug found by the test: the necessity check wrote a RUNNING checkpoint after the final COMPLETE one; checkpoints after the search now keep the final status. TC-13.6.6 (the fixture analysed from GitHub URLs) is NOT done: it needs the two fixture repositories published to GitHub, which waits for the user's permission.
+
+### 2026-10-21 18:56 UTC | START | M13.9 | by Chetan Agrawal
+- Verified code action as a WorkspaceEdit
+
+### 2026-10-21 19:04 UTC | TC PASS | TC-13.8.1 | by Chetan Agrawal
+- Positions are exact
+- evidence: evidence/M13.8/TC-13.8.1.txt
+
+### 2026-10-21 19:04 UTC | TC PASS | TC-13.8.2 | by Chetan Agrawal
+- URIs and encodings
+- evidence: evidence/M13.8/TC-13.8.2.txt
+
+### 2026-10-21 19:04 UTC | TC PASS | TC-13.8.3 | by Chetan Agrawal
+- Severity per verdict
+- evidence: evidence/M13.8/TC-13.8.3.txt
+
+### 2026-10-21 19:04 UTC | TC PASS | TC-13.8.4 | by Chetan Agrawal
+- Staleness and duplicates
+- evidence: evidence/M13.8/TC-13.8.4.txt
+
+### 2026-10-21 19:04 UTC | TC FAIL | TC-13.8.5 | by Chetan Agrawal
+- Four severities from real analyses
+- three of the four severities come from real analyses (Error: BREAK WITNESSED, Warning: SILENT DIVERGENCE WITNESSED, Hint: INCONCLUSIVE, each on the stored import line, tests/integration/test_lsp_live.py); Information needs POTENTIAL or EXPOSED, which need static analysis that is not wired into the live pipeline (audit, section 6). Waiting for the user to choose: wire static analysis in, or waive with this reason.
+
+### 2026-10-21 19:15 UTC | TC PASS | TC-13.9.1 | by Chetan Agrawal
+- Verified fix gives an exact edit
+- evidence: evidence/M13.9/TC-13.9.1.txt
+
+### 2026-10-21 19:15 UTC | TC PASS | TC-13.9.2 | by Chetan Agrawal
+- No action when unverified or stale
+- evidence: evidence/M13.9/TC-13.9.2.txt
+
+### 2026-10-21 19:15 UTC | TC PASS | TC-13.9.3 | by Chetan Agrawal
+- Correct target file
+- evidence: evidence/M13.9/TC-13.9.3.txt
+
+### 2026-10-21 19:15 UTC | NOTE | - | by Chetan Agrawal
+- M13.8: import sites are stored with each analysis and served (GET /api/analyses/{id}/imports); the server shows a consumer finding on the stored line while the file still has its analysed hash, re-reads the text and marks it stale when the file changed, and uses only the newest analysis of the repository. Three of the four severities come from real analyses (live test). Information needs static analysis in the live run: TC-13.8.5 is recorded as failed and waits for the user's decision. M13.9: the fix is stored with its target file and that file's hash; found a CRLF bug (read_text turned CRLF into LF) through a test.

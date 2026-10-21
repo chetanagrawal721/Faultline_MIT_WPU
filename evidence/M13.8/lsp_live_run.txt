@@ -1,0 +1,13 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chetan\Hackethopia\.venv\Scripts\python.exe
+rootdir: C:\Users\Chetan\Hackethopia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 2 items
+
+tests/integration/test_lsp_live.py::test_tc_13_8_5_three_live_severities_on_the_stored_import_lines 
+LIVE_SEVERITIES {"billing_e": {"code": "fnd_01M5FX8A1VQSWZ1Z0PJTY971VA", "file": "billing-svc/E/app/main.py", "line": 2, "repository": "faultline-demo/billing-svc-e", "severity": "Warning", "words": "SILENT DIVERGENCE WITNESSED"}, "billing_h": {"code": "fnd_01M5FXAHSMWYDA4PT1N0XSSAGT", "file": "billing-svc/H/app/main.py", "line": 2, "repository": "faultline-demo/billing-svc-h", "severity": "Hint", "words": "INCONCLUSIVE"}, "notify": {"code": "fnd_01M5FXD9VWW0TB92QK2MNTV2N7", "file": "notify-svc/D/app/main.py", "line": 2, "repository": "faultline-demo/notify-svc", "severity": "Error", "words": "BREAK WITNESSED"}}
+PASSED
+tests/integration/test_lsp_live.py::test_the_stored_import_sites_match_the_files_that_were_analysed PASSED
+
+======================== 2 passed in 342.22s (0:05:42) ========================
