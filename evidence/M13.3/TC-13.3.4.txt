@@ -1,0 +1,28 @@
+# TC-13.3.4
+# command: pytest tests/unit/test_pair_key.py -k explain -v
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[consumer commit] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[consumer lockfile] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[consumer repository] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[consumer world] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[entry modules] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[extra consumer] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[o_bind version] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[o_contract version] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[o_import version] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[o_tests version] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[platform] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[producer artifact byte] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[producer commit] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[producer lockfile] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[producer project path] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[producer repository] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[python version] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[reference world] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[resolution cut-off] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[resolution index] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[resolver logic] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[resolver version] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[sandbox image] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[verdict rule] PASSED
+tests/unit/test_pair_key.py::test_explain_names_exactly_the_changed_input[witness rule] PASSED
+====================== 25 passed, 30 deselected in 0.19s ======================

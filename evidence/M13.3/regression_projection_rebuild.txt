@@ -1,0 +1,2 @@
+# regression: projection and rebuild tests after the pair record was added
+8 passed in 296.16s (0:04:56)

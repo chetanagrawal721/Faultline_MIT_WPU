@@ -1,0 +1,4 @@
+# TC-13.3.3 the key is stable across analyses
+# command: pytest tests/integration/test_pair_key_live.py -v (two analyses of scenario D, separate databases)
+tests/integration/test_pair_key_live.py::test_the_same_pinned_inputs_give_the_same_pair_keys_in_two_analyses PASSED [100%]
+======================== 1 passed in 181.80s (0:03:01) ========================

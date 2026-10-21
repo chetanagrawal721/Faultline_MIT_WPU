@@ -1,0 +1,4 @@
+# TC-13.3.1
+# command: pytest tests/unit/test_pair_key.py -k deterministic -v
+tests/unit/test_pair_key.py::test_the_key_is_deterministic_across_processes_and_orderings PASSED
+====================== 1 passed, 54 deselected in 0.84s =======================

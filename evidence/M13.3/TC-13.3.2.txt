@@ -1,0 +1,32 @@
+# TC-13.3.2
+# command: pytest tests/unit/test_pair_key.py -k every_real_input or all_mutated or holds_nothing or lockfile_world or uv_resolved -v
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[consumer commit] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[consumer lockfile] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[consumer repository] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[consumer world] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[entry modules] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[extra consumer] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[o_bind version] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[o_contract version] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[o_import version] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[o_tests version] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[platform] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[producer artifact byte] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[producer commit] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[producer lockfile] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[producer project path] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[producer repository] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[python version] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[reference world] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[resolution cut-off] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[resolution index] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[resolver logic] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[resolver version] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[sandbox image] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[verdict rule] PASSED
+tests/unit/test_pair_key.py::test_every_real_input_changes_the_key[witness rule] PASSED
+tests/unit/test_pair_key.py::test_all_mutated_keys_are_different_from_each_other PASSED
+tests/unit/test_pair_key.py::test_the_record_holds_nothing_incidental PASSED
+tests/unit/test_pair_key.py::test_a_lockfile_world_ignores_the_resolution_cutoff PASSED
+tests/unit/test_pair_key.py::test_a_uv_resolved_world_depends_on_the_cutoff PASSED
+====================== 29 passed, 26 deselected in 0.29s ======================

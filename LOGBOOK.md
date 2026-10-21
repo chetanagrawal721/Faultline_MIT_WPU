@@ -1180,3 +1180,29 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 ### 2026-10-21 17:04 UTC | GATE DECLARED | Gate T1 | by Chetan Agrawal
 - Twist: storage
 - no waivers
+
+### 2026-10-21 17:07 UTC | START | M13.3 | by Chetan Agrawal
+- Stable pair key and pair records
+
+### 2026-10-21 17:30 UTC | TC PASS | TC-13.3.1 | by Chetan Agrawal
+- Key is deterministic
+- evidence: evidence/M13.3/TC-13.3.1.txt
+
+### 2026-10-21 17:30 UTC | TC PASS | TC-13.3.2 | by Chetan Agrawal
+- Key mutation matrix
+- evidence: evidence/M13.3/TC-13.3.2.txt
+
+### 2026-10-21 17:30 UTC | TC PASS | TC-13.3.3 | by Chetan Agrawal
+- Key is stable across analyses
+- evidence: evidence/M13.3/TC-13.3.3.txt
+
+### 2026-10-21 17:30 UTC | TC PASS | TC-13.3.4 | by Chetan Agrawal
+- explain names the change
+- evidence: evidence/M13.3/TC-13.3.4.txt
+
+### 2026-10-21 17:30 UTC | NOTE | - | by Chetan Agrawal
+- M13.3: the pair key hashes an explicit record (commits, lock/manifest digests, both world hashes, producer artifact hash, resolver, platform, entries, oracle versions, image, rules). Resolution cut-off, index and flags enter only when uv resolved the world (tested). Added migration 0008 (pair_cell) because 0007 was already applied; the key is stable across two analyses only when the commits are the same, and a second commit on the same local test remote has a parent and another SHA.
+
+### 2026-10-21 17:30 UTC | DONE | M13.3 | by Chetan Agrawal
+- Stable pair key and pair records
+- test cases passed: 4/4
