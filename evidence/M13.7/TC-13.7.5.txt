@@ -1,0 +1,4 @@
+# TC-13.7.5
+# command: pytest tests/unit/test_lsp_protocol.py -k "pinned_libraries" -v
+tests/unit/test_lsp_protocol.py::test_tc_13_7_5_the_pinned_libraries_implement_lsp_3_17 PASSED
+====================== 1 passed, 11 deselected in 1.69s =======================

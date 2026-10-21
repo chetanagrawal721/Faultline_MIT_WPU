@@ -1,0 +1,5 @@
+# TC-13.7.2
+# command: pytest tests/unit/test_lsp_protocol.py -k "lifecycle or exit_without" -v
+tests/unit/test_lsp_protocol.py::test_tc_13_7_2_lifecycle_initialize_shutdown_exit PASSED
+tests/unit/test_lsp_protocol.py::test_exit_without_shutdown_is_an_error_exit PASSED
+====================== 2 passed, 10 deselected in 3.96s =======================

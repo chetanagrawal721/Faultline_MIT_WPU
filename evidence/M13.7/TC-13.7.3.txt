@@ -1,0 +1,4 @@
+# TC-13.7.3
+# command: pytest tests/unit/test_lsp_protocol.py -k "malformed" -v
+tests/unit/test_lsp_protocol.py::test_tc_13_7_3_a_malformed_request_and_an_unsupported_method_do_not_stop_the_server PASSED
+====================== 1 passed, 11 deselected in 3.58s =======================

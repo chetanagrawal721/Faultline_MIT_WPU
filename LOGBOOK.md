@@ -1285,3 +1285,34 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 ### 2026-10-21 18:29 UTC | GATE DECLARED | Gate T2 | by Chetan Agrawal
 - Twist: incremental reuse
 - no waivers
+
+### 2026-10-21 18:46 UTC | TC PASS | TC-13.7.1 | by Chetan Agrawal
+- Framing on Windows and Linux
+- evidence: evidence/M13.7/TC-13.7.1.txt
+
+### 2026-10-21 18:46 UTC | TC PASS | TC-13.7.2 | by Chetan Agrawal
+- Lifecycle
+- evidence: evidence/M13.7/TC-13.7.2.txt
+
+### 2026-10-21 18:46 UTC | TC PASS | TC-13.7.3 | by Chetan Agrawal
+- Bad requests
+- evidence: evidence/M13.7/TC-13.7.3.txt
+
+### 2026-10-21 18:46 UTC | TC PASS | TC-13.7.4 | by Chetan Agrawal
+- API down
+- evidence: evidence/M13.7/TC-13.7.4.txt
+
+### 2026-10-21 18:46 UTC | TC PASS | TC-13.7.5 | by Chetan Agrawal
+- Pins
+- evidence: evidence/M13.7/TC-13.7.5.txt
+
+### 2026-10-21 18:46 UTC | TC PASS | TC-13.7.6 | by Chetan Agrawal
+- Diagnostic in VS Code
+- evidence: evidence/M13.7/TC-13.7.6.txt
+
+### 2026-10-21 18:46 UTC | NOTE | - | by Chetan Agrawal
+- M13.7: the language server (pygls 2.1.1, lsprotocol 2025.0.0, LSP 3.17) passes 12 protocol tests as a real stdio process, including CRLF and non-ASCII text. A real VS Code 1.95.3 (started by @vscode/test-electron) holds the Faultline diagnostic on line 2 of the notify-svc consumer with severity Error. Findings while doing it: the venv's python.exe launcher fails when VS Code starts it (No Python at ...), so the editor starts the server with the base interpreter and the venv site-packages on PYTHONPATH; a running VS Code reuses its own environment, so scripted launches use test-electron or an isolated profile; an extension setting with a default value hides the environment variable, so the extension reads inspect() for what the user set.
+
+### 2026-10-21 18:46 UTC | DONE | M13.7 | by Chetan Agrawal
+- Stdio LSP server and VS Code vertical slice
+- test cases passed: 6/6

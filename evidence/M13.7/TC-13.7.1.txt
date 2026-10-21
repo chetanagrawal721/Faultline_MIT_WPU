@@ -1,0 +1,5 @@
+# TC-13.7.1
+# command: pytest tests/unit/test_lsp_protocol.py -k "framing or stdout_holds_only" -v
+tests/unit/test_lsp_protocol.py::test_tc_13_7_1_framing_survives_newlines_crlf_and_non_ascii_text PASSED
+tests/unit/test_lsp_protocol.py::test_stdout_holds_only_frames_even_when_the_server_logs PASSED
+====================== 2 passed, 10 deselected in 7.24s =======================
