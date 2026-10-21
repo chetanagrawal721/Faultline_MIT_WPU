@@ -1,0 +1,16 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chetan\Hackethopia\.venv\Scripts\python.exe
+rootdir: C:\Users\Chetan\Hackethopia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 1 item
+
+tests/integration/test_fix_reanalysis.py::test_tc_13_9_4_the_edit_removes_the_witness_and_the_untouched_pair_is_reused 
+FIRST ANALYSIS funnel: {'relationships_discovered': 2, 'relationships_actionable': 2, 'suspected': 0, 'consumers_discovered': 2, 'consumers_analysed': 2, 'consumers_failed': [], 'cells': 2, 'cells_by_state': {'ANALYZED': 2}}
+FIRST ANALYSIS stats: {"failed_consumers": []}
+FIRST ANALYSIS findings: [('BREAK_WITNESSED', 'Reproduced: the call `urllib3.util.retry.Retry(total=..., method_whitelist=...)` at src/acme_http/retry.py:7:1'), ('BREAK_WITNESSED', "Reproduced: importing `acme_models.web` fails with `ImportError: cannot import name 'url_quote' from 'werkzeug")]
+
+AFTER THE FIX {'reused': 1, 'recomputed': 1, 'unfinished': 0, 'rejected_objects': 0} [('RECOMPUTED', 'CHANGED', 'NO_DIVERGENCE_OBSERVED'), ('REUSED', 'REUSED', 'BREAK_WITNESSED')] ['ANALYZED', 'ANALYZED']
+PASSED
+
+======================== 1 passed in 358.01s (0:05:58) ========================

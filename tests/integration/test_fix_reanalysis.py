@@ -90,10 +90,16 @@ def test_tc_13_9_4_the_edit_removes_the_witness_and_the_untouched_pair_is_reused
     fix = FixInfo(broken["id"], r.label, r.constraint, r.consumer, r.target_path, r.target_sha256, r.diff)
     action = build_action(diag(fid=broken["id"]), fix, [ws], lambda uri: None)
     assert action is not None
-    edited = apply((ws / "requirements.txt").read_bytes().decode("utf-8"), action.edit.document_changes[0].edits[0])
-    assert edited.endswith("werkzeug<3\n") and edited.startswith(original.decode() if isinstance(original, bytes) else original)
+    assert action.edit.document_changes[0].text_document.uri.endswith("/" + r.target_path), "the edit is on the file the fix names"
+    edited = apply((ws / r.target_path).read_bytes().decode("utf-8"), action.edit.document_changes[0].edits[0])
+    assert edited.endswith("werkzeug<3\n") and edited.startswith(original.decode())
     fixed = dict(consumer)
-    fixed["requirements.txt"] = edited.encode()
+    fixed[r.target_path] = edited.encode()
+    # the developer locks again: the lock file is authoritative for the consumer's world, so the constraint reaches it only through a new lock
+    spec = ws / "requirements.in"
+    spec.write_bytes(fixed["requirements.in"] if r.target_path == "requirements.in" else consumer["requirements.in"] + b"werkzeug<3\n")
+    fixed["requirements.in"] = spec.read_bytes()
+    fixed["requirements.lock.txt"] = relock(spec, ws / "requirements.lock.txt")
 
     keep_state(conn, "before")                                   # the database as the editor saw it before the fix (for a real VS Code session)
     apid2, _ = ingest_all(conn, sbx, image, daemon.store, repos("b", fixed))

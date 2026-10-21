@@ -1,0 +1,82 @@
+$ C:\Program Files\nodejs\npm.CMD test
+
+> faultline-vscode@0.1.0 test
+> tsc -p . && node out/test/runTest.js
+
+- Resolving version...
+✔ Validated version: 1.95.3
+✔ Found existing install in C:\Users\Chetan\Hackethopia\editors\vscode\.vscode-test\vscode-win32-x64-archive-1.95.3
+(node:35680) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+[main 2026-10-21T20:12:40.330Z] update#setState disabled
+[main 2026-10-21T20:12:40.332Z] update#ctor - updates are disabled by the environment
+[main 2026-10-21T20:12:40.393Z] Error: Error mutex already exists
+    at Eu.U (file:///C:/Users/Chetan/Hackethopia/editors/vscode/.vscode-test/vscode-win32-x64-archive-1.95.3/resources/app/out/main.js:81:18090)
+Started local extension host with pid 27228.
+Loading development extension at c:\Users\Chetan\Hackethopia\editors\vscode
+Settings Sync: Updating due to initialize
+Settings Sync: Updating authentication providers. Authentication Providers from store: [
+  { id: 'github', scopes: [ 'user:email' ] },
+  {
+    id: 'microsoft',
+    scopes: [ 'openid', 'profile', 'email', 'offline_access' ]
+  }
+]
+Settings Sync: Authentication providers updated []
+Settings Sync: Updating authentication providers. Authentication Providers from store: [
+  { id: 'github', scopes: [ 'user:email' ] },
+  {
+    id: 'microsoft',
+    scopes: [ 'openid', 'profile', 'email', 'offline_access' ]
+  }
+]
+Settings Sync: Authentication providers updated [ 'github' ]
+Settings Sync: Updating authentication providers. Authentication Providers from store: [
+  { id: 'github', scopes: [ 'user:email' ] },
+  {
+    id: 'microsoft',
+    scopes: [ 'openid', 'profile', 'email', 'offline_access' ]
+  }
+]
+Settings Sync: Authentication providers updated [ 'github' ]
+Settings Sync: Updating authentication providers. Authentication Providers from store: [
+  { id: 'github', scopes: [ 'user:email' ] },
+  {
+    id: 'microsoft',
+    scopes: [ 'openid', 'profile', 'email', 'offline_access' ]
+  }
+]
+Settings Sync: Authentication providers updated [ 'github', 'microsoft' ]
+Settings Sync: Updating authentication providers. Authentication Providers from store: [
+  { id: 'github', scopes: [ 'user:email' ] },
+  {
+    id: 'microsoft',
+    scopes: [ 'openid', 'profile', 'email', 'offline_access' ]
+  }
+]
+Settings Sync: Authentication providers updated [ 'github', 'microsoft' ]
+Settings Sync: Updating due to declared authentication providers changed
+Settings Sync: Updating authentication providers. Authentication Providers from store: [
+  { id: 'github', scopes: [ 'user:email' ] },
+  {
+    id: 'microsoft',
+    scopes: [ 'openid', 'profile', 'email', 'offline_access' ]
+  }
+]
+Settings Sync: Authentication providers updated [ 'github', 'microsoft' ]
+Settings Sync: Updating due to declared authentication providers changed
+Settings Sync: Updating authentication providers. Authentication Providers from store: [
+  { id: 'github', scopes: [ 'user:email' ] },
+  {
+    id: 'microsoft',
+    scopes: [ 'openid', 'profile', 'email', 'offline_access' ]
+  }
+]
+Settings Sync: Authentication providers updated [ 'github', 'microsoft' ]
+[network] #2: https://az764295.vo.msecnd.net/extensions/chat.json - error GET Failed to fetch
+Failed to fetch chat participant registry {}
+[main 2026-10-21T20:12:55.440Z] Extension host with pid 27228 exited with code: 0, signal: unknown.
+(node:14820) [DEP0168] DeprecationWarning: Uncaught N-API callback exception detected, please run node with option --force-node-api-uncaught-exceptions-policy=true to handle those exceptions properly.
+(Use `Code --trace-deprecation ...` to show where the warning was created)
+Exit code:   0

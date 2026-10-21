@@ -1,0 +1,7 @@
+# TC-13.9.4 after the fix is applied and the consumer is locked again, the witness is gone and only the affected pair is recomputed
+# command: pytest tests/integration/test_fix_reanalysis.py -v -s (real sandboxes; remediation verifies the fix with fresh runs; the editor's edit is built from the stored fix and applied; the developer's re-lock is the fixtures' own uv compile)
+FIRST ANALYSIS funnel: {'relationships_discovered': 2, 'relationships_actionable': 2, 'suspected': 0, 'consumers_discovered': 2, 'consumers_analysed': 2, 'consumers_failed': [], 'cells': 2, 'cells_by_state': {'ANALYZED': 2}}
+FIRST ANALYSIS stats: {"failed_consumers": []}
+AFTER THE FIX {'reused': 1, 'recomputed': 1, 'unfinished': 0, 'rejected_objects': 0} [('RECOMPUTED', 'CHANGED', 'NO_DIVERGENCE_OBSERVED'), ('REUSED', 'REUSED', 'BREAK_WITNESSED')] ['ANALYZED', 'ANALYZED']
+PASSED
+======================== 1 passed in 358.01s (0:05:58) ========================
