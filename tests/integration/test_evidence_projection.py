@@ -19,7 +19,7 @@ pytestmark = pytest.mark.docker
 GOLDEN = Path(__file__).resolve().parents[1] / "data" / "golden_evidence_scenario_d.json"
 
 
-def analyse_scenario_d(daemon, image, tmp: Path):
+def analyse_scenario_d(daemon, image, tmp: Path, tag: str = ""):
     from faultline.sandbox.client import SandboxClient
     from faultline.storage.db import connect
     from faultline.storage.migrate import migrate
@@ -28,9 +28,9 @@ def analyse_scenario_d(daemon, image, tmp: Path):
     migrate(conn)
     sbx = SandboxClient(port=daemon.port, token=TOKEN, timeout=600)
     apid, _ = ingest_all(conn, sbx, image, daemon.store, {
-        "rm_ev_prod": ("faultline-demo/acme-models", fixture_repo("acme-models")),
-        "rm_ev_notify": ("faultline-demo/notify-svc", fixture_repo("notify-svc/D")),
-        "rm_ev_orders": ("faultline-demo/orders-svc", fixture_repo("orders-svc/D"))})
+        f"rm_ev{tag}_prod": ("faultline-demo/acme-models", fixture_repo("acme-models")),
+        f"rm_ev{tag}_notify": ("faultline-demo/notify-svc", fixture_repo("notify-svc/D")),
+        f"rm_ev{tag}_orders": ("faultline-demo/orders-svc", fixture_repo("orders-svc/D"))})
     return conn, run_live_analysis(conn, sbx, image, daemon.store, apid)
 
 
@@ -60,7 +60,8 @@ def test_every_evidence_row_has_an_object_and_a_pointer(analysed):
         assert status.value == "OK", oid
         by_kind[st.get(oid).kind] = by_kind.get(st.get(oid).kind, 0) + 1
     rows = {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in ("oracle_run", "witness", "finding", "attribution")}
-    assert by_kind == {"oracle_result": rows["oracle_run"], "witness": rows["witness"], "verdict": rows["finding"], "attribution": rows["attribution"]}
+    # one pair record (M13.3) for the one analysed cell; it has no SQL rows of its own
+    assert by_kind == {"oracle_result": rows["oracle_run"], "witness": rows["witness"], "verdict": rows["finding"], "attribution": rows["attribution"], "pair_record": 1}
     assert rows["oracle_run"] == 12 and rows["witness"] == 2
     slots = {r["slot"] for r in conn.execute("SELECT slot FROM pointer")}
     assert len(slots) == rows["witness"] + rows["finding"] + rows["attribution"]
