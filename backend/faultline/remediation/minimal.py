@@ -71,7 +71,8 @@ def remediate(conn: sqlite3.Connection, sbx, image: str, store: Store, finding_i
         return Remediation("NONE", "remediation applies to a witnessed break only")
     cell = conn.execute("SELECT * FROM cell WHERE id=?", (f["cell_id"],)).fetchone()
     # the finding's own evidence, not witness.cell_id: a repeated analysis reuses the earlier witnesses, which belong to the earlier cell
-    wit = conn.execute("SELECT w.* FROM witness w JOIN finding_evidence fe ON fe.evidence_id=w.id AND fe.evidence_kind='WITNESS' WHERE fe.finding_id=? ORDER BY fe.rowid",
+    # only import witnesses: the fix is verified by re-running the import check in the fixed world, so those are the witnesses it can claim to have removed
+    wit = conn.execute("SELECT w.* FROM witness w JOIN finding_evidence fe ON fe.evidence_id=w.id AND fe.evidence_kind='WITNESS' WHERE fe.finding_id=? AND w.oracle='o_import' ORDER BY fe.rowid",
                        (finding_id,)).fetchall()
     att = conn.execute("SELECT a.* FROM attribution a JOIN finding_evidence fe ON fe.evidence_id=a.witness_id AND fe.evidence_kind='WITNESS' "
                        "WHERE fe.finding_id=? ORDER BY fe.rowid ASC LIMIT 1", (finding_id,)).fetchone()

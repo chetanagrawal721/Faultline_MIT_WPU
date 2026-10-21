@@ -33,6 +33,8 @@ def rerun_witness(conn: sqlite3.Connection, sbx: SandboxClient, image: str, witn
     w = conn.execute("SELECT * FROM witness WHERE id=?", (witness_id,)).fetchone()
     if w is None:
         raise KeyError(witness_id)
+    if w["oracle"] != "o_import":
+        raise ValueError(f"live re-run is available for import witnesses; this witness comes from {w['oracle']}")
     cell = conn.execute("SELECT * FROM cell WHERE id=?", (w["cell_id"],)).fetchone()
     artifact = conn.execute("SELECT artifact_content_hash FROM project WHERE id=?", (cell["artifact_project_id"],)).fetchone()[0]
     job = conn.execute("SELECT spec_json FROM oracle_job WHERE cell_id=? AND oracle=? ORDER BY rowid DESC LIMIT 1", (cell["id"], w["oracle"])).fetchone()
