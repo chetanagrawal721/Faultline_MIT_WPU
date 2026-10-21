@@ -1,0 +1,5 @@
+# TC-13.6.1
+# command: pytest tests/integration/test_ddmin_recovery.py -v -s (real sandboxes; the analysis runs in a child process that is killed or that exits at an exact point)
+tests/integration/test_ddmin_recovery.py::test_tc_13_6_1_the_labelled_change_is_found_and_the_test_count_matches PASSED
+# whole run:
+======================== 5 passed in 543.30s (0:09:03) ========================

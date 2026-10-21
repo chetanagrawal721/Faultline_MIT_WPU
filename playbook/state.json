@@ -153,10 +153,17 @@
       "started": "2026-10-21 17:46 UTC",
       "status": "done"
     },
+    "M13.6": {
+      "status": "in_progress"
+    },
     "M13.7": {
       "done": "2026-10-21 18:46 UTC",
       "started": "2026-10-21 18:07 UTC",
       "status": "done"
+    },
+    "M13.8": {
+      "started": "2026-10-21 18:46 UTC",
+      "status": "in_progress"
     },
     "M2.1": {
       "done": "2026-10-12 21:26 UTC",
@@ -831,6 +838,36 @@
     "TC-13.5.7": {
       "date": "2026-10-21 18:00 UTC",
       "evidence": "evidence/M13.5/TC-13.5.7.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.6.1": {
+      "date": "2026-10-21 18:55 UTC",
+      "evidence": "evidence/M13.6/TC-13.6.1.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.6.2": {
+      "date": "2026-10-21 18:55 UTC",
+      "evidence": "evidence/M13.6/TC-13.6.2.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.6.3": {
+      "date": "2026-10-21 18:55 UTC",
+      "evidence": "evidence/M13.6/TC-13.6.3.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.6.4": {
+      "date": "2026-10-21 18:55 UTC",
+      "evidence": "evidence/M13.6/TC-13.6.4.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.6.5": {
+      "date": "2026-10-21 18:55 UTC",
+      "evidence": "evidence/M13.6/TC-13.6.5.txt",
       "note": "",
       "status": "pass"
     },

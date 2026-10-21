@@ -1,0 +1,42 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chetan\Hackethopia\.venv\Scripts\python.exe
+rootdir: C:\Users\Chetan\Hackethopia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 5 items
+
+tests/integration/test_ddmin_recovery.py::test_tc_13_6_1_the_labelled_change_is_found_and_the_test_count_matches PASSED
+tests/integration/test_ddmin_recovery.py::test_tc_13_6_2_a_killed_worker_resumes_and_no_stored_test_runs_again ----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 63922)
+Traceback (most recent call last):
+  File "C:\Users\Chetan\Hackethopia\backend\faultline\sandbox\sandboxd.py", line 208, in handle
+    self._send(d.run(req["job"]))
+  File "C:\Users\Chetan\Hackethopia\backend\faultline\sandbox\sandboxd.py", line 228, in _send
+    self.wfile.write((json.dumps(obj) + "\n").encode())
+  File "C:\Users\Chetan\AppData\Roaming\uv\python\cpython-3.12.15-windows-x86_64-none\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Chetan\AppData\Roaming\uv\python\cpython-3.12.15-windows-x86_64-none\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Chetan\AppData\Roaming\uv\python\cpython-3.12.15-windows-x86_64-none\Lib\socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Chetan\AppData\Roaming\uv\python\cpython-3.12.15-windows-x86_64-none\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+  File "C:\Users\Chetan\Hackethopia\backend\faultline\sandbox\sandboxd.py", line 225, in handle
+    self._send({"error": f"{type(exc).__name__}: {exc}"})
+  File "C:\Users\Chetan\Hackethopia\backend\faultline\sandbox\sandboxd.py", line 228, in _send
+    self.wfile.write((json.dumps(obj) + "\n").encode())
+  File "C:\Users\Chetan\AppData\Roaming\uv\python\cpython-3.12.15-windows-x86_64-none\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+----------------------------------------
+PASSED
+tests/integration/test_ddmin_recovery.py::test_tc_13_6_4_nothing_of_the_killed_job_remains PASSED
+tests/integration/test_ddmin_recovery.py::test_tc_13_6_3_a_stop_before_the_checkpoint_does_not_run_that_test_again PASSED
+tests/integration/test_ddmin_recovery.py::test_tc_13_6_5_a_resumed_attribution_equals_the_uninterrupted_one PASSED
+
+======================== 5 passed in 543.30s (0:09:03) ========================

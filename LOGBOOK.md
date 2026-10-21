@@ -1316,3 +1316,29 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 ### 2026-10-21 18:46 UTC | DONE | M13.7 | by Chetan Agrawal
 - Stdio LSP server and VS Code vertical slice
 - test cases passed: 6/6
+
+### 2026-10-21 18:46 UTC | START | M13.8 | by Chetan Agrawal
+- Diagnostic locations, severities and freshness
+
+### 2026-10-21 18:55 UTC | TC PASS | TC-13.6.1 | by Chetan Agrawal
+- Uninterrupted run
+- evidence: evidence/M13.6/TC-13.6.1.txt
+
+### 2026-10-21 18:55 UTC | TC PASS | TC-13.6.2 | by Chetan Agrawal
+- Kill the worker mid-run
+- evidence: evidence/M13.6/TC-13.6.2.txt
+
+### 2026-10-21 18:55 UTC | TC PASS | TC-13.6.3 | by Chetan Agrawal
+- Crash before the checkpoint, on real runs
+- evidence: evidence/M13.6/TC-13.6.3.txt
+
+### 2026-10-21 18:55 UTC | TC PASS | TC-13.6.4 | by Chetan Agrawal
+- No orphan after the kill
+- evidence: evidence/M13.6/TC-13.6.4.txt
+
+### 2026-10-21 18:55 UTC | TC PASS | TC-13.6.5 | by Chetan Agrawal
+- Same result as uninterrupted
+- evidence: evidence/M13.6/TC-13.6.5.txt
+
+### 2026-10-21 18:55 UTC | NOTE | - | by Chetan Agrawal
+- M13.6: on real sandboxes the eight-candidate search ran 10 tests (8 singletons, 1 full-set, 1 necessity) as labelled. A worker killed in the middle of its fourth test resumed in a new analysis: the 3 stored tests were answered from the store, the killed test ran once more and is recorded as interrupted, every test finished exactly once, and the attribution equals the uninterrupted one. A worker that exited right after storing the third outcome and before its checkpoint: that test was found by its own stored object and not run again. Bug found by the test: the necessity check wrote a RUNNING checkpoint after the final COMPLETE one; checkpoints after the search now keep the final status. TC-13.6.6 (the fixture analysed from GitHub URLs) is NOT done: it needs the two fixture repositories published to GitHub, which waits for the user's permission.
