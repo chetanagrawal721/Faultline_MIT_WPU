@@ -401,3 +401,33 @@ class PairStatus(View):
     from_analysis: str | None = None
     verdict: str | None = None
 
+
+# ---- where consumers import the affected modules (M13.8) -------------------------------------------------------------
+
+class ImportSite(View):
+    module: str
+    file: str                          # relative to the consumer repository root
+    line: int                          # one-based
+    sha256: str | None = None          # the file's hash at the analysed commit
+
+
+class ConsumerImports(View):
+    cell_id: str
+    consumer: str                      # owner/name
+    commit: str
+    sites: list[ImportSite]
+
+
+# ---- the fix stored for a finding (M13.9) ----------------------------------------------------------------------------------
+
+class FixView(View):
+    finding_id: str
+    label: str                         # VERIFIED | SUGGESTED
+    constraint: str
+    consumer: str | None = None        # owner/name
+    target_path: str | None = None     # the requirements file the fix edits, relative to the consumer repository root
+    target_sha256: str | None = None   # its hash when the fix was verified
+    diff: str
+    reason: str | None = None
+    fresh_runs: int = 0
+

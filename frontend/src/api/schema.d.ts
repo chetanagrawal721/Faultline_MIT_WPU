@@ -41,6 +41,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/analyses/{analysis_id}/imports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Imports
+         * @description Where each consumer of this analysis imports the affected modules, with the hash of each file at the analysed commit.
+         */
+        get: operations["get_imports_api_analyses__analysis_id__imports_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/analyses/{analysis_id}/pairs": {
         parameters: {
             query?: never;
@@ -107,6 +127,26 @@ export interface paths {
         };
         /** Get Finding */
         get: operations["get_finding_api_findings__finding_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/findings/{finding_id}/fix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Fix
+         * @description The fix stored for a finding by the remediation (the most recent one, VERIFIED first); 404 when none exists.
+         */
+        get: operations["get_fix_api_findings__finding_id__fix_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -679,6 +719,17 @@ export interface components {
              */
             visibility: string;
         };
+        /** ConsumerImports */
+        ConsumerImports: {
+            /** Cell Id */
+            cell_id: string;
+            /** Commit */
+            commit: string;
+            /** Consumer */
+            consumer: string;
+            /** Sites */
+            sites: components["schemas"]["ImportSite"][];
+        };
         /** CountersView */
         CountersView: {
             /** Analysis Id */
@@ -880,6 +931,30 @@ export interface components {
             /** Witness Ids */
             witness_ids: string[];
         };
+        /** FixView */
+        FixView: {
+            /** Constraint */
+            constraint: string;
+            /** Consumer */
+            consumer?: string | null;
+            /** Diff */
+            diff: string;
+            /** Finding Id */
+            finding_id: string;
+            /**
+             * Fresh Runs
+             * @default 0
+             */
+            fresh_runs: number;
+            /** Label */
+            label: string;
+            /** Reason */
+            reason?: string | null;
+            /** Target Path */
+            target_path?: string | null;
+            /** Target Sha256 */
+            target_sha256?: string | null;
+        };
         /** GraphEdge */
         GraphEdge: {
             /** Kind */
@@ -941,6 +1016,17 @@ export interface components {
              * Format: date-time
              */
             time: string;
+        };
+        /** ImportSite */
+        ImportSite: {
+            /** File */
+            file: string;
+            /** Line */
+            line: number;
+            /** Module */
+            module: string;
+            /** Sha256 */
+            sha256?: string | null;
         };
         /** InventoryDep */
         InventoryDep: {
@@ -1500,6 +1586,37 @@ export interface operations {
             };
         };
     };
+    get_imports_api_analyses__analysis_id__imports_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                analysis_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsumerImports"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_pairs_api_analyses__analysis_id__pairs_get: {
         parameters: {
             query?: never;
@@ -1601,6 +1718,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FindingDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_fix_api_findings__finding_id__fix_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                finding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FixView"];
                 };
             };
             /** @description Validation Error */

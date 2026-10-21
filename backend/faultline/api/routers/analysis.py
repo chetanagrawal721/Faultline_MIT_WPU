@@ -5,8 +5,9 @@ from ...analysis.whypath import inventory_graph, why_path
 from ...core.errors import InvalidTransitionError, NotFoundError
 from ...core.ids import new_id
 from ...core.models import Job
-from ...core.views import AnalysisView, CountersView, InventoryGraph, PairStatus, WhyPath
+from ...core.views import AnalysisView, ConsumerImports, CountersView, InventoryGraph, PairStatus, WhyPath
 from ...evidence.counters import counters, pair_statuses
+from ...evidence.runtime import store_for
 from ...ingestion import service
 from ...storage import jobs
 from ..deps import fresh_conn, get_conn, require_token
@@ -24,6 +25,22 @@ def get_counters(analysis_id: str, conn=Depends(fresh_conn)) -> CountersView:
     """How many pairs this analysis reused and recomputed, counted from the event log only."""
     analysis_view(conn, analysis_id)
     return CountersView.model_validate(counters(conn, analysis_id))
+
+
+@router.get("/analyses/{analysis_id}/imports", response_model=list[ConsumerImports])
+def get_imports(analysis_id: str, conn=Depends(fresh_conn)) -> list[ConsumerImports]:
+    """Where each consumer of this analysis imports the affected modules, with the hash of each file at the analysed commit."""
+    analysis_view(conn, analysis_id)
+    st = store_for(conn)
+    if st is None:
+        return []
+    out = []
+    for r in conn.execute("SELECT p.object_id FROM pointer p JOIN cell c ON p.slot LIKE 'imports:' || c.id || ':%' WHERE c.analysis_id=? ORDER BY p.slot", (analysis_id,)):
+        got = st.get(r["object_id"])
+        if got.ok:
+            d = got.payload
+            out.append(ConsumerImports(cell_id=d["cell_id"], consumer=d["consumer_repo"], commit=d["consumer_commit"], sites=d["sites"]))
+    return out
 
 
 @router.get("/analyses/{analysis_id}/pairs", response_model=list[PairStatus])

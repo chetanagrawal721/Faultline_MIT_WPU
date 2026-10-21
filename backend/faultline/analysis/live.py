@@ -163,15 +163,19 @@ def _run_live(conn, sbx, image, store, analysis_project_id, aid, say) -> LiveRes
         src_root = (layout.get("source_roots") or ["."])[0]
         known = artifact_modules(prod_root, prod_inv["entries"], src_root, pkg)
         imported: dict[str, list[str]] = {}
+        scans: dict[str, tuple[object, dict[str, str]]] = {}
         for cid_, _rid in plan.consumers:
             cl = _project_layout(conn, cid_)
             cdir = store.snapshot_dir(cl["store_path"])
-            scan = scan_imports(Path(cdir), load_inventory(Path(cdir))["entries"], pkg, known, under=cl["rel_path"])
+            cinv = load_inventory(Path(cdir))
+            scan = scan_imports(Path(cdir), cinv["entries"], pkg, known, under=cl["rel_path"])
             imported[cid_] = scan.modules
+            scans[cid_] = (scan, {e["path"]: e.get("sha256") for e in cinv["entries"] if e.get("kind") == "file"})
         cell_id = persist_cell(conn, aid, plan, test_hash, imported)
         if plan.projection.no_drift:
             out_cells.append({"cell_id": cell_id, "state": "NO_DRIFT", "finding_id": None, "consumers": [c for c, _ in plan.consumers]})
             continue
+        _store_imports(conn, aid, cell_id, plan, scans)
 
         fid, state = execute_cell(conn, sbx, image, store, builder, aid, cell_id, plan, layout, pkg, imported, test_hash, rels, say, base, n,
                                   prod_root=prod_root, prod_inv=prod_inv, src_root=src_root)
@@ -179,6 +183,17 @@ def _run_live(conn, sbx, image, store, analysis_project_id, aid, say) -> LiveRes
     conn.execute("UPDATE analysis SET status='DONE', finished_at=?, stats_json=? WHERE id=?",
                  (_now(), json.dumps({"failed_consumers": failed}, sort_keys=True), aid))
     return LiveResult(aid, out_cells, funnel(conn, aid))
+
+
+def _store_imports(conn: sqlite3.Connection, analysis_id: str, cell_id: str, plan, scans: dict) -> None:
+    """Keep where each consumer imports the affected modules, with the hash of that file at the analysed commit: the language server shows a finding on
+    these lines and uses the hash to tell whether the file has changed since."""
+    for cid_, (scan, hashes) in scans.items():
+        row = conn.execute("SELECT s.sha, r.owner, r.name FROM project p JOIN snapshot s ON s.id=p.snapshot_id JOIN repository r ON r.id=s.repository_id "
+                           "WHERE p.id=?", (cid_,)).fetchone()
+        sites = [{"module": x["module"], "file": x["file"], "line": x["line"], "sha256": hashes.get(x["file"])} for x in scan.sites]
+        projections.store_object(conn, "consumer_imports", {"consumer_commit": row["sha"], "consumer_repo": f"{row['owner']}/{row['name']}", "consumer_project": cid_,
+                                                            "cell_id": cell_id, "sites": sites}, slot=f"imports:{cell_id}:{cid_}", analysis_id=analysis_id)
 
 
 def _built(conn: sqlite3.Connection, analysis_id: str, result):

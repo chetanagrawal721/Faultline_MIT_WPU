@@ -412,6 +412,38 @@
         "title": "CellView",
         "type": "object"
       },
+      "ConsumerImports": {
+        "additionalProperties": false,
+        "properties": {
+          "cell_id": {
+            "title": "Cell Id",
+            "type": "string"
+          },
+          "commit": {
+            "title": "Commit",
+            "type": "string"
+          },
+          "consumer": {
+            "title": "Consumer",
+            "type": "string"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/ImportSite"
+            },
+            "title": "Sites",
+            "type": "array"
+          }
+        },
+        "required": [
+          "cell_id",
+          "consumer",
+          "commit",
+          "sites"
+        ],
+        "title": "ConsumerImports",
+        "type": "object"
+      },
       "CountersView": {
         "additionalProperties": false,
         "properties": {
@@ -1082,6 +1114,84 @@
         "title": "FindingSummary",
         "type": "object"
       },
+      "FixView": {
+        "additionalProperties": false,
+        "properties": {
+          "constraint": {
+            "title": "Constraint",
+            "type": "string"
+          },
+          "consumer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consumer"
+          },
+          "diff": {
+            "title": "Diff",
+            "type": "string"
+          },
+          "finding_id": {
+            "title": "Finding Id",
+            "type": "string"
+          },
+          "fresh_runs": {
+            "default": 0,
+            "title": "Fresh Runs",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "target_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Path"
+          },
+          "target_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Sha256"
+          }
+        },
+        "required": [
+          "finding_id",
+          "label",
+          "constraint",
+          "diff"
+        ],
+        "title": "FixView",
+        "type": "object"
+      },
       "GraphEdge": {
         "additionalProperties": false,
         "properties": {
@@ -1241,6 +1351,41 @@
           "time"
         ],
         "title": "Health",
+        "type": "object"
+      },
+      "ImportSite": {
+        "additionalProperties": false,
+        "properties": {
+          "file": {
+            "title": "File",
+            "type": "string"
+          },
+          "line": {
+            "title": "Line",
+            "type": "integer"
+          },
+          "module": {
+            "title": "Module",
+            "type": "string"
+          },
+          "sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sha256"
+          }
+        },
+        "required": [
+          "module",
+          "file",
+          "line"
+        ],
+        "title": "ImportSite",
         "type": "object"
       },
       "InventoryDep": {
@@ -2831,6 +2976,53 @@
         ]
       }
     },
+    "/api/analyses/{analysis_id}/imports": {
+      "get": {
+        "description": "Where each consumer of this analysis imports the affected modules, with the hash of each file at the analysed commit.",
+        "operationId": "get_imports_api_analyses__analysis_id__imports_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "analysis_id",
+            "required": true,
+            "schema": {
+              "title": "Analysis Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConsumerImports"
+                  },
+                  "title": "Response Get Imports Api Analyses  Analysis Id  Imports Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Imports",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
     "/api/analyses/{analysis_id}/pairs": {
       "get": {
         "description": "Each pair of this analysis: reused or recomputed, and which inputs differ from the last time.",
@@ -3006,6 +3198,49 @@
           }
         },
         "summary": "Get Finding",
+        "tags": [
+          "findings"
+        ]
+      }
+    },
+    "/api/findings/{finding_id}/fix": {
+      "get": {
+        "description": "The fix stored for a finding by the remediation (the most recent one, VERIFIED first); 404 when none exists.",
+        "operationId": "get_fix_api_findings__finding_id__fix_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "title": "Finding Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Fix",
         "tags": [
           "findings"
         ]
