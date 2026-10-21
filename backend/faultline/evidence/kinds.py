@@ -21,6 +21,7 @@ KINDS: dict[str, Kind] = {k.name: k for k in (
     Kind("fix_plan", 1, ("finding_id", "label", "row", "slot", "seq")),
     Kind("pair_record", 1, ("pair_key", "inputs")),
     Kind("ddmin_checkpoint", 1, ("minimisation_id", "seq", "state")),
+    Kind("ddmin_test", 1, ("minimisation_id", "test_id", "subset", "direction", "outcome", "slot", "seq")),
     Kind("consumer_imports", 1, ("consumer_commit", "sites")),
     Kind("world_ref", 1, ("world_hash",)),
 )}

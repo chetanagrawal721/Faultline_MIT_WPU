@@ -18,6 +18,7 @@ from ..resolvers.pinned import PinnedRequirement
 from ..witnesses.signature import signature_of
 from ..worlds.builder import WorldBuilder, WorldBuildError
 from ..worlds.forced import LABEL, ForcedWorld, force
+from .checkpoint import ResumableDdmin, minimisation_id
 from .ddmin import Budget, DdminResult, Outcome, ddmin
 
 
@@ -81,11 +82,27 @@ def make_tester(sbx, image, store_hash: str, builder: WorldBuilder, *, entry: st
 
 def attribute(sbx, image, builder: WorldBuilder, *, artifact_hash: str, entry: str, top_level: str, pythonpath: str, signature: FailureSignature,
               ref: list[PinnedRequirement], consumer: list[PinnedRequirement], delta: list[str], budget: Budget | None = None,
-              run: Callable[..., OracleRunResult] | None = None) -> Attribution:
+              run: Callable[..., OracleRunResult] | None = None, conn: sqlite3.Connection | None = None, pair_key: str | None = None,
+              analysis_id: str | None = None, hook=None) -> Attribution:
+    """With `conn` and `pair_key` the search is resumable: every finished test is stored, and a repeat of the same pair, witness and delta (even in
+    a new analysis after the worker died) answers the stored tests from the store and runs only what is left. Without them it is the plain search."""
     log: list[dict] = []
     suff, nec = make_tester(sbx, image, artifact_hash, builder, entry=entry, top_level=top_level, pythonpath=pythonpath, signature=signature,
                             ref=ref, consumer=consumer, log=log, run=run)
-    res: DdminResult = ddmin(delta, suff, budget)
+    chain: ResumableDdmin | None = None
+    if conn is not None and pair_key is not None:
+        def search_test(subset):
+            out = suff(subset)
+            return out, dict(log[-1])                                           # the log entry is the stored detail of this test
+
+        def replay(direction, subset, outcome, detail):
+            if direction == "search" and detail:
+                log.append(detail)                                              # a test answered from the store still belongs in the attempt log
+        chain = ResumableDdmin(conn, minimisation=minimisation_id(pair_key, signature.model_dump(mode="json"), list(delta)), items=list(delta),
+                               test=search_test, budget=budget, analysis_id=analysis_id, hook=hook, on_replay=replay)
+        res: DdminResult = chain.run_search().result
+    else:
+        res = ddmin(delta, suff, budget)
     notes = [f"search: {res.tests} forced worlds tried over {len(delta)} differing packages; no coupled package groups were assumed",
              "forced worlds are attribution experiments, not observed environments"]
     if res.unresolved:
@@ -104,7 +121,14 @@ def attribute(sbx, image, builder: WorldBuilder, *, artifact_hash: str, entry: s
     suff_world = next((x["world_hash"] for x in log if x["subset"] == sorted(minimal) and x["outcome"] == "FAIL"), None)
     log.append({"direction": "sufficiency", "subset": list(minimal), "world_hash": suff_world, "outcome": "FAIL",
                 "note": "reference world plus the cause reproduces the failure with the exact witness signature"})
-    n_out, n_note, n_world = nec(frozenset(minimal))
+    if chain is not None:
+        def necessity_test(subset):
+            o, note, w = nec(subset)
+            return o, {"note": note, "world_hash": w}
+        n_out, n_detail = chain.check("necessity", frozenset(minimal), necessity_test)
+        n_note, n_world = (n_detail or {}).get("note", ""), (n_detail or {}).get("world_hash")
+    else:
+        n_out, n_note, n_world = nec(frozenset(minimal))
     runs = res.tests + 1
     log.append({"direction": "necessity", "subset": list(minimal), "world_hash": n_world, "outcome": n_out.value, "note": f"consumer with the cause reverted: {n_note}"})
     necessary = True if n_out == Outcome.PASS else False if n_out == Outcome.FAIL else None

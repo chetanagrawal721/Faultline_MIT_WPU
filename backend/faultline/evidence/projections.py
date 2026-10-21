@@ -115,7 +115,7 @@ def apply_other(conn: sqlite3.Connection, p: dict) -> None:
 
 
 APPLY = {"oracle_result": apply_oracle_result, "witness": apply_witness, "verdict": apply_verdict, "attribution": apply_attribution,
-         "fix_plan": apply_fix_plan, "pair_record": apply_other, "ddmin_checkpoint": apply_other, "consumer_imports": apply_other, "world_ref": apply_other}
+         "fix_plan": apply_fix_plan, "pair_record": apply_other, "ddmin_checkpoint": apply_other, "ddmin_test": apply_other, "consumer_imports": apply_other, "world_ref": apply_other}
 
 # the order a rebuild applies kinds in, so a row never refers to one that does not exist yet
 REBUILD_ORDER = ("oracle_result", "witness", "attribution", "verdict", "fix_plan")
