@@ -88,6 +88,12 @@ def reference_ddmin(items: Sequence[str], test: Callable[[frozenset[str]], Outco
 
 # ---- helpers -----------------------------------------------------------------------------------------------------------------------
 
+@pytest.fixture(autouse=True)
+def store_on(monkeypatch):
+    """These tests are about the evidence store, so they run with it on whatever the suite-wide setting is; the ones about the store being off set it themselves."""
+    monkeypatch.setenv("FAULTLINE_EVIDENCE_STORE", "on")
+
+
 @pytest.fixture
 def conn(tmp_path, monkeypatch):
     monkeypatch.setenv("FAULTLINE_EVIDENCE_DIR", str(tmp_path / "objects"))

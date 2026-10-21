@@ -24,7 +24,8 @@ def serve(name: str) -> tuple[subprocess.Popen, str]:
         port = s.getsockname()[1]
     env = {**os.environ, "PYTHONPATH": str(ROOT / "backend"), "FAULTLINE_DB": str(KEPT / name / "fix.db"), "FAULTLINE_STORE": str(KEPT / name / "store"),
            "FAULTLINE_MODE": "LIVE"}
-    code = "import uvicorn;from faultline.api.main import create_app;from faultline.core.config import Settings;uvicorn.run(create_app(Settings.from_env()),host='127.0.0.1',port=%d,log_level='warning')" % port
+    code = ("import uvicorn;from faultline.api.main import create_app;from faultline.core.config import Settings;"
+            f"uvicorn.run(create_app(Settings.from_env()),host='127.0.0.1',port={port},log_level='warning')")
     p = subprocess.Popen([sys.executable, "-c", code], env=env, cwd=ROOT)
     url = f"http://127.0.0.1:{port}"
     for _ in range(100):
@@ -39,8 +40,6 @@ def serve(name: str) -> tuple[subprocess.Popen, str]:
 def main() -> int:
     ws = Path(tempfile.mkdtemp()) / "notify-svc"
     shutil.copytree(ROOT / "fixtures" / "repos" / "notify-svc" / "D", ws)
-    lock = (ws / "requirements.lock.txt").read_bytes()
-    spec = (ws / "requirements.in").read_bytes()
     # the developer's re-lock after the edit is simulated only on the files the editor does not touch: the editor edits requirements.txt (or .in) itself
     procs = [serve("before"), serve("after")]
     try:

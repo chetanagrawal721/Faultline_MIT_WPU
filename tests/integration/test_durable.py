@@ -119,7 +119,7 @@ def test_tc_5_3_1_a_killed_worker_is_replaced_and_nothing_is_duplicated(world):
 
 def test_tc_5_3_2_cancelling_stops_the_container_keeps_partial_evidence_and_labels_it(world):
     job_id = new_job(world, "durable:cancel")
-    a = start_worker(world)
+    a = start_worker(world, {"FAULTLINE_REUSE": "off"})           # the pair was computed by the test before this one; with reuse on there would be no verification to cancel
     wait_for(lambda: running_oracle_job(world, job_id), "the worker to be mid-verification")
     t0 = time.monotonic()
     jobs.request_cancel(world["conn"], job_id)

@@ -5,7 +5,7 @@ import json
 import sqlite3
 import time
 from collections.abc import Callable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from pathlib import Path
 
 from ..attribution.runner import attribute, persist

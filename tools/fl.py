@@ -136,9 +136,9 @@ def cmd_up(args: list[str]) -> int:
         if rc:
             return rc
     db_dir = Path(tempfile.mkdtemp(prefix="faultline-up-")) if check else VAR
-    env = {**os.environ, "FAULTLINE_DB": str(db_dir / "faultline.db"), "PYTHONPATH": str(ROOT / "backend")}
+    py, path = server_python()     # the base interpreter with the environment's packages: the environment's own python.exe is a launcher that fails in some terminals ("No Python at ...")
+    env = {**os.environ, "FAULTLINE_DB": str(db_dir / "faultline.db"), "PYTHONPATH": os.pathsep.join(path)}
     VAR.mkdir(exist_ok=True)
-    py = venv_python()
     out = {}
     if detach:
         out = {"stdout": open(VAR / "api.log", "ab"), "stderr": subprocess.STDOUT}   # keep the caller's terminal free
@@ -198,6 +198,23 @@ def cmd_rebuild(args: list[str]) -> int:
     return run([venv_python(), "-m", "faultline.evidence.cli", *args], env={"PYTHONPATH": str(ROOT / "backend")})
 
 
+def real_path(p: Path) -> Path:
+    """The path as an ordinary terminal sees it. The Claude desktop app is a packaged app: its processes see AppData/Roaming redirected into
+    AppData/Local/Packages/Claude_*/LocalCache/Roaming, so a path they wrote (the base interpreter in pyvenv.cfg) does not exist for a normal terminal."""
+    if p.exists():
+        return p
+    parts = list(p.parts)
+    low = [x.lower() for x in parts]
+    for i in range(len(parts) - 1):
+        if low[i] == "appdata" and low[i + 1] == "roaming":
+            head, tail = Path(*parts[:i]), Path(*parts[i + 2:])
+            for pkg in sorted((head / "AppData" / "Local" / "Packages").glob("Claude_*")):
+                cand = pkg / "LocalCache" / "Roaming" / tail
+                if cand.exists():
+                    return cand
+    return p
+
+
 def server_python() -> tuple[str, list[str]]:
     """The interpreter VS Code starts the language server with, and what goes on its PYTHONPATH.
 
@@ -211,6 +228,7 @@ def server_python() -> tuple[str, list[str]]:
         for line in cfg.read_text(encoding="utf-8").splitlines():
             if line.startswith("home"):
                 home = line.split("=", 1)[1].strip()
+    home = str(real_path(Path(home))) if home else home
     for cand in ((Path(home) / "python.exe", venv / "Lib" / "site-packages"), (Path(home) / "python3", next(iter((venv / "lib").glob("python3*/site-packages")), venv / "lib"))) if home else ():
         if cand[0].exists() and cand[1].exists():
             return str(cand[0]), [str(ROOT / "backend"), str(cand[1])]

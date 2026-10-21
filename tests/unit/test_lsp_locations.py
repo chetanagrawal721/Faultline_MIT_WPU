@@ -1,4 +1,5 @@
 """M13.8: where a finding is shown, how a file is found from its URI, the severity of each verdict, and what happens when a file changes."""
+import sys
 from pathlib import Path
 
 import pytest
@@ -99,8 +100,12 @@ def test_other_text_is_not_an_import_of_the_module(src):
 
 # ---- TC-13.8.2: URIs, paths and encodings -------------------------------------------------------------------------------------------------------
 
-def test_windows_uris_become_paths():
+@pytest.mark.skipif(sys.platform != "win32", reason="a drive letter is a path root only on Windows; elsewhere it is an ordinary folder name")
+def test_windows_drive_uris_become_paths():
     assert path_of("file:///c%3A/Users/Chetan/app.py") == Path("c:/Users/Chetan/app.py") or str(path_of("file:///c%3A/Users/Chetan/app.py")).lower().endswith(r"c:\users\chetan\app.py")
+
+
+def test_encoded_uris_become_paths_with_the_characters_decoded():
     assert "é" in str(path_of("file:///c%3A/Users/Ch%C3%A9tan/app.py"))
     assert " " in str(path_of("file:///c%3A/My%20Project/app.py"))
 

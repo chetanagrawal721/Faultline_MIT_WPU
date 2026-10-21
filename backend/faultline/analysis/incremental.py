@@ -5,6 +5,7 @@ counted as a fresh run of anything. A stored result is used only if the verdict,
 not, it is rejected (an OBJECT_REJECTED event) and the pair is computed again.
 """
 import json
+import os
 import sqlite3
 from dataclasses import dataclass, field
 
@@ -28,7 +29,7 @@ class Reuse:
 
 @dataclass
 class Recompute:
-    reason: str                                      # NEW (no stored result), CHANGED (an earlier pair of these repositories had other inputs), REJECTED
+    reason: str                                      # FORCED (reuse switched off with FAULTLINE_REUSE=off), NEW (no stored result), CHANGED (an earlier pair of these repositories had other inputs), REJECTED
     changed: list[dict] = field(default_factory=list)
     rejected: dict | None = None
 
@@ -62,6 +63,8 @@ def decide(conn: sqlite3.Connection, key: str, rec: dict, cell_id: str, analysis
     st = store_for(conn)
     if st is None:
         return Recompute("NEW")                      # with the store off nothing is stored, so nothing can be reused
+    if os.environ.get("FAULTLINE_REUSE", "on").strip().lower() == "off":
+        return Recompute("FORCED")                   # every pair is computed again (results are still stored); for tests that need a live verification to cancel or kill
     row = conn.execute("SELECT * FROM pair_index WHERE pair_key=?", (key,)).fetchone()
     rejected = None
     if row is not None and row["verdict_id"]:

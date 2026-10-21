@@ -19,7 +19,6 @@ CASES = [("notify-svc/D", "faultline-demo/notify-svc", "Error"), ("plugins-svc",
 
 
 def main() -> int:
-    import os
     import time
     db = ROOT / "var" / "lsp_live" / "lsp.db"
     import shutil

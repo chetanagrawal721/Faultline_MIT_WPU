@@ -14,6 +14,12 @@ from faultline.storage.migrate import migrate
 from tests.unit.test_pair_key import base
 
 
+@pytest.fixture(autouse=True)
+def store_on(monkeypatch):
+    """These tests are about the evidence store, so they run with it on whatever the suite-wide setting is; the ones about the store being off set it themselves."""
+    monkeypatch.setenv("FAULTLINE_EVIDENCE_STORE", "on")
+
+
 @pytest.fixture
 def conn(tmp_path, monkeypatch):
     monkeypatch.setenv("FAULTLINE_EVIDENCE_DIR", str(tmp_path / "objects"))
@@ -130,3 +136,10 @@ def test_counters_come_from_events_and_an_unfinished_pair_is_not_counted_as_done
     rows = {p["cell_id"]: p for p in pair_statuses(conn, "an1")}
     assert {k: (v["status"], v["reason"]) for k, v in rows.items()} == {"c1": ("REUSED", "REUSED"), "c2": ("RECOMPUTED", "CHANGED"), "c3": ("UNFINISHED", "NEW")}
     assert rows["c2"]["changed"] == ["producer.commit"]
+
+
+def test_reuse_can_be_switched_off_and_every_pair_is_computed_again(conn, monkeypatch):
+    """FAULTLINE_REUSE=off forces a recomputation even when a verified stored result exists (used by tests that need a verification to be running)."""
+    monkeypatch.setenv("FAULTLINE_REUSE", "off")
+    d = incremental.decide(conn, "pk_any", {"producer": {"repo": "a", "project": "p"}, "consumers": []}, "cell_x", "an_x")
+    assert isinstance(d, incremental.Recompute) and d.reason == "FORCED"

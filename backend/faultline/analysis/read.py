@@ -8,12 +8,12 @@ from ..core.views import (
     AttemptView,
     AttributionView,
     CellView,
-    StaticSiteView,
     DeltaLine,
     EvidenceLine,
     FailedConsumer,
     OraclePlanStep,
     RelationshipView,
+    StaticSiteView,
 )
 from ..verdicts.stats import funnel
 
