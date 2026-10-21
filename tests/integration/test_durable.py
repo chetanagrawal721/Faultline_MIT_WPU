@@ -101,14 +101,15 @@ def test_tc_5_3_1_a_killed_worker_is_replaced_and_nothing_is_duplicated(world):
 
     def n(sql, *a):
         return conn.execute(sql, a).fetchone()[0]
-    assert n("SELECT COUNT(*) FROM witness WHERE analysis_id=?", done["id"]) == 1                     # exactly one witness in the result that is served
+    assert n("SELECT COUNT(*) FROM witness WHERE analysis_id=?", done["id"]) == 2                     # the served result has its two witnesses (import and the library's own test), each exactly once
+    assert n("SELECT COUNT(DISTINCT entry_point) FROM witness WHERE analysis_id=?", done["id"]) == 2
     assert n("SELECT COUNT(*) FROM witness WHERE analysis_id=?", interrupted["id"]) == 0              # the killed attempt never reached a witness
     assert n("SELECT COUNT(*) FROM finding f JOIN cell c ON c.id=f.cell_id WHERE c.analysis_id=? AND f.verdict='BREAK_WITNESSED'", done["id"]) == 1
     assert n("SELECT COUNT(*) FROM finding f JOIN cell c ON c.id=f.cell_id WHERE c.analysis_id=?", interrupted["id"]) == 0
     runs = conn.execute("SELECT r.id, c.analysis_id, r.provenance FROM oracle_run r JOIN oracle_job j ON j.id=r.oracle_job_id JOIN cell c ON c.id=j.cell_id "
                         "WHERE c.analysis_id IN (?,?)", (interrupted["id"], done["id"])).fetchall()
     assert len({r["id"] for r in runs}) == len(runs)                                                  # no run record is counted twice
-    assert sum(1 for r in runs if r["analysis_id"] == done["id"]) == 6 and all(r["provenance"] == "FRESH_EXECUTION" for r in runs if r["analysis_id"] == done["id"])
+    assert sum(1 for r in runs if r["analysis_id"] == done["id"]) == 12 and all(r["provenance"] == "FRESH_EXECUTION" for r in runs if r["analysis_id"] == done["id"])   # 6 for O-import and 6 for O-tests, each once
     assert n("SELECT COUNT(*) FROM oracle_job WHERE status='RUNNING' AND analysis_id=?", interrupted["id"]) == 0      # nothing is left 'running'
     from faultline.analysis.read import analysis_view, latest_analysis_id
     view = analysis_view(conn, latest_analysis_id(conn, world["apid"]))
