@@ -14,7 +14,7 @@ from ..core.errors import Cancelled, LeaseLost
 from ..core.ids import new_id
 from ..core.logging import phase
 from ..core.models import OracleRunResult
-from ..evidence import projections
+from ..evidence import pairs, projections
 from ..ingestion.clone import load_inventory
 from ..oracles import o_contract, planner
 from ..oracles.artifacts import prepare_artifact
@@ -212,6 +212,7 @@ def execute_cell(conn, sbx, image, store, builder, aid, cell_id, plan, layout, p
     modules = plan_modules(pkg, sorted({m for ms in imported.values() for m in ms if m != pkg}))
     env_id = builder.env_profile_id if hasattr(builder, "env_profile_id") else _env_id(builder)
     cell = FixtureCell(aid, cell_id, plan.producer_project_id, plan.reference.world_hash, test_hash, artifact, env_id)
+    pairs.record_pair(conn, cell_id, aid, pairs.collect_inputs(conn, cell_id, artifact_sha256=artifact, image=image))
     say(base + 0.05 / n, f"running O-import (3 + 3 fresh runs) on {', '.join(modules)}")
 
     def run(world_hash: str, modules=modules, artifact=artifact, pkg=pkg, pythonpath=pythonpath):
