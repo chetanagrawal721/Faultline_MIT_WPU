@@ -36,6 +36,7 @@ Each row is a claim; the second column is the evidence file that shows it. `scri
 | V22 | Type check, frontend build and generated API types are current | `evidence/M13.11/TC-13.11.4.txt` |
 | V23 | Demo A from a warm store: an unchanged rerun reuses every pair and runs no oracle; changing one producer recomputes only its pair | `evidence/M13.12/demo_A.txt` |
 | V24 | Demo B: the cause search is stopped for real, restarted, and no stored test runs again | `evidence/M13.12/demo_B.txt` |
+| V25 | The whole editor sequence in one real VS Code session: a BREAK WITNESSED error on line 2, the verified fix applied from the code action (only `werkzeug<3` appended), then an analysis started and cancelled from the editor; the container is gone and the job is CANCELLED | `evidence/M13.12/TC-13.12.3.txt`, `evidence/M13.12/editor_sequence.jsonl` |
 
 ## 2. Implemented, not verified
 
@@ -51,7 +52,7 @@ These exist in the code. They have not been shown to work in a real run, so they
 
 ## 3. Not done
 
-1. **Recording of the editor sequence (TC-13.12.3).** It is a manual step: someone must record diagnostics, fix and cancel from start to finish. The step log of each part exists (`evidence/M13.8/vscode_information_session.jsonl`, `evidence/M13.9/vscode_fix_session.jsonl`, `evidence/M13.10/vscode_cancel_session.jsonl`), but a single recording has not been made.
+1. **A screen video of the editor sequence.** TC-13.12.3 is recorded as a scripted session: one real VS Code 1.95.3 shows the diagnostic, applies the verified fix and cancels an analysis without being restarted (V25). It is a step log and a `docker ps` timeline, not a video; nobody has recorded the screen.
 2. **A live before/after editor fix on a real GitHub repository.** The fix is verified in a real VS Code on two prepared databases (before and after); the version where the developer commits the change and the project is re-analysed from GitHub has not been run.
 3. **Other ecosystems.** npm and Maven are inventory only (unchanged from before the twist).
 4. **Milestones outside the twist** that remain open in `CHECKLIST.md`: M11.4, M11.5, M12.1 to M12.4, M6.1, M7.2, M7.3, M8.1 to M8.3.

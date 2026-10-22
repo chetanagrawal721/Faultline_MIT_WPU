@@ -1491,3 +1491,27 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 ### 2026-10-22 00:59 UTC | TC PASS | TC-13.12.5 | by Chetan Agrawal
 - Wording
 - evidence: evidence/M13.12/TC-13.12.5.txt
+
+### 2026-10-22 01:01 UTC | TC PASS | TC-13.11.5 | by Chetan Agrawal
+- CI
+- evidence: evidence/M13.11/TC-13.11.5.txt
+
+### 2026-10-22 01:01 UTC | DONE | M13.11 | by Chetan Agrawal
+- SQL backward support and regression
+- test cases passed: 5/5
+
+### 2026-10-22 01:01 UTC | GATE DECLARED | Gate T5 | by Chetan Agrawal
+- Twist: fixes and cancellation
+- no waivers
+
+### 2026-10-22 01:05 UTC | TC PASS | TC-13.12.3 | by Chetan Agrawal
+- Editor sequence recorded
+- evidence: evidence/M13.12/TC-13.12.3.txt
+
+### 2026-10-22 01:05 UTC | DONE | M13.12 | by Chetan Agrawal
+- Jury demonstrations, instructions and final report
+- test cases passed: 5/5
+
+### 2026-10-22 01:05 UTC | GATE DECLARED | Gate T6 | by Chetan Agrawal
+- Twist: regression and jury demonstrations
+- no waivers

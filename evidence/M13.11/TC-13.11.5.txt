@@ -1,0 +1,17 @@
+# TC-13.11.5 CI (GitHub Actions) on the repository the work is pushed to
+run: https://github.com/chetanagrawal721/Faultline_MIT_WPU/actions/runs/39700556136 (commit 31f6ba0)
+status: completed, conclusion: success
+  success  Set up job
+  success  Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  success  Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+  success  Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  success  Install pinned tools
+  success  Faultline CI (lint, pins, tests, type drift, build, boot)
+  success  Replay a committed witness bundle on this clean machine (TC-5.2.2)
+  success  Release manifest (toolchain, image, lock and source hashes)
+  success  Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+  success  Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  success  Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+  success  Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  success  Complete job
+note: the older repository is not pushed to (standing instruction), so CI on it was not checked; the earlier runs on this repository failed for the reasons fixed in commits f3b8e3f, eaeb294 and 31f6ba0 (lint, platform tests, golden fingerprint).
