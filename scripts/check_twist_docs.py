@@ -15,7 +15,7 @@ REPORT = ROOT / "docs" / "INCREMENTAL_WITNESS_REPORT.md"
 BANNED = re.compile(r"\b(compatible|compatibility|proof|proofs|guarantee|guarantees|guaranteed|AI[- ]detected)\b", re.IGNORECASE)
 DISCLAIMED = re.compile(r"\b(never|not|no|nothing|avoid|without|banned|cannot|does not|do not)\b", re.IGNORECASE)
 VERDICTS = ["BREAK WITNESSED", "SILENT DIVERGENCE WITNESSED", "NO DIVERGENCE OBSERVED", "NOT EXPOSED", "EXPOSED", "POTENTIAL", "INCONCLUSIVE", "HYGIENE"]
-SCANNED = [*sorted((ROOT / "docs").glob("INCREMENTAL_WITNESS_*.md")), ROOT / "docs" / "DEMO_GUIDE.md", ROOT / "docs" / "DEMO_GUIDE_SIMPLE.md", ROOT / "docs" / "DEMO_COMPLETE.md",
+SCANNED = [*sorted((ROOT / "docs").glob("INCREMENTAL_WITNESS_*.md")), ROOT / "docs" / "DEMO_GUIDE.md", ROOT / "docs" / "DEMO_GUIDE_SIMPLE.md", ROOT / "docs" / "DEMO_COMPLETE.md", ROOT / "docs" / "DEMO_SQL_QUERIES.md",
            ROOT / "docs" / "adr" / "0008-incremental-witness.md", ROOT / "frontend" / "src" / "app" / "views" / "Reuse.tsx",
            ROOT / "backend" / "faultline" / "analysis" / "static.py", ROOT / "backend" / "faultline" / "analysis" / "incremental.py",
            *sorted((ROOT / "backend" / "faultline" / "lsp").glob("*.py"))]

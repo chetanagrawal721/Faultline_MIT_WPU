@@ -402,6 +402,8 @@ Copy the command printed under section 6 (`... --object <id>`), run it, and scro
 
 > **Say:** "This is the real file. You can open it in any editor. It is plain JSON."
 
+Twenty-plus ready-to-run queries, each with the words to say, are in `docs/DEMO_SQL_QUERIES.md`. For a 60-second version use A1, A4, B1 and D2.
+
 ### Do: ask the database a question (optional, 30 seconds)
 
 ```powershell

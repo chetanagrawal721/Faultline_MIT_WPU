@@ -2,6 +2,7 @@
 
     python tools/fl.py script scripts/show_store.py                 # location, tables, the evidence store, pair keys, newest events
     python tools/fl.py script scripts/show_store.py --hashes        # the tables that hold hashes, with real rows, and one hash followed end to end
+    python tools/fl.py script scripts/show_store.py --prove-append-only   # try to change an event (on a copy): the database refuses
     python tools/fl.py script scripts/show_store.py --object ID     # one stored object, printed as it is on disk
     python tools/fl.py script scripts/show_store.py --check         # re-hash every stored object and report any that does not match its name
     python tools/fl.py script scripts/show_store.py --sql "SELECT kind, COUNT(*) FROM evidence_event GROUP BY kind"   # any read-only query
@@ -133,12 +134,41 @@ def show_hashes(c: sqlite3.Connection, objects: Path) -> int:
     return 0
 
 
+def prove_append_only(db: Path) -> int:
+    """Works on a copy in the temporary folder; the real database is only read."""
+    import shutil
+    import tempfile
+    work = Path(tempfile.mkdtemp(prefix="fl-append-only-")) / "copy.db"
+    src = sqlite3.connect(f"file:{db.as_posix()}?mode=ro", uri=True)
+    dst = sqlite3.connect(work)
+    src.backup(dst)
+    src.close()
+    first = dst.execute("SELECT id, kind FROM evidence_event ORDER BY id LIMIT 1").fetchone()
+    print(f"a copy of the database is at {work} (the real file is not touched)")
+    print(f"event #{first[0]} is {first[1]}\n")
+    code = 0
+    for sql in (f"UPDATE evidence_event SET kind='X' WHERE id={first[0]}", f"DELETE FROM evidence_event WHERE id={first[0]}"):
+        print("  " + sql)
+        try:
+            dst.execute(sql)
+            dst.commit()
+            print("  -> it was ACCEPTED (this should not happen)\n")
+            code = 1
+        except sqlite3.Error as e:
+            print(f"  -> refused by the database: {e}\n")
+    dst.close()
+    shutil.rmtree(work.parent, ignore_errors=True)
+    print("The event log is append-only: the database itself refuses to change or delete a recorded event." if code == 0 else "NOT append-only")
+    return code
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--db")
     ap.add_argument("--object")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--hashes", action="store_true", help="show the tables that hold hashes")
+    ap.add_argument("--prove-append-only", action="store_true", help="on a throw-away copy, try to change and delete an event and show that the database refuses")
     ap.add_argument("--sql", help="a single SELECT statement, run read only")
     ap.add_argument("--events", type=int, default=12)
     a = ap.parse_args()
@@ -152,6 +182,8 @@ def main() -> int:
     if a.check:
         return check_objects(objects)
 
+    if a.prove_append_only:
+        return prove_append_only(db)
     c = connect_ro(db)
     if a.hashes:
         return show_hashes(c, objects)
@@ -159,7 +191,11 @@ def main() -> int:
         if not a.sql.lstrip().lower().startswith(("select", "with")) or ";" in a.sql.strip().rstrip(";"):
             print("only a single SELECT statement is accepted")
             return 2
-        cur = c.execute(a.sql)
+        try:
+            cur = c.execute(a.sql)
+        except sqlite3.Error as e:
+            print(f"the query was refused: {e}")
+            return 2
         cols = [d[0] for d in cur.description]
         rows = cur.fetchmany(200)
         widths = [max(len(str(x)) for x in [col, *[r[i] for r in rows]]) for i, col in enumerate(cols)]
