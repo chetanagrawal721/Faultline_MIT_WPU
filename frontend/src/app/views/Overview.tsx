@@ -69,11 +69,21 @@ export function OverviewView({ go }: { go: Go }) {
     ["verdict", "Verdict", analysis ? verdicts : "—", "findings"],
   ];
 
-  const attention: { key: string; tone: "warn" | "neutral"; label: string; text: string; hint: string; view: AppView; id?: string }[] = [
-    ...inconclusive.slice(0, 3).map((x) => ({ key: x.finding_id, tone: "warn" as const, label: "Inconclusive", text: `${x.artifact} → ${x.consumer}`, hint: "Open the finding", view: "finding" as AppView, id: x.finding_id })),
-    ...(analysis?.failed ?? []).slice(0, 3).map((x, i) => ({ key: `f${i}`, tone: "warn" as const, label: "Could not analyse", text: `${x.consumer}: ${x.reason}`, hint: "Open the world matrix", view: "worlds" as AppView })),
-    ...failedJobs.slice(0, 2).map((j) => ({ key: j.job_id, tone: "neutral" as const, label: "Job failed", text: `${j.kind} · ${j.failure_class ?? "unknown"}`, hint: "Open jobs", view: "jobs" as AppView })),
+  type Attention = { key: string; tone: "warn" | "neutral"; label: string; text: string; hint: string; view: AppView; id?: string; count: number };
+  const raw: Omit<Attention, "count">[] = [
+    ...inconclusive.map((x) => ({ key: x.finding_id, tone: "warn" as const, label: "Inconclusive", text: `${x.artifact} → ${x.consumer}`, hint: "Open the finding", view: "finding" as AppView, id: x.finding_id })),
+    ...(analysis?.failed ?? []).map((x, i) => ({ key: `f${i}`, tone: "warn" as const, label: "Could not analyse", text: `${x.consumer}: ${x.reason}`, hint: "Open the world matrix", view: "worlds" as AppView })),
+    ...failedJobs.map((j) => ({ key: j.job_id, tone: "neutral" as const, label: "Job failed", text: `${j.kind} · ${j.failure_class ?? "unknown"}`, hint: "Open jobs", view: "jobs" as AppView })),
   ];
+  // the same problem repeated is one line with a count, so the list says how many kinds of problem there are, not how often one was recorded
+  const grouped = new Map<string, Attention>();
+  for (const a of raw) {
+    const k = `${a.label}|${a.text}`;
+    const seen = grouped.get(k);
+    if (seen) seen.count += 1;
+    else grouped.set(k, { ...a, count: 1 });
+  }
+  const attention = [...grouped.values()].slice(0, 6);
 
   return (
     <>
@@ -109,7 +119,7 @@ export function OverviewView({ go }: { go: Go }) {
           <div className="work-grid two-one">
             <div data-testid="dashboard">
               <Panel title="Analysis funnel" meta={project ? `${project.name} · persisted stages` : "Persisted stages"}>
-                <div className={analysis ? "funnel" : "funnel"} data-testid="funnel" {...(analysis ? { "data-analysis-id": analysis.id } : {})}>
+                <div className="funnel" data-testid="funnel" {...(analysis ? { "data-analysis-id": analysis.id } : {})}>
                   {stages.map(([key, label, count, view], index) => (
                     <button key={key} onClick={() => go(view)} data-testid={`funnel-${key}`}>
                       <span>0{index + 1}</span>
@@ -129,14 +139,17 @@ export function OverviewView({ go }: { go: Go }) {
                 {analysis && Number(fn.consumers_discovered ?? 0) === 0 && <StateNote view="funnel" kind="empty" detail="No actionable relationship was found, so there is nothing to analyse." />}
               </Panel>
             </div>
-            <Panel title="Needs attention" meta={attention.length ? `${attention.length} item${attention.length === 1 ? "" : "s"}` : "Nothing flagged"}>
+            <Panel title="Needs attention" meta={attention.length ? `${raw.length} recorded · ${attention.length} kind${attention.length === 1 ? "" : "s"}` : "Nothing flagged"}>
               {attention.length === 0 ? (
                 <p className="panel-copy">Nothing in the persisted records needs attention. That is a statement about these records, not about the repositories.</p>
               ) : (
                 <div className="attention-list">
                   {attention.map((a) => (
                     <button key={a.key} onClick={() => go(a.view, a.id)}>
-                      <Status tone={a.tone}>{a.label}</Status>
+                      <span className="attention-head">
+                        <Status tone={a.tone}>{a.label}</Status>
+                        {a.count > 1 && <em className="attention-count" title={`${a.count} records`}>×{a.count}</em>}
+                      </span>
                       <strong>{a.text}</strong>
                       <small>{a.hint}</small>
                     </button>
@@ -156,7 +169,7 @@ export function OverviewView({ go }: { go: Go }) {
                   p.repositories.map((r) => `${r.owner}/${r.name}`).join(", ") || "none yet",
                   <code>{p.repositories.map((r) => short(r.pinned_sha, 7)).join(" → ") || "—"}</code>,
                   <ModeStatus mode={a?.mode ?? p.mode} />,
-                  a ? `${a.status}${a.outcome ? ` · ${a.outcome}` : ""}` : "No analysis",
+                  <span className="nowrap">{a ? `${a.status}${a.outcome ? ` · ${a.outcome}` : ""}` : "No analysis"}</span>,
                   a && a.cells.some((c) => c.verdict) ? (
                     <VerdictStatus verdict={a.cells.find((c) => c.verdict === "BREAK_WITNESSED")?.verdict ?? a.cells.find((c) => c.verdict)?.verdict ?? "INCONCLUSIVE"} />
                   ) : (
