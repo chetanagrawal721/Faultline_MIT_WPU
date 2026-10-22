@@ -1,3 +1,4 @@
+import { groupReasons, summarise } from "../../lib/text";
 import { useRef, useState } from "react";
 import { api, type FindingDetail, type Job } from "../../api/client";
 import { useAsync, short, words } from "../../lib/hooks";
@@ -99,7 +100,7 @@ function WhyPath({ id }: { id: string }) {
               <strong>{s.title}</strong>
               <Status tone={s.status === "analysed" ? "good" : "neutral"}>{s.status === "analysed" ? "Analysed" : "Not analysed"}</Status>
             </summary>
-            <p>{s.detail}</p>
+            <p>{summarise(s.detail)}</p>
             {s.items.length > 0 && (
               <ul className="why-items">
                 {s.items.map((it, k) => (
@@ -159,7 +160,7 @@ export function FindingView({ go, id }: { go: Go; id: string | null }) {
           <h2>
             Scoped verdict · {d.artifact} → {d.consumer}
           </h2>
-          <p data-testid="headline">{d.headline}</p>
+          <p data-testid="headline">{summarise(d.headline)}</p>
         </div>
         <div className="app-actions">
           <AppAction quiet onClick={() => go("worlds")}>
@@ -179,11 +180,11 @@ export function FindingView({ go, id }: { go: Go; id: string | null }) {
         <div className="finding-summary-grid">
           <div>
             <span>What was observed</span>
-            <p>{d.headline}</p>
+            <p>{summarise(d.headline)}</p>
           </div>
           <div>
             <span>What remains uncertain</span>
-            <p>{d.scope.reasons.length ? d.scope.reasons.join(" · ") : d.scope.not_checked.slice(0, 2).join(" · ")}</p>
+            <p>{d.scope.reasons.length ? groupReasons(d.scope.reasons).join(" · ") : d.scope.not_checked.slice(0, 2).join(" · ")}</p>
           </div>
           <div>
             <span>Scope</span>
@@ -252,15 +253,12 @@ export function FindingView({ go, id }: { go: Go; id: string | null }) {
       <div className="work-grid equal">
         <Panel title="Scope of this result" meta={`Verdict policy ${d.scope.policy}`}>
           <div data-testid="scope">
-            <dl className="key-values">
-              <div>
-                <dt>Exercised</dt>
-                <dd>{d.scope.exercised.length ? d.scope.exercised.map((e) => <code key={e} className="mod">{e} </code>) : "nothing"}</dd>
-              </div>
+            <dl className="key-values stacked">
+              <ExercisedRows items={d.scope.exercised} />
               {d.scope.not_applicable.length > 0 && (
                 <div>
                   <dt>Not applicable in this world</dt>
-                  <dd>{d.scope.not_applicable.map((e) => <code key={e}>{e} </code>)}</dd>
+                  <dd className="scope-chips">{d.scope.not_applicable.map((e) => <code key={e}>{e}</code>)}</dd>
                 </div>
               )}
             </dl>
@@ -274,7 +272,7 @@ export function FindingView({ go, id }: { go: Go; id: string | null }) {
               <>
                 <p className="panel-note"><strong>Why some interactions were not decided</strong></p>
                 <ul className="why-items">
-                  {d.scope.reasons.map((x) => (
+                  {groupReasons(d.scope.reasons).map((x) => (
                     <li key={x}>{x}</li>
                   ))}
                 </ul>
@@ -288,5 +286,54 @@ export function FindingView({ go, id }: { go: Go; id: string | null }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** What was exercised: the modules imported, and the call sites checked, grouped by file so that sixty sites read as a few lines instead of a wall of chips. */
+function ExercisedRows({ items }: { items: string[] }) {
+  const modules = items.filter((e) => !e.startsWith("bind:"));
+  const sites = new Map<string, string[]>();
+  for (const e of items) {
+    const m = /^bind:(.+):(\d+):(\d+)$/.exec(e);
+    if (m) sites.set(m[1], [...(sites.get(m[1]) ?? []), `${m[2]}:${m[3]}`]);
+  }
+  const total = [...sites.values()].reduce((n, v) => n + v.length, 0);
+  if (items.length === 0) {
+    return (
+      <div>
+        <dt>Exercised</dt>
+        <dd>nothing</dd>
+      </div>
+    );
+  }
+  return (
+    <>
+      {modules.length > 0 && (
+        <div>
+          <dt>Modules imported</dt>
+          <dd className="scope-chips">{modules.map((e) => <code key={e}>{e}</code>)}</dd>
+        </div>
+      )}
+      {total > 0 && (
+        <div>
+          <dt>Call sites checked</dt>
+          <dd>
+            <details className="scope-sites">
+              <summary>
+                {total} call site{total === 1 ? "" : "s"} in {sites.size} file{sites.size === 1 ? "" : "s"}
+              </summary>
+              <ul>
+                {[...sites.entries()].map(([file, lines]) => (
+                  <li key={file}>
+                    <code>{file}</code>
+                    <span>{lines.length} · lines {lines.map((l) => l.split(":")[0]).join(", ")}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </dd>
+        </div>
+      )}
+    </>
   );
 }

@@ -1,3 +1,4 @@
+import { summarise } from "../../lib/text";
 import { useState } from "react";
 import { api, type RelationshipView } from "../../api/client";
 import { useAsync, short, words } from "../../lib/hooks";
@@ -100,7 +101,7 @@ export function FindingsView({ go }: { go: Go }) {
             testid="findings-list"
             columns={["Finding", "Artifact → consumer", "Verdict", "Mode", "Scoped statement"]}
             rowAttrs={(i) => ({ "data-testid": "finding-row", "data-verdict": rows[i].verdict })}
-            rows={rows.map((f) => [<code>{short(f.finding_id.replace(/^fnd_/, ""), 10)}</code>, `${f.artifact} → ${f.consumer}`, <VerdictStatus verdict={f.verdict} />, <ModeStatus mode={f.mode} />, <span className="clamp-3" title={f.headline}>{f.headline}</span>])}
+            rows={rows.map((f) => [<code>{short(f.finding_id.replace(/^fnd_/, ""), 10)}</code>, `${f.artifact} → ${f.consumer}`, <VerdictStatus verdict={f.verdict} />, <ModeStatus mode={f.mode} />, <span className="clamp-3" title={f.headline}>{summarise(f.headline)}</span>])}
             onRow={(i) => go("finding", rows[i].finding_id)}
           />
         )}

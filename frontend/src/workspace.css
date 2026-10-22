@@ -413,3 +413,13 @@ html[data-theme="dark"] .faultline-loader { background: #141513; color: #ece9e0;
 .workspace.shell .attention-count { font-style: normal; font-size: 11.5px; font-weight: 600; color: var(--ui-muted); background: var(--ui-surface-2); border: 1px solid var(--ui-border); border-radius: 999px; padding: 0 7px; line-height: 18px; font-variant-numeric: tabular-nums; }
 .workspace.shell .work-panel > .panel-note:last-child { border-top: 1px solid var(--ui-border); }
 .workspace.shell .nowrap { white-space: nowrap; }
+
+/* Finding: the scope panel reads top to bottom, left aligned; call sites are grouped by file and folded */
+.workspace.shell .key-values.stacked > div { flex-direction: column; gap: 6px; }
+.workspace.shell .key-values.stacked dd { text-align: left; }
+.workspace.shell .scope-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.workspace.shell .scope-sites summary { cursor: pointer; color: var(--ui-text); }
+.workspace.shell .scope-sites summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.workspace.shell .scope-sites ul { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+.workspace.shell .scope-sites li { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
+.workspace.shell .scope-sites li span { color: var(--ui-muted); font-size: 12px; text-align: right; }
