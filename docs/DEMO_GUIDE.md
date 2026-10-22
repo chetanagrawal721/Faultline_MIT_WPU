@@ -34,7 +34,7 @@ $env:FAULTLINE_MODE = "LIVE"
 2. In PowerShell run the preflight and a warm-up case (this builds and stores the dependency worlds so the live demo is fast):
 
 ```powershell
-& "C:Python314python.exe" tools/fl.py script scripts/demo_check.py --case hero
+& "C:\Python314\python.exe" tools/fl.py script scripts/demo_check.py --case hero
 ```
 
 3. Wait for `Ready to demo.` (about 2-3 minutes). If it prints `FAIL`, read the line; common causes are Docker not running or no internet.

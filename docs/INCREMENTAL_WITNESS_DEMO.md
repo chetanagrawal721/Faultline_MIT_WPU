@@ -8,13 +8,13 @@ Say the mode out loud: everything here is a real run in Docker. Nothing is mocke
 
 ```powershell
 cd C:\Users\Chetan\Hackethopia
-& "C:\Python314\python.exe" scripts/twist_demo.py --preflight
+& "C:\Python314\python.exe" tools/fl.py script scripts/twist_demo.py --preflight
 ```
 
 If the preflight says there is no warm store, create it. It is a real cold run of five pairs (about 13 minutes), and it is what makes the demonstrations fast:
 
 ```powershell
-& "C:\Python314\python.exe" scripts/twist_demo.py --warm
+& "C:\Python314\python.exe" tools/fl.py script scripts/twist_demo.py --warm
 ```
 
 The warm store (database and objects) is kept under `var/twist_demo/warm`, and its checksum is written to `var/twist_demo/warm.json`. Each demonstration copies it first, so the warm store itself is never written to. The preflight re-checks the checksum.
@@ -24,7 +24,7 @@ Docker must be running and no other Faultline stack should be running (its worke
 ## 1. Demo A: it remembers, and it re-runs only what changed (about 6 minutes)
 
 ```powershell
-& "C:\Python314\python.exe" scripts/twist_demo.py --demo A
+& "C:\Python314\python.exe" tools/fl.py script scripts/twist_demo.py --demo A
 ```
 
 What to say and what appears:
@@ -43,7 +43,7 @@ Reference numbers from the earlier five-pair measurement (not a promise for anot
 ## 2. Demo B: a crash does not lose the search (about 8 minutes)
 
 ```powershell
-& "C:\Python314\python.exe" scripts/twist_demo.py --demo B
+& "C:\Python314\python.exe" tools/fl.py script scripts/twist_demo.py --demo B
 ```
 
 The fixture has two repositories whose dependency worlds differ by eight packages; one of them (`werkzeug`) breaks the import. Finding which one takes ten sandbox tests (labelled before the first run in `fixtures/twist/bisect.yaml`).
