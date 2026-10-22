@@ -4,6 +4,7 @@ VS Code (a pinned build started by @vscode/test-electron) -> the extension -> th
 samples `docker ps` while the editor session runs, and checks the job and the events afterwards.
 """
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -17,7 +18,8 @@ from tests.conftest import labelled_containers
 from tests.integration.test_lsp_cancel import ROOT, job_of_kind, query, served, start_worker
 from tests.livefix import fixture_repo
 
-pytestmark = [pytest.mark.docker, pytest.mark.slow]
+pytestmark = [pytest.mark.docker, pytest.mark.slow,
+              pytest.mark.skipif(sys.platform != "win32" and not os.environ.get("DISPLAY"), reason="a real VS Code window needs a display; run it on a desktop (it passed on Windows, evidence/M13.10)")]
 EVIDENCE = ROOT / "evidence" / "M13.10" / "vscode_cancel_session.jsonl"
 
 

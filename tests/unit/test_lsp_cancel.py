@@ -147,7 +147,8 @@ def test_a_cancel_when_the_api_has_gone_is_reported_and_does_not_crash_the_serve
         a.close()                                                    # the API is gone when the cancel is sent
         c.cancel(rid)
         r = c.response(rid, timeout=30)
-        assert r["error"]["code"] == CANCELLED, "the request is still answered as cancelled"
+        # either order is legitimate: the cancel arrives first (answered as cancelled) or the poll finds the API gone first (answered with an error); a result is never given
+        assert "result" not in r and r["error"]["code"] in (CANCELLED, -32603), r
         c.drain(0.5)
         states = [n["state"] for n in notifications(c, "faultline/status")]
         assert "unavailable" in states, "the cancel that could not be sent is reported, never shown as done"
