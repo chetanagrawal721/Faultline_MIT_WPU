@@ -1,0 +1,17 @@
+  ok    start from the warm store (checksum equal)
+
+Demo A, step 1: run the same analysis again. Nothing has changed.
+  47 s, counters {"reused": 5, "recomputed": 0, "unfinished": 0, "rejected_objects": 0}
+  ok    every pair is reused, none is computed  ({"reused": 5, "recomputed": 0, "unfinished": 0, "rejected_objects": 0})
+  ok    no oracle ran in this analysis (0 fresh executions)
+  ok    one PAIR_REUSED event per pair
+  ok    the pair list says REUSED for each pair
+
+Demo A, step 2: one producer gets a new commit (a comment in acme-showcase); run again.
+  344 s, counters {"reused": 4, "recomputed": 1, "unfinished": 0, "rejected_objects": 0}
+  ok    only the changed producer's pair is computed; the others are reused  ({"reused": 4, "recomputed": 1, "unfinished": 0, "rejected_objects": 0})
+  why it was computed again: CHANGED (producer.commit, producer_artifact_sha256)
+  ok    the reason names the producer's own inputs  ([['producer.commit', 'producer_artifact_sha256']])
+  ok    no stored object was rejected
+
+ALL CHECKS PASSED

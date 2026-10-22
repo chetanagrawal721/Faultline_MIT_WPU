@@ -1,0 +1,17 @@
+Demo B, step 1: start the analysis in a worker process and stop it for real right after the third test result is stored.
+  ok    the worker ended abruptly (exit code 77, no clean-up)  (exit code 77)
+  stored test results: 3; tests started 3, finished 3; checkpoints 2
+  ok    three test results were stored before the stop
+
+Demo B, step 2: restart. A new analysis of the same pair takes the minimisation over.
+  finished in 83 s
+  ok    every one of the 10 tests finished exactly once across both processes
+  ok    no test whose result was stored was started again
+  ok    the stored results were answered from the store (DDMIN_TEST_RESUMED)  (3 resumed)
+  ok    the earlier sandbox run records are still there, unchanged
+  ok    the stored test objects are byte-for-byte the same objects (content-addressed ids unchanged)
+  ok    the checkpoint chain is intact  (11 checkpoints)
+  ok    the attribution is the labelled one  (['werkzeug'] COMPLETE two_sided)
+  ok    the restarted analysis finished
+
+ALL CHECKS PASSED

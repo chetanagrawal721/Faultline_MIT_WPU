@@ -1472,3 +1472,22 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 ### 2026-10-22 00:32 UTC | TC PASS | TC-13.11.3 | by Chetan Agrawal
 - Parity
 - evidence: evidence/M13.11/TC-13.11.3.txt
+
+### 2026-10-22 00:59 UTC | START | M13.12 | by Chetan Agrawal
+- Jury demonstrations, instructions and final report
+
+### 2026-10-22 00:59 UTC | TC PASS | TC-13.12.1 | by Chetan Agrawal
+- Demo A passes
+- evidence: evidence/M13.12/TC-13.12.1.txt
+
+### 2026-10-22 00:59 UTC | TC PASS | TC-13.12.2 | by Chetan Agrawal
+- Demo B passes
+- evidence: evidence/M13.12/TC-13.12.2.txt
+
+### 2026-10-22 00:59 UTC | TC PASS | TC-13.12.4 | by Chetan Agrawal
+- Report claims have evidence
+- evidence: evidence/M13.12/TC-13.12.4.txt
+
+### 2026-10-22 00:59 UTC | TC PASS | TC-13.12.5 | by Chetan Agrawal
+- Wording
+- evidence: evidence/M13.12/TC-13.12.5.txt

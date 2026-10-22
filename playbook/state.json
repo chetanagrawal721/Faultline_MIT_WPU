@@ -150,6 +150,10 @@
       "started": "2026-10-21 22:38 UTC",
       "status": "in_progress"
     },
+    "M13.12": {
+      "started": "2026-10-22 00:59 UTC",
+      "status": "in_progress"
+    },
     "M13.2": {
       "done": "2026-10-21 17:04 UTC",
       "started": "2026-10-21 15:28 UTC",
@@ -784,6 +788,30 @@
     "TC-13.11.4": {
       "date": "2026-10-21 22:56 UTC",
       "evidence": "evidence/M13.11/TC-13.11.4.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.12.1": {
+      "date": "2026-10-22 00:59 UTC",
+      "evidence": "evidence/M13.12/TC-13.12.1.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.12.2": {
+      "date": "2026-10-22 00:59 UTC",
+      "evidence": "evidence/M13.12/TC-13.12.2.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.12.4": {
+      "date": "2026-10-22 00:59 UTC",
+      "evidence": "evidence/M13.12/TC-13.12.4.txt",
+      "note": "",
+      "status": "pass"
+    },
+    "TC-13.12.5": {
+      "date": "2026-10-22 00:59 UTC",
+      "evidence": "evidence/M13.12/TC-13.12.5.txt",
       "note": "",
       "status": "pass"
     },

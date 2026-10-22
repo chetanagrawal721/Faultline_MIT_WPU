@@ -66,7 +66,7 @@ Use two real public repositories (full list in `docs/DEMO_RUNBOOK.md`):
 ### Page 4: **Relationships** (left menu)
 
 - **Do:** open the first relationship.
-- **Say:** "This is the proof that the two repositories are related: the file and the line in both manifests. Look-alike names go to a 'suspected' list and never become findings."
+- **Say:** "This is the evidence that the two repositories are related: the file and the line in both manifests. Look-alike names go to a 'suspected' list and never become findings."
 
 ### Page 5: **World matrix**
 
@@ -111,7 +111,7 @@ Plain meaning: **do not repeat work you already did, and prove it.**
 - **Do:** on **New analysis** (or the project's analyze action) run the same two repositories again.
 - **Go back to:** **Overview** -> the panel **Reuse and recomputation**.
 - **Point at:** *Pairs reused* is now 1, *Pairs recomputed* is 0.
-- **Say:** "Nothing changed, so it did not run the sandbox again. It found the stored answer, checked that the answer and its evidence are intact, and reused it. This took seconds, not minutes."
+- **Say:** "Nothing changed, so it did not run the sandbox again. It found the stored answer, checked that the answer and its evidence are intact, and reused it. This took under a minute (47.9 s measured), not eleven."
 - **Point at:** the pair status and the reason: *REUSED*.
 - **Say:** "A reused result is never counted as a fresh run, so it can never fake a witness."
 
@@ -165,7 +165,7 @@ Open VS Code on `fixtures/repos/notify-svc/D` and open `app/main.py`.
 
 ## 5. Closing (20 seconds)
 
-> "Witnesses, not warnings. Red means we reproduced a failure, three times out of three, with fresh runs, and we found the package that causes it and a fix we re-checked. When we are not sure we say INCONCLUSIVE and tell you what we did not check. And because it remembers, the second run takes seconds, not minutes."
+> "Witnesses, not warnings. Red means we reproduced a failure, three times out of three, with fresh runs, and we found the package that causes it and a fix we re-checked. When we are not sure we say INCONCLUSIVE and tell you what we did not check. And because it remembers, the second run takes under a minute instead of eleven."
 
 ---
 

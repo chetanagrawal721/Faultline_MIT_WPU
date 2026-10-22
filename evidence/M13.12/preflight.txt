@@ -1,0 +1,8 @@
+Preflight
+  ok    Docker answers
+  ok    the execution image is in the allowlist
+  ok    the eight-candidate fixture is present
+  ok    the warm store matches its checksum  (eb9c82eb9a604b97)
+  ok    the warm store holds a completed analysis  (5 pairs)
+
+ALL CHECKS PASSED

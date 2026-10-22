@@ -6710,3 +6710,69 @@ Start by auditing the current codebase. Prioritise correctness, reproducibility,
 ~~~~~~
 
 **Outcome:** The revised methodology (`docs/INCREMENTAL_WITNESS_METHODOLOGY.md`) and the phase-by-phase playbook (`docs/INCREMENTAL_WITNESS_PLAYBOOK.md`), written before any implementation.
+
+### Prompt 35: Attempt the Information severity and finish the open acceptance cases
+
+**Purpose:** Decide whether the fourth severity can be connected to the live pipeline without changing the verdict semantics, and finish the cancellation and fix acceptance cases.
+
+**Prompt:**
+
+~~~~~~text
+We have decided to attempt the Information-severity integration because it could improve FAULTLINE's ability to communicate potential dependency risks separately from confirmed runtime breakage.
+
+Currently, live analysis reportedly produces Error, Warning, and Hint diagnostics. The Information severity mapping is already implemented and unit-tested, but findings such as POTENTIAL and EXPOSED are not yet connected to the live diagnostic pipeline.
+
+The objective is to expose genuine existing static-analysis findings as Information diagnostics without changing the dynamic verification engine or destabilizing the completed twist.
+
+Step 1 - Inspect the actual current state. Before editing anything: inspect the current Git status and recent commits; preserve all uncommitted work; locate the existing implementations of POTENTIAL, EXPOSED, and the LSP severity mapping; trace how diagnostics are currently generated and published; determine whether static findings already contain the information needed for valid LSP diagnostics, including a reliable source location and relevant dependency identity; identify the smallest integration point that can expose these findings without modifying core verdict semantics. Do not assume the earlier status report perfectly reflects the current checkout.
+
+Step 2 - Implement Information severity if the integration is safe. Prefer a narrow adapter between the existing static-analysis output and the current diagnostic publisher. Reuse existing static-analysis functionality; publish an Information diagnostic only for a genuine finding whose semantics justify that severity; preserve the original finding, verdict, provenance, and freshness information; use real source locations and never fabricate a call-site line; avoid duplicate diagnostics; do not promote a potential risk into a confirmed runtime failure; do not generate a verified witness or verified fix from static analysis alone; do not modify the content-addressed storage model, stable pair identities, DDMin algorithm, cancellation architecture, or SQL workflow unless inspection proves a change is necessary. If it requires implementing new static-analysis logic or changing core verdict generation, stop and report the blocker.
+
+Step 3 - Finish only the outstanding mandatory acceptance cases: rerun the adjusted real VS Code cancellation-session test; confirm that cancellation reaches the backend, terminates the sandbox, marks the job cancelled, and does not leave valid-looking findings from the cancelled run; complete the remaining verified code-action acceptance test; ensure remediation edits the correct consumer dependency file and is verified only after the resulting environment has been freshly validated. Do not weaken meaningful product assertions just to make a test pass; distinguish legitimate language-client cancellation representations from actual cancellation failures.
+
+Step 4 - Protect SQL compatibility. Run the existing targeted SQL workflow regression tests and verify that evidence-store operations do not introduce stale or duplicate results.
+
+Step 5 - Final integration check. Run the smallest meaningful end-to-end acceptance pass covering incremental reuse and selective recomputation, DDMin checkpoint recovery if recent changes could affect it, live VS Code diagnostics and cancellation, verified code-action behavior, SQL workflow compatibility, and the Information severity integration if implemented.
+~~~~~~
+
+**Outcome:** The cancellation and verified-fix cases were completed on real executions (M13.9, M13.10). The investigation found that live analysis never built the static inputs, so the Information severity needed a change to verdict generation; this was reported as a blocker.
+
+### Prompt 36: Implement the fourth severity properly
+
+**Purpose:** Connect the missing static inputs to the live verdict pipeline with the smallest safe change, and prove it.
+
+**Prompt:**
+
+~~~~~~text
+Implement the missing fourth-severity support properly. Do not waive TC-13.8.5 yet.
+
+The existing static-analysis modules, verdict rules, and Information severity mapping are already present. The problem is that live analysis does not build the usage index or API delta, and `live.py` calls `decide` without exposure data.
+
+First inspect the actual implementations and tests for `live.py`, `verdicts/engine.py`, `usage/exposure.py`, and `diff/`. Trace the exact semantics of POTENTIAL and EXPOSED before changing anything.
+
+Then connect the missing inputs to the existing live verdict-generation pipeline with the smallest safe architectural change. Do not fabricate findings, hardcode Information diagnostics, bypass the evidence store, or weaken existing tests.
+
+Add focused tests proving that:
+- Real static evidence can generate the appropriate POTENTIAL/EXPOSED verdict.
+- The resulting finding maps to Information and reaches the normal diagnostics pipeline.
+- No Information finding is emitted when the required evidence is absent.
+- Existing Error, Warning, and Hint behaviour remains unchanged.
+
+Run the relevant unit and integration tests, then run a real analysis and verify Information in the live VS Code session. Preserve the existing SQL workflow, incremental reuse, evidence provenance, and verdict semantics.
+
+If an architectural blocker appears, explain the exact missing contract and propose a minimal solution rather than silently abandoning the work. Update the tracker only when the acceptance criteria genuinely pass.
+~~~~~~
+
+**Outcome:** A static-evidence adapter (`analysis/static.py`, a wheel-surface reader that runs in the sandbox) raises only an unsettled cell to EXPOSED or POTENTIAL; the rule is part of the pair key. A real analysis shows Error, Warning, Information and Hint in a real VS Code (M13.8).
+
+### Prompt 37: A complete demo guide
+
+**Purpose:** Produce one ordered, page-by-page demonstration script in plain language.
+
+**Prompt:**
+
+~~~~~~text
+give me proper demo_guide file in which there is each and every step for the demo ok
+~~~~~~
+
+**Outcome:** `docs/DEMO_GUIDE.md` (every step with the real screen labels, fallbacks, judge answers and a clock) and `docs/DEMO_GUIDE_SIMPLE.md` (the same story in simpler words).

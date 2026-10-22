@@ -1,0 +1,6 @@
+Warm run: a real cold analysis of five pairs (nothing is stored yet, so every pair is computed)
+  857 s, counters {"reused": 0, "recomputed": 5, "unfinished": 0, "rejected_objects": 0}
+  ok    every pair was computed, none reused
+  the store now holds 242 objects; checksum eb9c82eb9a604b97
+
+ALL CHECKS PASSED

@@ -182,7 +182,7 @@ Plain meaning: **do not repeat work that is already proven, and prove that you d
 
 1. **New analysis** -> paste the same two links -> **Pin repositories** -> tick -> **Run analysis**.
 2. Say: "Same repositories, same commits, nothing changed."
-3. This run finishes in seconds instead of minutes.
+3. This run finishes in under a minute (47.9 s measured) instead of the 680 s of the first run.
 
 ### Step 3.2: Show the counters
 
@@ -250,7 +250,7 @@ Use the Extension Development Host window from step A4. Open `app/main.py`.
 
 ## Part 5. Close (30 seconds)
 
-> "Witnesses, not warnings. Red means we reproduced a failure, three times out of three, with fresh runs, and we found the package that causes it and a fix we re-checked. When we are not sure we say INCONCLUSIVE and tell you what we did not check. And because it remembers, the second run takes seconds, not minutes."
+> "Witnesses, not warnings. Red means we reproduced a failure, three times out of three, with fresh runs, and we found the package that causes it and a fix we re-checked. When we are not sure we say INCONCLUSIVE and tell you what we did not check. And because it remembers, the second run takes under a minute instead of eleven."
 
 ---
 
@@ -274,7 +274,7 @@ Use the Extension Development Host window from step A4. Open `app/main.py`.
 - **Do you write your own version solver?** No. The package manager's own resolver and the lock file decide the versions.
 - **Is AI deciding?** No. Verdicts come from a fixed table of rules. The product works with the language model switched off.
 - **How do you know the stored result is right?** Every stored result has a hash; a damaged one is rejected and recomputed. A reused result never counts as a fresh run.
-- **What can it not do?** It does not claim compatibility, it only fully runs Python today, and static reading (EXPOSED, POTENTIAL) is labelled as reading, not as a failure.
+- **What can it not do?** It never says two setups are compatible (it only reports what it reproduced or could not check), it only fully runs Python today, and static reading (EXPOSED, POTENTIAL) is labelled as reading, not as a failure.
 - **How does the editor know which worlds to use?** It does not build worlds. The backend builds them from the pinned GitHub commits; the editor shows the newest analysis for the repository in your folder. Uncommitted local edits are not analysed (the diagnostic is marked "this file has changed since the analysis").
 
 ## Part 8. Timeline for the clock
@@ -284,7 +284,7 @@ Use the Extension Development Host window from step A4. Open `app/main.py`.
 | 0:00-1:00 | Story | Overview |
 | 1:00-2:30 | New analysis and run | New analysis, Analysis run |
 | 2:30-4:30 | Overview, Relationships, World matrix | tables and delta |
-| 4:30-7:00 | Finding, Witness, Why-path, Fix | the proof |
+| 4:30-7:00 | Finding, Witness, Why-path, Fix | the evidence |
 | 7:00-9:00 | Reuse (second run) | Overview, Reuse and recomputation |
 | 9:00-11:30 | Editor | VS Code |
 | 11:30-12:00 | Close | any |
