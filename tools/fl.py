@@ -235,6 +235,18 @@ def server_python() -> tuple[str, list[str]]:
     return venv_python(), [str(ROOT / "backend")]
 
 
+def cmd_script(args: list[str]) -> int:
+    """Run a script of this repository with the project's packages, from any terminal (the virtual environment's own launcher is not used).
+
+    python tools/fl.py script scripts/twist_demo.py --preflight
+    """
+    if not args or not (ROOT / args[0]).is_file():
+        print("usage: python tools/fl.py script <path under the repository> [arguments]", file=sys.stderr)
+        return 2
+    py, path = server_python()
+    return run([py, *args], env={"PYTHONPATH": os.pathsep.join([*path, str(ROOT)])})
+
+
 def cmd_vscode(args: list[str]) -> int:
     """Build the VS Code extension and open a folder (the consumer repository) in an Extension Development Host with it loaded."""
     folder = next((a for a in args if not a.startswith("--")), None)
@@ -345,7 +357,7 @@ def types_current() -> int:
 
 COMMANDS = {"up": cmd_up, "down": cmd_down, "test": cmd_test, "lint": cmd_lint, "fixtures": cmd_fixtures,
             "e2e": cmd_e2e, "check-pins": cmd_check_pins, "gen-types": cmd_gen_types,
-            "check-types": lambda a: types_current(), "images": cmd_images, "ci": cmd_ci, "rebuild": cmd_rebuild, "vscode": cmd_vscode, "vscode-test": cmd_vscode_test}
+            "check-types": lambda a: types_current(), "images": cmd_images, "ci": cmd_ci, "rebuild": cmd_rebuild, "vscode": cmd_vscode, "script": cmd_script, "vscode-test": cmd_vscode_test}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
