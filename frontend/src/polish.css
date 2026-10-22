@@ -103,3 +103,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) { .workspace.shell * { transition: none !important; animation: none !important; } }
+
+/* raw output of a run: readable, wrapped, scrollable */
+.workspace.shell pre, .workspace.shell pre code { font-size: 12.5px !important; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }

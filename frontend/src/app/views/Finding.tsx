@@ -119,11 +119,13 @@ function WhyPath({ id }: { id: string }) {
 
 function Repeatability({ d }: { d: FindingDetail }) {
   const w = d.witnesses[0];
+  const checks = Math.max(1, Math.round(d.fresh_runs / 6)); // every check (import, call sites, tests, data contract) runs 3 + 3 times
+  const total = checks > 1 ? `${d.fresh_runs} fresh executions (${checks} checks, 6 each)` : `${d.fresh_runs}/6 fresh executions`;
   return (
-    <Panel title="Repeatability" meta={`${d.fresh_runs} of 6 fresh executions`}>
+    <Panel title="Repeatability" meta={total}>
       <div data-testid="repeatability">
         <p className="panel-copy">
-          Reference passed <strong>{w ? w.ref_pass : d.runs.filter((r) => r.side === "ref").length}/3</strong> · consumer failed <strong>{w ? w.test_fail : 0}/3</strong> · fresh executions <strong>{d.fresh_runs}/6</strong>
+          Reference passed <strong>{w ? w.ref_pass : d.runs.filter((r) => r.side === "ref").length}/3</strong> · consumer failed <strong>{w ? w.test_fail : 0}/3</strong> · <strong>{total}</strong>
           {d.reused_runs > 0 ? ` · reused results ${d.reused_runs} (not counted)` : ""}
         </p>
         <DataTable

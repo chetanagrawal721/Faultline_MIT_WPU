@@ -1,0 +1,128 @@
+{
+ "project": {
+  "project": "ap_01M5H3HM3MPMYZBXVQFHTAD5B3",
+  "finding": "fnd_01M5H3J2S8C3SBJG1WFVQSJ65K",
+  "started": "2026-10-22T06:07:38Z",
+  "name": "chetanagrawal721/faultline-fixture-acme-models + chetanagrawal721/faultline-fi",
+  "inconclusive": "fnd_01M4VTVQ0CHQ2X5G98EVSPGP0P"
+ },
+ "theme": "light",
+ "width": 1440,
+ "height": 900,
+ "shots": [
+  {
+   "file": "01-home-light.png",
+   "title": "Product site: home",
+   "note": "The public front page. It states the claim (witnesses, not warnings) before anyone logs in.",
+   "route": "#/"
+  },
+  {
+   "file": "02-how-it-works-light.png",
+   "title": "Product site: how it works",
+   "note": "The pipeline in plain steps: pin, relate, build two worlds, run three times each, witness, attribute, fix.",
+   "route": "#/how"
+  },
+  {
+   "file": "03-capabilities-light.png",
+   "title": "Product site: capabilities",
+   "note": "What is supported and what is not, stated openly.",
+   "route": "#/capabilities"
+  },
+  {
+   "file": "10-overview-light.png",
+   "title": "Workspace: Overview",
+   "note": "Counts of investigations and findings, the outcome chart, jobs by status, the Reuse and recomputation panel, the analysis funnel and what needs attention.",
+   "route": "#/app"
+  },
+  {
+   "file": "11-new-analysis-light.png",
+   "title": "New analysis",
+   "note": "Paste the library and the consumer. Both are pinned to exact commits before anything runs.",
+   "route": "#/app/new"
+  },
+  {
+   "file": "12-findings-light.png",
+   "title": "Findings",
+   "note": "Every verdict in one list, with its mode (LIVE) and the sentence that states what was and was not shown.",
+   "route": "#/app/findings"
+  },
+  {
+   "file": "13-finding-light.png",
+   "title": "Finding detail (BREAK WITNESSED)",
+   "note": "The scoped verdict, what the evidence establishes, the why-path, both worlds, the dependency delta, the six runs, the scope, re-run and fix.",
+   "route": "#/app/finding/fnd_01M5H3J2S8C3SBJG1WFVQSJ65K"
+  },
+  {
+   "file": "14-witness-light.png",
+   "title": "Witness detail",
+   "note": "Three fresh passes against three fresh failures with the same signature, the six-run board and the raw output.",
+   "route": "#/app/witness/fnd_01M5H3J2S8C3SBJG1WFVQSJ65K"
+  },
+  {
+   "file": "15-finding-inconclusive-light.png",
+   "title": "Finding detail (INCONCLUSIVE)",
+   "note": "An unsettled result is never shown as a pass: the reasons are listed, grouped by cause.",
+   "route": "#/app/finding/fnd_01M4VTVQ0CHQ2X5G98EVSPGP0P"
+  },
+  {
+   "file": "16-world-matrix-light.png",
+   "title": "World matrix",
+   "note": "The reference world, the consumer world, and the exact delta: only the packages whose versions differ.",
+   "route": "#/app/worlds"
+  },
+  {
+   "file": "17-relationships-light.png",
+   "title": "Relationships",
+   "note": "Why two repositories are related: the file and line in both manifests at the pinned commit.",
+   "route": "#/app/relationships"
+  },
+  {
+   "file": "18-inventory-graph-light.png",
+   "title": "Inventory graph",
+   "note": "Repositories, manifests and packages as a graph with evidence-backed edges.",
+   "route": "#/app/inventory"
+  },
+  {
+   "file": "19-evidence-light.png",
+   "title": "Evidence",
+   "note": "The bundle behind a witness: artifacts with their SHA-256, the manifest, integrity and replay.",
+   "route": "#/app/evidence"
+  },
+  {
+   "file": "20-jobs-light.png",
+   "title": "Jobs",
+   "note": "Every background job with its status, run time, wait time, failure class and attempts.",
+   "route": "#/app/jobs"
+  },
+  {
+   "file": "21-repositories-light.png",
+   "title": "Repositories",
+   "note": "The pinned snapshot of each repository and its inventory.",
+   "route": "#/app/repository"
+  },
+  {
+   "file": "22-capabilities-and-coverage-light.png",
+   "title": "Capabilities and coverage",
+   "note": "What this deployment can do per ecosystem, which oracles exist and which features are enabled.",
+   "route": "#/app/coverage"
+  },
+  {
+   "file": "23-settings-light.png",
+   "title": "Settings",
+   "note": "Theme, access token and application information.",
+   "route": "#/app/settings"
+  },
+  {
+   "file": "30-reuse-panel-light.png",
+   "title": "Reuse and recomputation (the twist)",
+   "note": "Pairs reused, pairs recomputed, stored objects rejected, worlds reused and built, with the reason for each pair. Counted from the append-only event log.",
+   "route": "#/app (crop)"
+  },
+  {
+   "file": "31-funnel-light.png",
+   "title": "Analysis funnel",
+   "note": "Every stage as a recorded count, from submitted to verdict.",
+   "route": "#/app (crop)"
+  }
+ ]
+}
