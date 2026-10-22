@@ -1,6 +1,7 @@
 """Shows where Faultline keeps its data and what is in it. Read only: it opens the database with mode=ro and only reads the object files.
 
     python tools/fl.py script scripts/show_store.py                 # location, tables, the evidence store, pair keys, newest events
+    python tools/fl.py script scripts/show_store.py --hashes        # the tables that hold hashes, with real rows, and one hash followed end to end
     python tools/fl.py script scripts/show_store.py --object ID     # one stored object, printed as it is on disk
     python tools/fl.py script scripts/show_store.py --check         # re-hash every stored object and report any that does not match its name
     python tools/fl.py script scripts/show_store.py --sql "SELECT kind, COUNT(*) FROM evidence_event GROUP BY kind"   # any read-only query
@@ -70,11 +71,74 @@ def check_objects(objects: Path) -> int:
     return 1 if bad else 0
 
 
+HASH_TABLES = [
+    ("object_index", "object_id", "Every stored object. object_id is the SHA-256 of the object's kind and content, and it is also the file name in var/evidence/objects."),
+    ("pointer", "object_id", "The current version of each result. slot names the thing (for example finding:<cell>), object_id is the hash of its latest object, seq is the version."),
+    ("pair_index", "pair_key, pair_record_id, verdict_id", "One row per producer-consumer pair. pair_key is the hash of all the pair's inputs; the other two point at stored objects."),
+    ("pair_cell", "pair_key", "Which cell of which analysis was computed for which pair key (this is how a later analysis finds a reusable result)."),
+    ("ddmin_checkpoint", "object_id", "The cause search's checkpoints: one immutable object per step, numbered by seq."),
+    ("resolved_world", "world_hash", "Every dependency world. world_hash is the hash of the world's exact contents (packages, versions, wheel hashes, runtime)."),
+    ("snapshot", "sha", "The exact commit each repository was pinned to."),
+    ("snapshot_file", "content_hash, blob_sha", "Every file of a snapshot, by content hash."),
+    ("witness", "witness_key, input_hash", "A witness is identified by a hash of what it witnessed, not by when it was found."),
+]
+
+
+def show_hashes(c: sqlite3.Connection, objects: Path) -> int:
+    from faultline.evidence.object_store import object_id
+    print("Tables that hold hashes (hashes are shortened to 16 characters here; the full value is in the table)")
+    for table, cols, note in HASH_TABLES:
+        n = count(c, table)
+        line(f"{table}   ({n} rows)")
+        print(f"  {note}")
+        names = [x.strip() for x in cols.split(",")]
+        extra = {"object_index": ["kind", "slot", "seq"], "pointer": ["slot", "seq"], "ddmin_checkpoint": ["seq", "status"], "pair_cell": ["cell_id"],
+                 "resolved_world": ["kind"], "witness": ["oracle", "entry_point"], "snapshot": ["repository_id"]}.get(table, [])
+        try:
+            rows = c.execute(f"SELECT {', '.join(names + extra)} FROM {table} ORDER BY rowid DESC LIMIT 3").fetchall()
+        except sqlite3.Error as e:
+            print(f"  ({e})")
+            continue
+        for r in rows:
+            print("  " + "   ".join(f"{k}={str(r[k])[:16] + ('...' if len(str(r[k])) > 16 and all(ch in '0123456789abcdef_pkwx' for ch in str(r[k])[:6]) else '') if k in names else str(r[k])[:40]}" for k in r.keys()))
+
+    line("One hash followed from the database to the file and back")
+    row = c.execute("SELECT pair_key, pair_record_id, verdict_id FROM pair_index WHERE verdict_id IS NOT NULL ORDER BY created_at DESC LIMIT 1").fetchone()
+    if not row:
+        print("  (no pair with a stored result yet: run an analysis)")
+        return 0
+    print(f"  pair_index.pair_key       {row['pair_key']}")
+    print(f"  pair_index.pair_record_id {row['pair_record_id']}")
+    print(f"  pair_index.verdict_id     {row['verdict_id']}")
+    f = objects / row["verdict_id"][:2] / f"{row['verdict_id']}.json"
+    print(f"\n  the file for verdict_id   {f}")
+    d = json.loads(f.read_text(encoding="utf-8"))
+    recomputed = object_id(d["kind"], d["schema_version"], d["payload"])
+    print(f"  hash recomputed from the file's content: {recomputed}")
+    print(f"  equal to verdict_id: {'YES: the stored result is exactly what was written' if recomputed == row['verdict_id'] else 'NO: the file was changed'}")
+    p = d["payload"]
+    print(f"\n  the verdict inside: {p.get('verdict')}  (policy {p.get('policy')})")
+    ev = p.get("evidence", [])
+    print(f"  it cites {len(ev)} evidence items, for example: " + ", ".join(f"{k}:{str(i)[:14]}" for k, i in ev[:3]))
+    rec = objects / row["pair_record_id"][:2] / f"{row['pair_record_id']}.json"
+    if rec.exists():
+        inp = json.loads(rec.read_text(encoding="utf-8"))["payload"]["inputs"]
+        print("\n  the pair record behind pair_key (the inputs the key is made of):")
+        for k in ("reference_world_hash", "consumer_world_hash", "producer_artifact_sha256", "image", "witness_rule", "verdict_rule", "static_rule"):
+            if k in inp:
+                print(f"    {k:<26}{str(inp[k])[:72]}")
+        print(f"    {'producer.commit':<26}{str(inp.get('producer', {}).get('commit'))[:72]}")
+    slots = [r["slot"] for r in c.execute("SELECT slot FROM pointer WHERE object_id=?", (row["verdict_id"],))]
+    print(f"\n  pointer rows that name this verdict_id: {slots or '(an older version: the pointer has moved on)'}")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--db")
     ap.add_argument("--object")
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--hashes", action="store_true", help="show the tables that hold hashes")
     ap.add_argument("--sql", help="a single SELECT statement, run read only")
     ap.add_argument("--events", type=int, default=12)
     a = ap.parse_args()
@@ -89,6 +153,8 @@ def main() -> int:
         return check_objects(objects)
 
     c = connect_ro(db)
+    if a.hashes:
+        return show_hashes(c, objects)
     if a.sql:
         if not a.sql.lstrip().lower().startswith(("select", "with")) or ";" in a.sql.strip().rstrip(";"):
             print("only a single SELECT statement is accepted")

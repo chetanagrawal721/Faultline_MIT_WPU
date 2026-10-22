@@ -370,6 +370,32 @@ It prints six sections. Walk through them with these words:
 5. **The newest events.** "This is the append-only event log. Look at `PAIR_REUSED`, `WORLD_REUSED`, `POINTER_MOVED`, `JOB_DONE`. The database refuses to update or delete a row here, so it is a trustworthy history. The reuse counters on the Overview page are counted from this log."
 6. **One stored object.** "This is the latest verdict, exactly as it is on disk: its kind, its policy, the sentence it says, and how many pieces of evidence it cites."
 
+### Do: show the tables that hold the hashes (the part judges ask about)
+
+```powershell
+& "C:\Python314\python.exe" tools/fl.py script scripts/show_store.py --hashes
+```
+
+It prints each table that holds a hash, with its real newest rows, and then follows **one hash** from the database to the file and back. Walk through it in this order:
+
+| Table | What the hash is | What to say |
+|---|---|---|
+| `object_index` | `object_id`: SHA-256 of the object's kind and content; also the file name | "Every stored result has a row here. The id is the hash of its content, so two different contents can never share an id." |
+| `pointer` | `object_id` per `slot` (for example `finding:<cell>`) | "This says which object is the current version of each result. A new version gets a new hash and the pointer moves; the old object is never edited." |
+| `pair_index` | `pair_key` (hash of all the pair's inputs), `pair_record_id`, `verdict_id` | "One row per producer-consumer pair. If the key matches, the stored verdict can be reused." |
+| `pair_cell` | `pair_key` per cell and analysis | "This is how a later analysis finds a reusable result for the same pair." |
+| `ddmin_checkpoint` | `object_id` per checkpoint, numbered by `seq` | "The cause search saves each step as an immutable object. This is what a restarted worker reads." |
+| `resolved_world` | `world_hash` | "A dependency world is identified by the hash of its exact contents: packages, versions, wheel hashes, runtime. The same world always gets the same hash." |
+| `snapshot` | `sha` (git commit) | "The exact commit each repository was pinned to." |
+| `snapshot_file` | `content_hash` | "Every file of every snapshot, by content hash." |
+| `witness` | `witness_key` | "A witness is identified by what it witnessed, not by when it was found." |
+
+Then read the last block, **One hash followed from the database to the file and back**:
+
+> **Say:** "Here is one pair key. Its row points at a verdict object by hash. Here is the file with that name. I take the file's content and recompute its hash, and it equals the id in the database. So the stored result is exactly what was written. Inside it is the verdict, here BREAK WITNESSED, and the list of evidence it cites: witnesses and oracle runs.
+>
+> And here is the pair record behind the key: the inputs it is made of. The reference world hash, the consumer world hash, the hash of the library's code, the sandbox image, the witness rule three plus three, the verdict rule, and the commit. Change any of these and the key changes, and the pair is recomputed."
+
 ### Do: show one object in full (optional, 20 seconds)
 
 Copy the command printed under section 6 (`... --object <id>`), run it, and scroll a little.
