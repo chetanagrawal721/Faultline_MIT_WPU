@@ -345,6 +345,89 @@ Point at these lines:
 
 ---
 
+## Part 5b. Show where the data is stored (2 minutes, the database)
+
+Judges often ask "where does it store this?". Show it. The viewer is read only, so it is safe to run while the project is running and it cannot change or damage anything.
+
+### Where the data is (say this first)
+
+> **Say:** "Faultline keeps its data in two places. First, a normal SQL database: one SQLite file, `var/faultline.db`. It holds the repositories, the worlds, the runs, the findings, and the jobs. This is the original design and it still works exactly as before.
+>
+> Second, the twist added an evidence store next to it: a folder of immutable files, `var/evidence/objects`. Every proven result, that is every oracle run, witness, attribution, verdict and fix plan, is written there once, as a file whose name is the SHA-256 hash of its content. The result tables in SQL are written from those objects and can be rebuilt from them."
+
+### Do: run the viewer
+
+```powershell
+& "C:\Python314\python.exe" tools/fl.py script scripts/show_store.py
+```
+
+It prints six sections. Walk through them with these words:
+
+1. **Where the data is.** "Here is the SQL file and its size, and here is the evidence folder with its object files. The name of each file is the hash of its content, so a changed or damaged file no longer matches its own name."
+2. **The tables.** "These are the row counts of the tables: inputs, worlds, analysis, results, and the new evidence-store tables: `object_index`, `pointer`, `pair_index`, `pair_cell`, `ddmin_checkpoint`, `evidence_event`."
+3. **By kind of object.** "These are the kinds of object in the store: oracle results, witnesses, verdicts, attributions, pair records, and the minimisation's checkpoints and tests."
+4. **Pair keys.** "One key per producer-consumer pair. This is how reuse recognises a pair: same key, same inputs, so the stored result can be used. These keys are why the second run took 47.9 seconds."
+5. **The newest events.** "This is the append-only event log. Look at `PAIR_REUSED`, `WORLD_REUSED`, `POINTER_MOVED`, `JOB_DONE`. The database refuses to update or delete a row here, so it is a trustworthy history. The reuse counters on the Overview page are counted from this log."
+6. **One stored object.** "This is the latest verdict, exactly as it is on disk: its kind, its policy, the sentence it says, and how many pieces of evidence it cites."
+
+### Do: show one object in full (optional, 20 seconds)
+
+Copy the command printed under section 6 (`... --object <id>`), run it, and scroll a little.
+
+> **Say:** "This is the real file. You can open it in any editor. It is plain JSON."
+
+### Do: ask the database a question (optional, 30 seconds)
+
+```powershell
+& "C:\Python314\python.exe" tools/fl.py script scripts/show_store.py --sql "SELECT kind, COUNT(*) AS n FROM evidence_event GROUP BY kind ORDER BY n DESC"
+```
+
+> **Say:** "It is a normal SQL database, so I can query it. Here is how many events of each kind were recorded. Only SELECT statements are accepted in this viewer."
+
+Other queries that read well:
+
+- `SELECT pair_key, created_at FROM pair_index` - the pair keys.
+- `SELECT slot, seq FROM pointer LIMIT 10` - the current version of each result.
+- `SELECT kind, subject FROM evidence_event WHERE kind LIKE 'PAIR_%' ORDER BY id DESC LIMIT 10` - reuse and recomputation events.
+- `SELECT verdict, COUNT(*) FROM finding GROUP BY verdict` - the findings by verdict.
+
+### Do: show that a damaged object is caught (optional, 1 minute, on a copy)
+
+First the normal check:
+
+```powershell
+& "C:\Python314\python.exe" tools/fl.py script scripts/show_store.py --check
+```
+
+> **Say:** "This re-reads every stored object and re-computes its hash. All of them match their names."
+
+Now damage a **copy**, never the real store:
+
+```powershell
+Copy-Item var\evidence var\evidence_demo -Recurse
+$f = Get-ChildItem var\evidence_demo\objects -Recurse -Filter *.json | Select-Object -First 1
+(Get-Content $f.FullName -Raw).Replace('"kind":"', '"kind" :"') | Set-Content $f.FullName -NoNewline
+$env:FAULTLINE_EVIDENCE_DIR = "var\evidence_demo\objects"
+& "C:\Python314\python.exe" tools/fl.py script scripts/show_store.py --check
+Remove-Item Env:FAULTLINE_EVIDENCE_DIR
+Remove-Item var\evidence_demo -Recurse -Force
+```
+
+You see `1 object(s) do not match: ... (CORRUPT)`.
+
+> **Say:** "I changed one character in a copy, and the check finds it immediately. If this were a real stored result, Faultline would reject it, record an `OBJECT_REJECTED` event, and recompute that pair. It never trusts a result it cannot verify."
+
+### If you want a graphical view
+
+Any SQLite viewer opens the same file: for example DB Browser for SQLite (open `varaultline.db`, tab "Browse Data"). Open it **read only** during a demo.
+
+### What to avoid saying
+
+- Do not say the data is "encrypted" or "tamper-proof". Say it is hash-checked: a change is detected.
+- Do not say the SQL tables are the source of truth for results. Say: the objects are, and the tables follow them.
+
+---
+
 ## Part 6. The editor (3 minutes)
 
 Use the VS Code window with `app/main.py` open (`fixtures/repos/notify-svc/D`).
@@ -442,6 +525,7 @@ Optional: say "If I edit this file after the analysis, the diagnostic is marked 
 6. Why-path: werkzeug is the cause. **Propose and verify a fix**: VERIFIED, `werkzeug<3`, nothing pushed. (1 min)
 7. Reuse: run again → reused 1, recomputed 0, 47.9 s vs 680 s. Changed producer → only that pair, with the reason. (2 min)
 8. Crash demo: stop after 3 stored tests, restart, 10 tests once, same answer. (1 min, recorded)
+8b. Database: `show_store.py` - SQL file + evidence objects, pair keys, event log, one object, `--check`. (2 min)
 9. Editor: red on line 2, colours, **Ctrl+.** verified fix, cancel and `docker ps`. (3 min)
 10. Close: "Witnesses, not warnings. If unsure, INCONCLUSIVE." Then questions.
 
