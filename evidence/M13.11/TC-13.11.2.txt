@@ -1,0 +1,12 @@
+# TC-13.11.2 integration tests, both settings (real Docker): durable, remediation, rerun, live, live_failures, replay, witness, showcase, attribution, projection, o_import, o_bind, o_contract, o_tests
+store ON, first run (before two fixes):
+FAILED tests/integration/test_durable.py::test_tc_5_3_2_cancelling_stops_the_container_keeps_partial_evidence_and_labels_it
+FAILED tests/integration/test_o_contract.py::test_tc_7_1_4_a_field_with_a_default_is_the_same_in_both_worlds
+2 failed, 70 passed in 2314.35s (0:38:34)
+  -> test_durable cancel test: the second analysis reused the first one's stored result so nothing was running to cancel; FAULTLINE_REUSE=off added for that test. test_o_contract: SANDBOX_FAILURE while another stack was cleaning containers.
+store ON, the two failed files rerun after the fix:
+7 passed in 402.62s (0:06:42)
+store OFF, same files:
+72 passed in 1698.40s (0:28:18)
+evidence projection and golden (after the dump stopped comparing the machine-specific image fingerprint):
+3 passed in 200.97s (0:03:20)

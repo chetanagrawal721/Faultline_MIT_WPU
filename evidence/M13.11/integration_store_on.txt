@@ -1,0 +1,50 @@
+.F.............................................................F........ [100%]
+================================== FAILURES ===================================
+_ test_tc_5_3_2_cancelling_stops_the_container_keeps_partial_evidence_and_labels_it _
+
+world = {'db': WindowsPath('C:/Users/Chetan/AppData/Local/Temp/pytest-of-Chetan/pytest-944/durable0/faultline.db'), 'conn': <s...>, 'apid': 'ap_01M5GA9S2SEPM67JWPMFGDPJBS', 'daemon': <faultline.sandbox.sandboxd.Daemon object at 0x000001EA7C5F07D0>}
+
+    def test_tc_5_3_2_cancelling_stops_the_container_keeps_partial_evidence_and_labels_it(world):
+        job_id = new_job(world, "durable:cancel")
+        a = start_worker(world)
+>       wait_for(lambda: running_oracle_job(world, job_id), "the worker to be mid-verification")
+
+tests\integration\test_durable.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+predicate = <function test_tc_5_3_2_cancelling_stops_the_container_keeps_partial_evidence_and_labels_it.<locals>.<lambda> at 0x000001EA7C9423E0>
+what = 'the worker to be mid-verification', limit = 300.0
+
+    def wait_for(predicate, what: str, limit: float = 300.0):
+        t0 = time.monotonic()
+        while time.monotonic() - t0 < limit:
+            v = predicate()
+            if v:
+                return v
+            time.sleep(0.4)
+>       pytest.fail(f"timed out waiting for {what}")
+E       Failed: timed out waiting for the worker to be mid-verification
+
+tests\integration\test_durable.py:71: Failed
+_______ test_tc_7_1_4_a_field_with_a_default_is_the_same_in_both_worlds _______
+
+scenario_j = (<sqlite3.Connection object at 0x000001EA7CE82890>, <faultline.sandbox.client.SandboxClient object at 0x000001EA7CD230...umers_discovered': 1, 'consumers_analysed': 1, 'consumers_failed': [], 'cells': 1, 'cells_by_state': {'ANALYZED': 1}}))
+daemon = <faultline.sandbox.sandboxd.Daemon object at 0x000001EA7C5F07D0>
+image = 'sha256:70d20a164cd5bfd8356fd954aa4416c915687e4427c48a5d7dafdaaf0ee62f8c'
+
+    def test_tc_7_1_4_a_field_with_a_default_is_the_same_in_both_worlds(scenario_j, daemon, image):
+        conn, sbx, _res = scenario_j
+        cell = conn.execute("SELECT c.ref_world_hash, c.test_world_hash, p.artifact_content_hash, p.rel_path FROM cell c JOIN project p ON p.id=c.artifact_project_id").fetchone()
+        art_dir = daemon.store.artifact_dir(cell["artifact_content_hash"])
+        ex = o_contract.explore(sbx, image, producer_world=cell["ref_world_hash"], consumer_world=cell["test_world_hash"], artifact_hash=cell["artifact_content_hash"],
+                                art_dir=art_dir, types=[o_contract.ContractType("acme_contracts.customer", "LoyaltyNote")], pythonpath=("/artifact/src",))
+>       assert ex.n_valid >= 2 and dict(ex.classes) == {"SAME": ex.n_valid}                              # every accepted input reads the same
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert (0 >= 2)
+E        +  where 0 = Exploration(types=[ContractType(module='acme_contracts.customer', name='LoyaltyNote')], n_total=0, n_invalid=0, classes=Counter(), items=[], candidates=[], notes=['LoyaltyNote: the producer run did not finish (SANDBOX_FAILURE)']).n_valid
+
+tests\integration\test_o_contract.py:85: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_durable.py::test_tc_5_3_2_cancelling_stops_the_container_keeps_partial_evidence_and_labels_it
+FAILED tests/integration/test_o_contract.py::test_tc_7_1_4_a_field_with_a_default_is_the_same_in_both_worlds
+2 failed, 70 passed in 2314.35s (0:38:34)

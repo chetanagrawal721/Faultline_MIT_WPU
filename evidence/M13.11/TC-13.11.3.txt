@@ -1,0 +1,10 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chetan\Hackethopia\.venv\Scripts\python.exe
+rootdir: C:\Users\Chetan\Hackethopia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 1 item
+
+tests/integration/test_store_parity.py::test_tc_13_11_3_store_off_and_on_give_identical_findings_witnesses_attribution_and_fix PASSED
+
+======================== 1 passed in 242.45s (0:04:02) ========================

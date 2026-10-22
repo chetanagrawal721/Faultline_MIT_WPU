@@ -1,0 +1,747 @@
+........................................................................ [ 11%]
+..FFFFFF.FFFFFFFFFF.FFF.FF.F............................................ [ 23%]
+......................................F.FFFFFFFF........................ [ 35%]
+........................................................................ [ 47%]
+.................................................s...................... [ 59%]
+........................................................................ [ 71%]
+........................................................................ [ 83%]
+........................................................................ [ 95%]
+.............................                                            [100%]
+================================== FAILURES ===================================
+_____ test_the_resumable_search_gives_the_results_of_the_original[single] _____
+
+conn = <sqlite3.Connection object at 0x0000014DAA059030>, kind = 'single'
+
+    @pytest.mark.parametrize("kind", KINDS)
+    def test_the_resumable_search_gives_the_results_of_the_original(conn, kind):
+        ref = reference_ddmin(ITEMS, oracle(kind))
+        got = ResumableDdmin(conn, minimisation=mid(kind), items=ITEMS, test=oracle(kind)).run_search()
+        assert summary(got.result) == summary(ref)
+        assert got.tests_run == len({a.subset for a in ref.attempts}) and got.tests_resumed == 0 and got.resumed_from_seq is None
+>       assert got.checkpoints == got.tests_run + 1                                      # one per test, and the final one
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 0 == (13 + 1)
+E        +  where 0 = ResumeResult(result=DdminResult(minimal=('p07',), status='COMPLETE', attempts=[Attempt(subset=('p00',), outcome=<Outco...1863f20', tests_run=13, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='COMPLETE', interrupted_tests=[]).checkpoints
+E        +  and   13 = ResumeResult(result=DdminResult(minimal=('p07',), status='COMPLETE', attempts=[Attempt(subset=('p00',), outcome=<Outco...1863f20', tests_run=13, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='COMPLETE', interrupted_tests=[]).tests_run
+
+tests\unit\test_ddmin_resume.py:141: AssertionError
+______ test_the_resumable_search_gives_the_results_of_the_original[pair] ______
+
+conn = <sqlite3.Connection object at 0x0000014DAA0593F0>, kind = 'pair'
+
+    @pytest.mark.parametrize("kind", KINDS)
+    def test_the_resumable_search_gives_the_results_of_the_original(conn, kind):
+        ref = reference_ddmin(ITEMS, oracle(kind))
+        got = ResumableDdmin(conn, minimisation=mid(kind), items=ITEMS, test=oracle(kind)).run_search()
+        assert summary(got.result) == summary(ref)
+        assert got.tests_run == len({a.subset for a in ref.attempts}) and got.tests_resumed == 0 and got.resumed_from_seq is None
+>       assert got.checkpoints == got.tests_run + 1                                      # one per test, and the final one
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 0 == (24 + 1)
+E        +  where 0 = ResumeResult(result=DdminResult(minimal=('p02', 'p09'), status='COMPLETE', attempts=[Attempt(subset=('p00',), outcome=...c895915', tests_run=24, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='COMPLETE', interrupted_tests=[]).checkpoints
+E        +  and   24 = ResumeResult(result=DdminResult(minimal=('p02', 'p09'), status='COMPLETE', attempts=[Attempt(subset=('p00',), outcome=...c895915', tests_run=24, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='COMPLETE', interrupted_tests=[]).tests_run
+
+tests\unit\test_ddmin_resume.py:141: AssertionError
+_____ test_the_resumable_search_gives_the_results_of_the_original[triple] _____
+
+conn = <sqlite3.Connection object at 0x0000014DAA058A90>, kind = 'triple'
+
+    @pytest.mark.parametrize("kind", KINDS)
+    def test_the_resumable_search_gives_the_results_of_the_original(conn, kind):
+        ref = reference_ddmin(ITEMS, oracle(kind))
+        got = ResumableDdmin(conn, minimisation=mid(kind), items=ITEMS, test=oracle(kind)).run_search()
+        assert summary(got.result) == summary(ref)
+        assert got.tests_run == len({a.subset for a in ref.attempts}) and got.tests_resumed == 0 and got.resumed_from_seq is None
+>       assert got.checkpoints == got.tests_run + 1                                      # one per test, and the final one
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 0 == (45 + 1)
+E        +  where 0 = ResumeResult(result=DdminResult(minimal=('p01', 'p05', 'p10'), status='COMPLETE', attempts=[Attempt(subset=('p00',), o...3679d16', tests_run=45, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='COMPLETE', interrupted_tests=[]).checkpoints
+E        +  and   45 = ResumeResult(result=DdminResult(minimal=('p01', 'p05', 'p10'), status='COMPLETE', attempts=[Attempt(subset=('p00',), o...3679d16', tests_run=45, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='COMPLETE', interrupted_tests=[]).tests_run
+
+tests\unit\test_ddmin_resume.py:141: AssertionError
+__ test_the_resumable_search_gives_the_results_of_the_original[independent] ___
+
+conn = <sqlite3.Connection object at 0x0000014DAA0598A0>, kind = 'independent'
+
+    @pytest.mark.parametrize("kind", KINDS)
+    def test_the_resumable_search_gives_the_results_of_the_original(conn, kind):
+        ref = reference_ddmin(ITEMS, oracle(kind))
+        got = ResumableDdmin(conn, minimisation=mid(kind), items=ITEMS, test=oracle(kind)).run_search()
+        assert summary(got.result) == summary(ref)
+        assert got.tests_run == len({a.subset for a in ref.attempts}) and got.tests_resumed == 0 and got.resumed_from_seq is None
+>       assert got.checkpoints == got.tests_run + 1                                      # one per test, and the final one
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 0 == (13 + 1)
+E        +  where 0 = ResumeResult(result=DdminResult(minimal=('p03',), status='COMPLETE', attempts=[Attempt(subset=('p00',), outcome=<Outco...45ec3ad', tests_run=13, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='COMPLETE', interrupted_tests=[]).checkpoints
+E        +  and   13 = ResumeResult(result=DdminResult(minimal=('p03',), status='COMPLETE', attempts=[Attempt(subset=('p00',), outcome=<Outco...45ec3ad', tests_run=13, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='COMPLETE', interrupted_tests=[]).tests_run
+
+tests\unit\test_ddmin_resume.py:141: AssertionError
+_ test_the_resumable_search_gives_the_results_of_the_original[non_monotonic] __
+
+conn = <sqlite3.Connection object at 0x0000014DAA05A200>, kind = 'non_monotonic'
+
+    @pytest.mark.parametrize("kind", KINDS)
+    def test_the_resumable_search_gives_the_results_of_the_original(conn, kind):
+        ref = reference_ddmin(ITEMS, oracle(kind))
+        got = ResumableDdmin(conn, minimisation=mid(kind), items=ITEMS, test=oracle(kind)).run_search()
+        assert summary(got.result) == summary(ref)
+        assert got.tests_run == len({a.subset for a in ref.attempts}) and got.tests_resumed == 0 and got.resumed_from_seq is None
+>       assert got.checkpoints == got.tests_run + 1                                      # one per test, and the final one
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 0 == (13 + 1)
+E        +  where 0 = ResumeResult(result=DdminResult(minimal=('p04',), status='COMPLETE', attempts=[Attempt(subset=('p00',), outcome=<Outco...cb4b099', tests_run=13, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='COMPLETE', interrupted_tests=[]).checkpoints
+E        +  and   13 = ResumeResult(result=DdminResult(minimal=('p04',), status='COMPLETE', attempts=[Attempt(subset=('p00',), outcome=<Outco...cb4b099', tests_run=13, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='COMPLETE', interrupted_tests=[]).tests_run
+
+tests\unit\test_ddmin_resume.py:141: AssertionError
+______ test_the_resumable_search_gives_the_results_of_the_original[none] ______
+
+conn = <sqlite3.Connection object at 0x0000014DAA05AA70>, kind = 'none'
+
+    @pytest.mark.parametrize("kind", KINDS)
+    def test_the_resumable_search_gives_the_results_of_the_original(conn, kind):
+        ref = reference_ddmin(ITEMS, oracle(kind))
+        got = ResumableDdmin(conn, minimisation=mid(kind), items=ITEMS, test=oracle(kind)).run_search()
+        assert summary(got.result) == summary(ref)
+        assert got.tests_run == len({a.subset for a in ref.attempts}) and got.tests_resumed == 0 and got.resumed_from_seq is None
+>       assert got.checkpoints == got.tests_run + 1                                      # one per test, and the final one
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 0 == (13 + 1)
+E        +  where 0 = ResumeResult(result=DdminResult(minimal=None, status='NO_CAUSE', attempts=[Attempt(subset=('p00',), outcome=<Outcome.P...dcccf5a', tests_run=13, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='NO_CAUSE', interrupted_tests=[]).checkpoints
+E        +  and   13 = ResumeResult(result=DdminResult(minimal=None, status='NO_CAUSE', attempts=[Attempt(subset=('p00',), outcome=<Outcome.P...dcccf5a', tests_run=13, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='NO_CAUSE', interrupted_tests=[]).tests_run
+
+tests\unit\test_ddmin_resume.py:141: AssertionError
+__ test_the_state_reported_before_each_test_names_the_phase_and_granularity ___
+
+conn = <sqlite3.Connection object at 0x0000014DAA05AF20>
+
+    def test_the_state_reported_before_each_test_names_the_phase_and_granularity(conn):
+        from faultline.attribution.ddmin import ddmin
+        states = []
+        ddmin(ITEMS, oracle("triple"), on_state=lambda s: states.append(s))
+        assert states[0]["phase"] == "SINGLETONS" and states[0]["i"] == 0
+        assert {s["phase"] for s in states} == {"SINGLETONS", "FULL", "REDUCE"}
+        reduce = [s for s in states if s["phase"] == "REDUCE"]
+        assert reduce and all(s["n"] >= 2 and s["part"] in ("subset", "complement") and set(s["c"]) <= set(ITEMS) for s in reduce)
+        ResumableDdmin(conn, minimisation=mid("s"), items=ITEMS, test=oracle("triple")).run_search()
+>       last = conn.execute("SELECT object_id FROM ddmin_checkpoint WHERE minimisation_id=? ORDER BY seq DESC LIMIT 1", (mid("s"),)).fetchone()[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+tests\unit\test_ddmin_resume.py:169: TypeError
+_ test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing[single] _
+
+conn = <sqlite3.Connection object at 0x0000014DAA05AB60>, kind = 'single'
+
+    @pytest.mark.parametrize("kind", ["single", "triple", "non_monotonic"])
+    def test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing(conn, kind):
+        ITEMS = SMALL                                                                    # noqa: N806  (a smaller delta keeps this exhaustive test quick)
+        whole_calls: list = []
+        whole = ResumableDdmin(conn, minimisation=mid("whole" + kind, ITEMS), items=ITEMS, test=oracle(kind, whole_calls)).run_search()
+        total = whole.tests_run
+        for k in range(total + 1):
+            m = mid(f"{kind}-{k}", ITEMS)
+            first_calls: list = []
+            try:
+                ResumableDdmin(conn, minimisation=m, items=ITEMS, test=stopping_after(k, kind, first_calls)).run_search()
+                stopped = False
+            except Interrupted:
+                stopped = True
+            assert stopped == (k < total)
+            second_calls: list = []
+            r = ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle(kind, second_calls)).run_search()
+            assert summary(r.result) == summary(whole.result), (kind, k)
+>           assert not (set(first_calls) & set(second_calls)), "a test whose outcome was stored must not run again"
+E           AssertionError: a test whose outcome was stored must not run again
+E           assert not ({frozenset({'p00'})} & {frozenset({'p06'}), frozenset({'p00'}), frozenset({'p05'}), frozenset({'p03'}), frozenset({'p04'}), frozenset({'p01'}), ...})
+E            +  where {frozenset({'p00'})} = set([frozenset({'p00'})])
+E            +  and   {frozenset({'p06'}), frozenset({'p00'}), frozenset({'p05'}), frozenset({'p03'}), frozenset({'p04'}), frozenset({'p01'}), ...} = set([frozenset({'p00'}), frozenset({'p01'}), frozenset({'p02'}), frozenset({'p03'}), frozenset({'p04'}), frozenset({'p05'}), ...])
+
+tests\unit\test_ddmin_resume.py:213: AssertionError
+_ test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing[triple] _
+
+conn = <sqlite3.Connection object at 0x0000014DAA05AA70>, kind = 'triple'
+
+    @pytest.mark.parametrize("kind", ["single", "triple", "non_monotonic"])
+    def test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing(conn, kind):
+        ITEMS = SMALL                                                                    # noqa: N806  (a smaller delta keeps this exhaustive test quick)
+        whole_calls: list = []
+        whole = ResumableDdmin(conn, minimisation=mid("whole" + kind, ITEMS), items=ITEMS, test=oracle(kind, whole_calls)).run_search()
+        total = whole.tests_run
+        for k in range(total + 1):
+            m = mid(f"{kind}-{k}", ITEMS)
+            first_calls: list = []
+            try:
+                ResumableDdmin(conn, minimisation=m, items=ITEMS, test=stopping_after(k, kind, first_calls)).run_search()
+                stopped = False
+            except Interrupted:
+                stopped = True
+            assert stopped == (k < total)
+            second_calls: list = []
+            r = ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle(kind, second_calls)).run_search()
+            assert summary(r.result) == summary(whole.result), (kind, k)
+>           assert not (set(first_calls) & set(second_calls)), "a test whose outcome was stored must not run again"
+E           AssertionError: a test whose outcome was stored must not run again
+E           assert not ({frozenset({'p00'})} & {frozenset({'p06'}), frozenset({'p00'}), frozenset({'p05'}), frozenset({'p03'}), frozenset({'p04'}), frozenset({'p01'}), ...})
+E            +  where {frozenset({'p00'})} = set([frozenset({'p00'})])
+E            +  and   {frozenset({'p06'}), frozenset({'p00'}), frozenset({'p05'}), frozenset({'p03'}), frozenset({'p04'}), frozenset({'p01'}), ...} = set([frozenset({'p00'}), frozenset({'p01'}), frozenset({'p02'}), frozenset({'p03'}), frozenset({'p04'}), frozenset({'p05'}), ...])
+
+tests\unit\test_ddmin_resume.py:213: AssertionError
+_ test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing[non_monotonic] _
+
+conn = <sqlite3.Connection object at 0x0000014DAA05A200>, kind = 'non_monotonic'
+
+    @pytest.mark.parametrize("kind", ["single", "triple", "non_monotonic"])
+    def test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing(conn, kind):
+        ITEMS = SMALL                                                                    # noqa: N806  (a smaller delta keeps this exhaustive test quick)
+        whole_calls: list = []
+        whole = ResumableDdmin(conn, minimisation=mid("whole" + kind, ITEMS), items=ITEMS, test=oracle(kind, whole_calls)).run_search()
+        total = whole.tests_run
+        for k in range(total + 1):
+            m = mid(f"{kind}-{k}", ITEMS)
+            first_calls: list = []
+            try:
+                ResumableDdmin(conn, minimisation=m, items=ITEMS, test=stopping_after(k, kind, first_calls)).run_search()
+                stopped = False
+            except Interrupted:
+                stopped = True
+            assert stopped == (k < total)
+            second_calls: list = []
+            r = ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle(kind, second_calls)).run_search()
+            assert summary(r.result) == summary(whole.result), (kind, k)
+>           assert not (set(first_calls) & set(second_calls)), "a test whose outcome was stored must not run again"
+E           AssertionError: a test whose outcome was stored must not run again
+E           assert not ({frozenset({'p00'})} & {frozenset({'p06'}), frozenset({'p00'}), frozenset({'p05'}), frozenset({'p03'}), frozenset({'p04'}), frozenset({'p01'}), ...})
+E            +  where {frozenset({'p00'})} = set([frozenset({'p00'})])
+E            +  and   {frozenset({'p06'}), frozenset({'p00'}), frozenset({'p05'}), frozenset({'p03'}), frozenset({'p04'}), frozenset({'p01'}), ...} = set([frozenset({'p00'}), frozenset({'p01'}), frozenset({'p02'}), frozenset({'p03'}), frozenset({'p04'}), frozenset({'p05'}), ...])
+
+tests\unit\test_ddmin_resume.py:213: AssertionError
+_ test_a_stop_between_the_stored_outcome_and_the_checkpoint_does_not_run_that_test_again _
+
+conn = <sqlite3.Connection object at 0x0000014DAA0584F0>
+
+    def test_a_stop_between_the_stored_outcome_and_the_checkpoint_does_not_run_that_test_again(conn):
+        m = mid("fault")
+        seen: list = []
+    
+        def hook(point):
+            if point is Fault.AFTER_TEST_STORED and len(seen) == 3:
+                raise Stop()
+>       with pytest.raises(Stop):
+             ^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE Stop
+
+tests\unit\test_ddmin_resume.py:229: Failed
+_____ test_an_interrupted_test_is_recorded_as_interrupted_and_runs_again ______
+
+conn = <sqlite3.Connection object at 0x0000014DAA058B80>
+
+    def test_an_interrupted_test_is_recorded_as_interrupted_and_runs_again(conn):
+        m = mid("int")
+        calls: list = []
+        with pytest.raises(Interrupted):
+            ResumableDdmin(conn, minimisation=m, items=ITEMS, test=stopping_after(2, "single", calls)).run_search()
+        ev = conn.execute("SELECT subject, payload_json FROM evidence_event WHERE kind='DDMIN_ATTEMPT_INTERRUPTED'").fetchall()
+>       assert len(ev) == 1 and "Interrupted" in ev[0]["payload_json"]
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests\unit\test_ddmin_resume.py:252: AssertionError
+______ test_an_unresolved_outcome_is_a_finished_test_and_is_not_repeated ______
+
+conn = <sqlite3.Connection object at 0x0000014DAA058D60>
+
+    def test_an_unresolved_outcome_is_a_finished_test_and_is_not_repeated(conn):
+        m = mid("unres")
+        unresolved = frozenset({frozenset({"p03"})})
+        first: list = []
+        r1 = ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle("single", first, unresolved)).run_search()
+        second: list = []
+        r2 = ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle("single", second, unresolved)).run_search()
+>       assert second == [] and r2.tests_run == 0 and summary(r2.result) == summary(r1.result) and r1.result.unresolved == 1
+E       AssertionError: assert ([frozenset({'...{'p05'}), ...] == []
+E         
+E         Left contains 13 more items, first extra item: frozenset({'p00'})
+E         Use -v to get more diff)
+
+tests\unit\test_ddmin_resume.py:269: AssertionError
+_______ test_a_damaged_latest_checkpoint_falls_back_to_the_previous_one _______
+
+conn = <sqlite3.Connection object at 0x0000014DAA0589A0>
+tmp_path = WindowsPath('C:/Users/Chetan/AppData/Local/Temp/pytest-of-Chetan/pytest-943/test_a_damaged_latest_checkpoi0')
+
+    def test_a_damaged_latest_checkpoint_falls_back_to_the_previous_one(conn, tmp_path):
+        m = mid("dmg")
+        seen: list = []
+        with pytest.raises(Interrupted):
+            ResumableDdmin(conn, minimisation=m, items=ITEMS, test=stopping_after(4, "triple", seen)).run_search()
+>       damage(conn, tmp_path, 0, m)
+
+tests\unit\test_ddmin_resume.py:287: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <sqlite3.Connection object at 0x0000014DAA0589A0>
+tmp_path = WindowsPath('C:/Users/Chetan/AppData/Local/Temp/pytest-of-Chetan/pytest-943/test_a_damaged_latest_checkpoi0')
+seq_from_top = 0, m = 'mn_0ffeb10db6ebb36b80a4821ec2ae1f24a439ef03'
+
+    def damage(conn, tmp_path, seq_from_top=0, m=None):
+>       oid = conn.execute("SELECT object_id FROM ddmin_checkpoint WHERE minimisation_id=? ORDER BY seq DESC LIMIT 1 OFFSET ?", (m, seq_from_top)).fetchone()[0]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+tests\unit\test_ddmin_resume.py:275: TypeError
+_________ test_when_every_checkpoint_is_damaged_the_error_is_explicit _________
+
+conn = <sqlite3.Connection object at 0x0000014DAA05A4D0>
+tmp_path = WindowsPath('C:/Users/Chetan/AppData/Local/Temp/pytest-of-Chetan/pytest-943/test_when_every_checkpoint_is_0')
+
+    def test_when_every_checkpoint_is_damaged_the_error_is_explicit(conn, tmp_path):
+        m = mid("alldmg")
+        with pytest.raises(Interrupted):
+            ResumableDdmin(conn, minimisation=m, items=ITEMS, test=stopping_after(3, "triple", [])).run_search()
+        for i in range(3):
+>           damage(conn, tmp_path, i, m)
+
+tests\unit\test_ddmin_resume.py:302: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <sqlite3.Connection object at 0x0000014DAA05A4D0>
+tmp_path = WindowsPath('C:/Users/Chetan/AppData/Local/Temp/pytest-of-Chetan/pytest-943/test_when_every_checkpoint_is_0')
+seq_from_top = 0, m = 'mn_ab27738c329d5bc6a548873c208f564493f0344e'
+
+    def damage(conn, tmp_path, seq_from_top=0, m=None):
+>       oid = conn.execute("SELECT object_id FROM ddmin_checkpoint WHERE minimisation_id=? ORDER BY seq DESC LIMIT 1 OFFSET ?", (m, seq_from_top)).fetchone()[0]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+tests\unit\test_ddmin_resume.py:275: TypeError
+_______________ test_two_resumers_cannot_both_advance_the_chain _______________
+
+tmp_path = WindowsPath('C:/Users/Chetan/AppData/Local/Temp/pytest-of-Chetan/pytest-943/test_two_resumers_cannot_both_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000014DA9E56210>
+
+    def test_two_resumers_cannot_both_advance_the_chain(tmp_path, monkeypatch):
+        monkeypatch.setenv("FAULTLINE_EVIDENCE_DIR", str(tmp_path / "objects"))
+        path = tmp_path / "race.db"
+        c0 = connect(path)
+        migrate(c0)
+        m = mid("race")
+        barrier = threading.Barrier(2)
+        outcomes: list = []
+    
+        def worker():
+            c = connect(path, check_same_thread=False)
+    
+            def t(s):
+                try:
+                    barrier.wait(timeout=10)                                            # both are inside their first test at the same moment
+                except threading.BrokenBarrierError:
+                    pass
+                return Outcome.PASS
+            try:
+                ResumableDdmin(c, minimisation=m, items=["a", "b", "c"], test=t).run_search()
+                outcomes.append("finished")
+            except ChainAdvanced:
+                outcomes.append("advanced")
+        ts = [threading.Thread(target=worker) for _ in range(2)]
+        [x.start() for x in ts]
+        [x.join(timeout=30) for x in ts]
+>       assert sorted(outcomes) == ["advanced", "finished"], outcomes
+E       AssertionError: ['finished', 'finished']
+E       assert ['finished', 'finished'] == ['advanced', 'finished']
+E         
+E         At index 0 diff: 'finished' != 'advanced'
+E         Use -v to get more diff
+
+tests\unit\test_ddmin_resume.py:335: AssertionError
+_ test_a_budget_that_runs_out_gives_a_limited_result_and_a_later_run_continues _
+
+conn = <sqlite3.Connection object at 0x0000014DAA05BD30>
+
+    def test_a_budget_that_runs_out_gives_a_limited_result_and_a_later_run_continues(conn):
+        m = mid("budget")
+        first: list = []
+        r1 = ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle("triple", first), budget=Budget(max_tests=5)).run_search()
+        assert r1.status == "BUDGET_LIMITED" and r1.tests_run == 5
+>       last = store_for(conn).get(conn.execute("SELECT object_id FROM ddmin_checkpoint WHERE minimisation_id=? ORDER BY seq DESC LIMIT 1", (m,)).fetchone()[0]).payload
+               ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'get'
+
+tests\unit\test_ddmin_resume.py:354: AttributeError
+_______________ test_the_budget_counts_tests_run_before_a_stop ________________
+
+conn = <sqlite3.Connection object at 0x0000014DAA05BF10>
+
+    def test_the_budget_counts_tests_run_before_a_stop(conn):
+        m = mid("budget2")
+        with pytest.raises(Interrupted):
+            ResumableDdmin(conn, minimisation=m, items=ITEMS, test=stopping_after(3, "triple", []), budget=Budget(max_tests=4)).run_search()
+        r = ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle("triple"), budget=Budget(max_tests=4)).run_search()
+>       assert r.status == "BUDGET_LIMITED" and r.tests_run == 1, "3 stored + 1 more = the budget of 4, in total across both runs"
+E       AssertionError: 3 stored + 1 more = the budget of 4, in total across both runs
+E       assert ('BUDGET_LIMITED' == 'BUDGET_LIMITED'
+E         
+E           BUDGET_LIMITED and 4 == 1)
+E        +  where 4 = ResumeResult(result=DdminResult(minimal=None, status='BUDGET_LIMITED', attempts=[Attempt(subset=('p00',), outcome=<Out...99', tests_run=4, tests_resumed=0, checkpoints=0, resumed_from_seq=None, status='BUDGET_LIMITED', interrupted_tests=[]).tests_run
+
+tests\unit\test_ddmin_resume.py:367: AssertionError
+_______________ test_a_new_algorithm_version_starts_a_new_chain _______________
+
+conn = <sqlite3.Connection object at 0x0000014DAA078400>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000014DAA08B800>
+
+    def test_a_new_algorithm_version_starts_a_new_chain(conn, monkeypatch):
+        a = mid("version")
+        ResumableDdmin(conn, minimisation=a, items=ITEMS, test=oracle("single")).run_search()
+        monkeypatch.setattr(cp, "ALGORITHM_VERSION", "ddmin/3")
+        b = minimisation_id("pk_demo", {"kind": "version"}, ITEMS)
+        assert a != b
+        calls: list = []
+        r = ResumableDdmin(conn, minimisation=b, items=ITEMS, test=oracle("single", calls)).run_search()
+        assert r.tests_resumed == 0 and r.resumed_from_seq is None and calls, "the old chain is not resumed"
+>       assert conn.execute("SELECT COUNT(*) FROM ddmin_checkpoint WHERE minimisation_id=?", (a,)).fetchone()[0] > 0, "the old chain is kept as history"
+E       AssertionError: the old chain is kept as history
+E       assert 0 > 0
+
+tests\unit\test_ddmin_resume.py:379: AssertionError
+_____ test_a_finished_chain_run_again_runs_nothing_and_adds_no_checkpoint _____
+
+conn = <sqlite3.Connection object at 0x0000014DAA05BD30>
+
+    def test_a_finished_chain_run_again_runs_nothing_and_adds_no_checkpoint(conn):
+        m = mid("again")
+        ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle("pair")).run_search()
+        n = conn.execute("SELECT COUNT(*) FROM ddmin_checkpoint WHERE minimisation_id=?", (m,)).fetchone()[0]
+        calls: list = []
+        r = ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle("pair", calls)).run_search()
+>       assert calls == [] and r.tests_run == 0 and r.tests_resumed > 0
+E       AssertionError: assert ([frozenset({'...{'p05'}), ...] == []
+E         
+E         Left contains 24 more items, first extra item: frozenset({'p00'})
+E         Use -v to get more diff)
+
+tests\unit\test_ddmin_resume.py:395: AssertionError
+________________ test_the_counters_show_resumed_and_run_tests _________________
+
+conn = <sqlite3.Connection object at 0x0000014DAA059210>
+
+    def test_the_counters_show_resumed_and_run_tests(conn):
+        m = mid("count")
+        with pytest.raises(Interrupted):
+            ResumableDdmin(conn, minimisation=m, items=ITEMS, test=stopping_after(3, "single", []), analysis_id="an1").run_search()
+        ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle("single"), analysis_id="an1").run_search()
+        c = counters(conn, "an1")["ddmin"]
+>       assert c["tests_resumed"] >= 3 and c["tests_run"] >= 4
+E       assert (0 >= 3)
+
+tests\unit\test_ddmin_resume.py:405: AssertionError
+________ test_a_check_after_the_search_keeps_the_chain_marked_finished ________
+
+conn = <sqlite3.Connection object at 0x0000014DAA059120>
+
+    def test_a_check_after_the_search_keeps_the_chain_marked_finished(conn):
+        m = mid("final")
+        rd = ResumableDdmin(conn, minimisation=m, items=ITEMS, test=oracle("single"))
+        assert rd.run_search().status == "COMPLETE"
+        out, detail = rd.check("necessity", frozenset({"p07"}), lambda s: (Outcome.PASS, {"note": "reverted: passes", "world_hash": "w_1"}))
+        assert out is Outcome.PASS and detail["note"] == "reverted: passes"
+        rows = conn.execute("SELECT seq, status FROM ddmin_checkpoint WHERE minimisation_id=? ORDER BY seq", (m,)).fetchall()
+>       assert rows[-1]["status"] == "COMPLETE" and len(rows) >= 2, "the checkpoint written for the check does not make a finished chain look unfinished"
+               ^^^^^^^^
+E       IndexError: list index out of range
+
+tests\unit\test_ddmin_resume.py:421: IndexError
+___________________ test_a_verified_stored_result_is_reused ___________________
+
+conn = <sqlite3.Connection object at 0x0000014DAA058E50>
+
+    def test_a_verified_stored_result_is_reused(conn):
+        inp = base()
+>       key, vid = store_pair(conn, inp)
+                   ^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_incremental_decide.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <sqlite3.Connection object at 0x0000014DAA058E50>
+inp = PairKeyInput(producer=Side(repo='acme/models', commit='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project='.', manifes...eeeeeeeeeeeeeeeeeeeeeeeeeeee', resolver_logic='6', witness_rule='3+3', verdict_rule='verdict-policy/1', static_rule='')
+verdict = 'BREAK_WITNESSED', with_verdict = True, evidence = None
+
+    def store_pair(conn, inp, *, verdict="BREAK_WITNESSED", with_verdict=True, evidence=None) -> tuple[str, str | None]:
+        key = pair_key(inp)
+        rec_id, _ = projections.store_object(conn, "pair_record", {"pair_key": key, "inputs": record(inp)})
+        vid = None
+        if with_verdict:
+            row = {"id": "fnd_old", "analysis_id": "an_old", "scope_kind": "ARTIFACT_CELL", "cell_id": "cell_old", "relationship_id": None, "verdict": verdict,
+                   "sub_label": None, "headline": "h", "scope_json": json.dumps({"consumers": ["x"]}), "coverage": None, "priority": 1, "created_at": "t"}
+            vid, _ = projections.store_object(conn, "verdict", {"finding": row, "verdict": verdict, "policy": "verdict-policy/1", "evidence": evidence or []},
+                                              slot="finding:cell_old")
+>       conn.execute("INSERT INTO pair_index(pair_key, pair_record_id, verdict_id, created_at) VALUES (?,?,?,?)", (key, rec_id, vid, "2026-01-01T00:00:00Z"))
+E       sqlite3.IntegrityError: NOT NULL constraint failed: pair_index.pair_record_id
+
+tests\unit\test_incremental_decide.py:35: IntegrityError
+_____________ test_a_pair_stored_without_a_verdict_is_not_reused ______________
+
+conn = <sqlite3.Connection object at 0x0000014DAA059C60>
+
+    def test_a_pair_stored_without_a_verdict_is_not_reused(conn):
+        inp = base()
+>       key, _ = store_pair(conn, inp, with_verdict=False)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_incremental_decide.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <sqlite3.Connection object at 0x0000014DAA059C60>
+inp = PairKeyInput(producer=Side(repo='acme/models', commit='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project='.', manifes...eeeeeeeeeeeeeeeeeeeeeeeeeeee', resolver_logic='6', witness_rule='3+3', verdict_rule='verdict-policy/1', static_rule='')
+verdict = 'BREAK_WITNESSED', with_verdict = False, evidence = None
+
+    def store_pair(conn, inp, *, verdict="BREAK_WITNESSED", with_verdict=True, evidence=None) -> tuple[str, str | None]:
+        key = pair_key(inp)
+        rec_id, _ = projections.store_object(conn, "pair_record", {"pair_key": key, "inputs": record(inp)})
+        vid = None
+        if with_verdict:
+            row = {"id": "fnd_old", "analysis_id": "an_old", "scope_kind": "ARTIFACT_CELL", "cell_id": "cell_old", "relationship_id": None, "verdict": verdict,
+                   "sub_label": None, "headline": "h", "scope_json": json.dumps({"consumers": ["x"]}), "coverage": None, "priority": 1, "created_at": "t"}
+            vid, _ = projections.store_object(conn, "verdict", {"finding": row, "verdict": verdict, "policy": "verdict-policy/1", "evidence": evidence or []},
+                                              slot="finding:cell_old")
+>       conn.execute("INSERT INTO pair_index(pair_key, pair_record_id, verdict_id, created_at) VALUES (?,?,?,?)", (key, rec_id, vid, "2026-01-01T00:00:00Z"))
+E       sqlite3.IntegrityError: NOT NULL constraint failed: pair_index.pair_record_id
+
+tests\unit\test_incremental_decide.py:35: IntegrityError
+_________________ test_an_inconclusive_result_is_never_reused _________________
+
+conn = <sqlite3.Connection object at 0x0000014DAA05AE30>
+
+    def test_an_inconclusive_result_is_never_reused(conn):
+        inp = base()
+>       key, _ = store_pair(conn, inp, verdict="INCONCLUSIVE")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_incremental_decide.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <sqlite3.Connection object at 0x0000014DAA05AE30>
+inp = PairKeyInput(producer=Side(repo='acme/models', commit='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project='.', manifes...eeeeeeeeeeeeeeeeeeeeeeeeeeee', resolver_logic='6', witness_rule='3+3', verdict_rule='verdict-policy/1', static_rule='')
+verdict = 'INCONCLUSIVE', with_verdict = True, evidence = None
+
+    def store_pair(conn, inp, *, verdict="BREAK_WITNESSED", with_verdict=True, evidence=None) -> tuple[str, str | None]:
+        key = pair_key(inp)
+        rec_id, _ = projections.store_object(conn, "pair_record", {"pair_key": key, "inputs": record(inp)})
+        vid = None
+        if with_verdict:
+            row = {"id": "fnd_old", "analysis_id": "an_old", "scope_kind": "ARTIFACT_CELL", "cell_id": "cell_old", "relationship_id": None, "verdict": verdict,
+                   "sub_label": None, "headline": "h", "scope_json": json.dumps({"consumers": ["x"]}), "coverage": None, "priority": 1, "created_at": "t"}
+            vid, _ = projections.store_object(conn, "verdict", {"finding": row, "verdict": verdict, "policy": "verdict-policy/1", "evidence": evidence or []},
+                                              slot="finding:cell_old")
+>       conn.execute("INSERT INTO pair_index(pair_key, pair_record_id, verdict_id, created_at) VALUES (?,?,?,?)", (key, rec_id, vid, "2026-01-01T00:00:00Z"))
+E       sqlite3.IntegrityError: NOT NULL constraint failed: pair_index.pair_record_id
+
+tests\unit\test_incremental_decide.py:35: IntegrityError
+_______________ test_a_damaged_verdict_is_rejected_and_reported _______________
+
+conn = <sqlite3.Connection object at 0x0000014DAA0589A0>
+tmp_path = WindowsPath('C:/Users/Chetan/AppData/Local/Temp/pytest-of-Chetan/pytest-943/test_a_damaged_verdict_is_reje0')
+
+    def test_a_damaged_verdict_is_rejected_and_reported(conn, tmp_path):
+        inp = base()
+>       key, vid = store_pair(conn, inp)
+                   ^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_incremental_decide.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <sqlite3.Connection object at 0x0000014DAA0589A0>
+inp = PairKeyInput(producer=Side(repo='acme/models', commit='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project='.', manifes...eeeeeeeeeeeeeeeeeeeeeeeeeeee', resolver_logic='6', witness_rule='3+3', verdict_rule='verdict-policy/1', static_rule='')
+verdict = 'BREAK_WITNESSED', with_verdict = True, evidence = None
+
+    def store_pair(conn, inp, *, verdict="BREAK_WITNESSED", with_verdict=True, evidence=None) -> tuple[str, str | None]:
+        key = pair_key(inp)
+        rec_id, _ = projections.store_object(conn, "pair_record", {"pair_key": key, "inputs": record(inp)})
+        vid = None
+        if with_verdict:
+            row = {"id": "fnd_old", "analysis_id": "an_old", "scope_kind": "ARTIFACT_CELL", "cell_id": "cell_old", "relationship_id": None, "verdict": verdict,
+                   "sub_label": None, "headline": "h", "scope_json": json.dumps({"consumers": ["x"]}), "coverage": None, "priority": 1, "created_at": "t"}
+            vid, _ = projections.store_object(conn, "verdict", {"finding": row, "verdict": verdict, "policy": "verdict-policy/1", "evidence": evidence or []},
+                                              slot="finding:cell_old")
+>       conn.execute("INSERT INTO pair_index(pair_key, pair_record_id, verdict_id, created_at) VALUES (?,?,?,?)", (key, rec_id, vid, "2026-01-01T00:00:00Z"))
+E       sqlite3.IntegrityError: NOT NULL constraint failed: pair_index.pair_record_id
+
+tests\unit\test_incremental_decide.py:35: IntegrityError
+___________________ test_a_missing_pair_record_is_rejected ____________________
+
+conn = <sqlite3.Connection object at 0x0000014DAA0586D0>
+tmp_path = WindowsPath('C:/Users/Chetan/AppData/Local/Temp/pytest-of-Chetan/pytest-943/test_a_missing_pair_record_is_0')
+
+    def test_a_missing_pair_record_is_rejected(conn, tmp_path):
+        inp = base()
+>       key, _ = store_pair(conn, inp)
+                 ^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_incremental_decide.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <sqlite3.Connection object at 0x0000014DAA0586D0>
+inp = PairKeyInput(producer=Side(repo='acme/models', commit='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project='.', manifes...eeeeeeeeeeeeeeeeeeeeeeeeeeee', resolver_logic='6', witness_rule='3+3', verdict_rule='verdict-policy/1', static_rule='')
+verdict = 'BREAK_WITNESSED', with_verdict = True, evidence = None
+
+    def store_pair(conn, inp, *, verdict="BREAK_WITNESSED", with_verdict=True, evidence=None) -> tuple[str, str | None]:
+        key = pair_key(inp)
+        rec_id, _ = projections.store_object(conn, "pair_record", {"pair_key": key, "inputs": record(inp)})
+        vid = None
+        if with_verdict:
+            row = {"id": "fnd_old", "analysis_id": "an_old", "scope_kind": "ARTIFACT_CELL", "cell_id": "cell_old", "relationship_id": None, "verdict": verdict,
+                   "sub_label": None, "headline": "h", "scope_json": json.dumps({"consumers": ["x"]}), "coverage": None, "priority": 1, "created_at": "t"}
+            vid, _ = projections.store_object(conn, "verdict", {"finding": row, "verdict": verdict, "policy": "verdict-policy/1", "evidence": evidence or []},
+                                              slot="finding:cell_old")
+>       conn.execute("INSERT INTO pair_index(pair_key, pair_record_id, verdict_id, created_at) VALUES (?,?,?,?)", (key, rec_id, vid, "2026-01-01T00:00:00Z"))
+E       sqlite3.IntegrityError: NOT NULL constraint failed: pair_index.pair_record_id
+
+tests\unit\test_incremental_decide.py:35: IntegrityError
+___________ test_a_cited_witness_that_is_missing_rejects_the_result ___________
+
+conn = <sqlite3.Connection object at 0x0000014DAA059030>
+
+    def test_a_cited_witness_that_is_missing_rejects_the_result(conn):
+        inp = base()
+>       key, _ = store_pair(conn, inp, evidence=[["WITNESS", "wit_gone"]])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_incremental_decide.py:90: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <sqlite3.Connection object at 0x0000014DAA059030>
+inp = PairKeyInput(producer=Side(repo='acme/models', commit='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project='.', manifes...eeeeeeeeeeeeeeeeeeeeeeeeeeee', resolver_logic='6', witness_rule='3+3', verdict_rule='verdict-policy/1', static_rule='')
+verdict = 'BREAK_WITNESSED', with_verdict = True
+evidence = [['WITNESS', 'wit_gone']]
+
+    def store_pair(conn, inp, *, verdict="BREAK_WITNESSED", with_verdict=True, evidence=None) -> tuple[str, str | None]:
+        key = pair_key(inp)
+        rec_id, _ = projections.store_object(conn, "pair_record", {"pair_key": key, "inputs": record(inp)})
+        vid = None
+        if with_verdict:
+            row = {"id": "fnd_old", "analysis_id": "an_old", "scope_kind": "ARTIFACT_CELL", "cell_id": "cell_old", "relationship_id": None, "verdict": verdict,
+                   "sub_label": None, "headline": "h", "scope_json": json.dumps({"consumers": ["x"]}), "coverage": None, "priority": 1, "created_at": "t"}
+            vid, _ = projections.store_object(conn, "verdict", {"finding": row, "verdict": verdict, "policy": "verdict-policy/1", "evidence": evidence or []},
+                                              slot="finding:cell_old")
+>       conn.execute("INSERT INTO pair_index(pair_key, pair_record_id, verdict_id, created_at) VALUES (?,?,?,?)", (key, rec_id, vid, "2026-01-01T00:00:00Z"))
+E       sqlite3.IntegrityError: NOT NULL constraint failed: pair_index.pair_record_id
+
+tests\unit\test_incremental_decide.py:35: IntegrityError
+_______ test_a_changed_input_is_computed_again_and_the_change_is_named ________
+
+conn = <sqlite3.Connection object at 0x0000014DAA05B5B0>
+
+    def test_a_changed_input_is_computed_again_and_the_change_is_named(conn):
+        old = base()
+>       store_pair(conn, old)
+
+tests\unit\test_incremental_decide.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <sqlite3.Connection object at 0x0000014DAA05B5B0>
+inp = PairKeyInput(producer=Side(repo='acme/models', commit='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project='.', manifes...eeeeeeeeeeeeeeeeeeeeeeeeeeee', resolver_logic='6', witness_rule='3+3', verdict_rule='verdict-policy/1', static_rule='')
+verdict = 'BREAK_WITNESSED', with_verdict = True, evidence = None
+
+    def store_pair(conn, inp, *, verdict="BREAK_WITNESSED", with_verdict=True, evidence=None) -> tuple[str, str | None]:
+        key = pair_key(inp)
+        rec_id, _ = projections.store_object(conn, "pair_record", {"pair_key": key, "inputs": record(inp)})
+        vid = None
+        if with_verdict:
+            row = {"id": "fnd_old", "analysis_id": "an_old", "scope_kind": "ARTIFACT_CELL", "cell_id": "cell_old", "relationship_id": None, "verdict": verdict,
+                   "sub_label": None, "headline": "h", "scope_json": json.dumps({"consumers": ["x"]}), "coverage": None, "priority": 1, "created_at": "t"}
+            vid, _ = projections.store_object(conn, "verdict", {"finding": row, "verdict": verdict, "policy": "verdict-policy/1", "evidence": evidence or []},
+                                              slot="finding:cell_old")
+>       conn.execute("INSERT INTO pair_index(pair_key, pair_record_id, verdict_id, created_at) VALUES (?,?,?,?)", (key, rec_id, vid, "2026-01-01T00:00:00Z"))
+E       sqlite3.IntegrityError: NOT NULL constraint failed: pair_index.pair_record_id
+
+tests\unit\test_incremental_decide.py:35: IntegrityError
+_________________ test_another_repository_is_not_the_baseline _________________
+
+conn = <sqlite3.Connection object at 0x0000014DAA05BF10>
+
+    def test_another_repository_is_not_the_baseline(conn):
+>       store_pair(conn, base())
+
+tests\unit\test_incremental_decide.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <sqlite3.Connection object at 0x0000014DAA05BF10>
+inp = PairKeyInput(producer=Side(repo='acme/models', commit='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project='.', manifes...eeeeeeeeeeeeeeeeeeeeeeeeeeee', resolver_logic='6', witness_rule='3+3', verdict_rule='verdict-policy/1', static_rule='')
+verdict = 'BREAK_WITNESSED', with_verdict = True, evidence = None
+
+    def store_pair(conn, inp, *, verdict="BREAK_WITNESSED", with_verdict=True, evidence=None) -> tuple[str, str | None]:
+        key = pair_key(inp)
+        rec_id, _ = projections.store_object(conn, "pair_record", {"pair_key": key, "inputs": record(inp)})
+        vid = None
+        if with_verdict:
+            row = {"id": "fnd_old", "analysis_id": "an_old", "scope_kind": "ARTIFACT_CELL", "cell_id": "cell_old", "relationship_id": None, "verdict": verdict,
+                   "sub_label": None, "headline": "h", "scope_json": json.dumps({"consumers": ["x"]}), "coverage": None, "priority": 1, "created_at": "t"}
+            vid, _ = projections.store_object(conn, "verdict", {"finding": row, "verdict": verdict, "policy": "verdict-policy/1", "evidence": evidence or []},
+                                              slot="finding:cell_old")
+>       conn.execute("INSERT INTO pair_index(pair_key, pair_record_id, verdict_id, created_at) VALUES (?,?,?,?)", (key, rec_id, vid, "2026-01-01T00:00:00Z"))
+E       sqlite3.IntegrityError: NOT NULL constraint failed: pair_index.pair_record_id
+
+tests\unit\test_incremental_decide.py:35: IntegrityError
+_________________ test_the_store_off_means_nothing_is_reused __________________
+
+conn = <sqlite3.Connection object at 0x0000014DAA05BC40>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000014DAA08AFF0>
+
+    def test_the_store_off_means_nothing_is_reused(conn, monkeypatch):
+        inp = base()
+>       key, _ = store_pair(conn, inp)
+                 ^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_incremental_decide.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <sqlite3.Connection object at 0x0000014DAA05BC40>
+inp = PairKeyInput(producer=Side(repo='acme/models', commit='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project='.', manifes...eeeeeeeeeeeeeeeeeeeeeeeeeeee', resolver_logic='6', witness_rule='3+3', verdict_rule='verdict-policy/1', static_rule='')
+verdict = 'BREAK_WITNESSED', with_verdict = True, evidence = None
+
+    def store_pair(conn, inp, *, verdict="BREAK_WITNESSED", with_verdict=True, evidence=None) -> tuple[str, str | None]:
+        key = pair_key(inp)
+        rec_id, _ = projections.store_object(conn, "pair_record", {"pair_key": key, "inputs": record(inp)})
+        vid = None
+        if with_verdict:
+            row = {"id": "fnd_old", "analysis_id": "an_old", "scope_kind": "ARTIFACT_CELL", "cell_id": "cell_old", "relationship_id": None, "verdict": verdict,
+                   "sub_label": None, "headline": "h", "scope_json": json.dumps({"consumers": ["x"]}), "coverage": None, "priority": 1, "created_at": "t"}
+            vid, _ = projections.store_object(conn, "verdict", {"finding": row, "verdict": verdict, "policy": "verdict-policy/1", "evidence": evidence or []},
+                                              slot="finding:cell_old")
+>       conn.execute("INSERT INTO pair_index(pair_key, pair_record_id, verdict_id, created_at) VALUES (?,?,?,?)", (key, rec_id, vid, "2026-01-01T00:00:00Z"))
+E       sqlite3.IntegrityError: NOT NULL constraint failed: pair_index.pair_record_id
+
+tests\unit\test_incremental_decide.py:35: IntegrityError
+=========================== short test summary info ===========================
+FAILED tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[single]
+FAILED tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[pair]
+FAILED tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[triple]
+FAILED tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[independent]
+FAILED tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[non_monotonic]
+FAILED tests/unit/test_ddmin_resume.py::test_the_resumable_search_gives_the_results_of_the_original[none]
+FAILED tests/unit/test_ddmin_resume.py::test_the_state_reported_before_each_test_names_the_phase_and_granularity
+FAILED tests/unit/test_ddmin_resume.py::test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing[single]
+FAILED tests/unit/test_ddmin_resume.py::test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing[triple]
+FAILED tests/unit/test_ddmin_resume.py::test_stopping_after_any_test_and_resuming_gives_the_same_result_and_repeats_nothing[non_monotonic]
+FAILED tests/unit/test_ddmin_resume.py::test_a_stop_between_the_stored_outcome_and_the_checkpoint_does_not_run_that_test_again
+FAILED tests/unit/test_ddmin_resume.py::test_an_interrupted_test_is_recorded_as_interrupted_and_runs_again
+FAILED tests/unit/test_ddmin_resume.py::test_an_unresolved_outcome_is_a_finished_test_and_is_not_repeated
+FAILED tests/unit/test_ddmin_resume.py::test_a_damaged_latest_checkpoint_falls_back_to_the_previous_one
+FAILED tests/unit/test_ddmin_resume.py::test_when_every_checkpoint_is_damaged_the_error_is_explicit
+FAILED tests/unit/test_ddmin_resume.py::test_two_resumers_cannot_both_advance_the_chain
+FAILED tests/unit/test_ddmin_resume.py::test_a_budget_that_runs_out_gives_a_limited_result_and_a_later_run_continues
+FAILED tests/unit/test_ddmin_resume.py::test_the_budget_counts_tests_run_before_a_stop
+FAILED tests/unit/test_ddmin_resume.py::test_a_new_algorithm_version_starts_a_new_chain
+FAILED tests/unit/test_ddmin_resume.py::test_a_finished_chain_run_again_runs_nothing_and_adds_no_checkpoint
+FAILED tests/unit/test_ddmin_resume.py::test_the_counters_show_resumed_and_run_tests
+FAILED tests/unit/test_ddmin_resume.py::test_a_check_after_the_search_keeps_the_chain_marked_finished
+FAILED tests/unit/test_incremental_decide.py::test_a_verified_stored_result_is_reused
+FAILED tests/unit/test_incremental_decide.py::test_a_pair_stored_without_a_verdict_is_not_reused
+FAILED tests/unit/test_incremental_decide.py::test_an_inconclusive_result_is_never_reused
+FAILED tests/unit/test_incremental_decide.py::test_a_damaged_verdict_is_rejected_and_reported
+FAILED tests/unit/test_incremental_decide.py::test_a_missing_pair_record_is_rejected
+FAILED tests/unit/test_incremental_decide.py::test_a_cited_witness_that_is_missing_rejects_the_result
+FAILED tests/unit/test_incremental_decide.py::test_a_changed_input_is_computed_again_and_the_change_is_named
+FAILED tests/unit/test_incremental_decide.py::test_another_repository_is_not_the_baseline
+FAILED tests/unit/test_incremental_decide.py::test_the_store_off_means_nothing_is_reused
+31 failed, 573 passed, 1 skipped in 152.13s (0:02:32)

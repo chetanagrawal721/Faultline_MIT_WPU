@@ -1,0 +1,5 @@
+# TC-13.11.1 unit tests, both settings (the two store-specific files pin the store on for themselves; the first store-off run failed 31 tests for that reason, kept as unit_store_off_first_run_31_failed.txt)
+store on:
+604 passed, 1 skipped in 267.45s (0:04:27)
+store off:
+604 passed, 1 skipped in 239.01s (0:03:59)

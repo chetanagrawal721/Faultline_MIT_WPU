@@ -49,9 +49,9 @@ def dump_evidence(conn: sqlite3.Connection, analysis_id: str | None = None) -> d
                           "JOIN oracle_job j ON j.id=r.oracle_job_id" + (" WHERE j.analysis_id=?" if analysis_id else ""), args):
         res = _j(r["result_json"]) or {}
         entries = sorted(_key(e.get("entry"), e.get("passed"), e.get("exc_type"), e.get("message")) for e in res.get("entries", []))
-        k = _key(r["oracle"], r["side"], r["provenance"], r["failure_class"], r["exit_code"], r["env_fingerprint"], entries)
+        k = _key(r["oracle"], r["side"], r["provenance"], r["failure_class"], r["exit_code"], entries)           # the fingerprint names the machine's image: not part of the comparison
         runs[k] = {"oracle": r["oracle"], "side": r["side"], "provenance": r["provenance"], "failure_class": r["failure_class"], "exit_code": r["exit_code"],
-                   "env_fingerprint": r["env_fingerprint"], "entries": entries, "count": runs.get(k, {}).get("count", 0) + 1}
+                   "entries": entries, "count": runs.get(k, {}).get("count", 0) + 1}
     evidence_links: dict[str, int] = {}
     for r in conn.execute("SELECT e.evidence_kind, COUNT(*) AS n FROM finding_evidence e JOIN finding f ON f.id=e.finding_id"
                           + (" WHERE f.analysis_id=?" if analysis_id else "") + " GROUP BY e.evidence_kind", args):

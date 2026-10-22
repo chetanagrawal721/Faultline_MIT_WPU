@@ -1464,3 +1464,11 @@ Format: `### <UTC time> | <EVENT> | <id> | by <name>` followed by details.
 ### 2026-10-21 22:56 UTC | TC PASS | TC-13.11.4 | by Chetan Agrawal
 - Frontend and types
 - evidence: evidence/M13.11/TC-13.11.4.txt
+
+### 2026-10-22 00:32 UTC | TC PASS | TC-13.11.2 | by Chetan Agrawal
+- Integration tests, both settings
+- evidence: evidence/M13.11/TC-13.11.2.txt
+
+### 2026-10-22 00:32 UTC | TC PASS | TC-13.11.3 | by Chetan Agrawal
+- Parity
+- evidence: evidence/M13.11/TC-13.11.3.txt
